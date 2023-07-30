@@ -1,0 +1,11 @@
+.main {
+  display: flex;
+  min-width: 1400px;
+  gap: 20px;
+}
+
+.left-container,
+.right-container {
+  flex-shrink: 0;
+  width: calc(50% - 10px);
+}
