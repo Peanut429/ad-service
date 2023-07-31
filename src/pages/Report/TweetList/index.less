@@ -1,0 +1,141 @@
+.tweet {
+  display: flex;
+  margin-bottom: 10px;
+  padding: 20px;
+  column-gap: 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e6eb;
+  // box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16), 0 3px 6px 0px rgba(0, 0, 0, 0.12);
+  &__left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .avatar {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 15px;
+      object-fit: contain;
+      overflow: hidden;
+      border-radius: 50%;
+      box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+    }
+    .tweet__sentiment {
+      cursor: pointer;
+    }
+  }
+  &__head {
+    margin-bottom: 15px;
+    vertical-align: middle;
+    .nickname {
+      max-width: 40%;
+      overflow: hidden;
+      font-size: 20px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+  }
+  &__label {
+    padding: 2px 6px;
+    color: #1890ff;
+    font-size: 12px;
+    line-height: 14px;
+    border: 1px solid;
+    border-radius: 12px;
+  }
+  &__right {
+    flex: 1;
+  }
+  &__time {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  &__content {
+    display: flex;
+    min-height: 87px;
+    .content-left {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+  }
+  &__title {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  &__text {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #333;
+    font-size: 13px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  &__data {
+    color: #8c8c8c;
+    font-size: 14px;
+  }
+  &__image {
+    flex: 0 0 87px;
+    height: 87px;
+    margin-left: 5px;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
+.sort-wrapper {
+  display: flex;
+  flex: 1;
+  height: 34px;
+  background-color: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  .sort__item {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    font-size: 14px;
+    border-right: 1px solid rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    user-select: none;
+    &:last-child {
+      border: none;
+    }
+    .sort-icon-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      .sort-icon__up,
+      .sort-icon__down {
+        width: 0;
+        height: 0;
+        border: 5px solid transparent;
+      }
+      .sort-icon__up {
+        margin-bottom: 2px;
+        border-bottom-color: rgba(0, 0, 0, 0.25);
+        &.active {
+          border-bottom-color: #1890ff;
+        }
+      }
+      .sort-icon__down {
+        border-top-color: rgba(0, 0, 0, 0.25);
+        &.active {
+          border-top-color: #1890ff;
+        }
+      }
+    }
+  }
+}
