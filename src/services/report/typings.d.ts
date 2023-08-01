@@ -29,8 +29,26 @@ declare namespace ReportApi {
     };
   };
 
+  type TweetTrendData = {
+    frequency: [];
+    heat: { key: string; value: number }[];
+  };
+
+  type AdNodeItem = {
+    id: string;
+    heat: number;
+    tweetNum: number;
+    type: string;
+    topics: string[];
+    parentId?: string;
+    time?: string;
+    title?: string;
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
+    tweetTrend: TweetTrendData;
+    adNode: AdNodeItem[];
   }>;
 
   type TweetListReq = {

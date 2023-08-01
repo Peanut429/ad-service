@@ -8,6 +8,7 @@ import Keywords from './Keywords';
 import { chartData } from '@/services/report';
 import TweetList from './TweetList';
 import styles from './index.module.scss';
+import Popularity from './Popularity';
 
 const Report = () => {
   const contextValue = useCreateReducer<ReportInitialState>({
@@ -37,8 +38,10 @@ const Report = () => {
       userType,
       sentiment,
     });
-    console.log(res);
+
     dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
+    dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
+    dispatch({ field: 'adNode', value: res.data.adNode });
   };
 
   useEffect(() => {
@@ -50,7 +53,12 @@ const Report = () => {
       <div>
         <div className={styles.main}>
           <div className={styles['left-container']}>
-            <Tabs items={[{ label: '相关词分析', children: <Keywords />, key: 'keyword' }]} />
+            <Tabs
+              items={[
+                { label: '相关词分析', children: <Keywords />, key: 'keyword' },
+                { label: '声量分析', children: <Popularity />, key: 'popularity' },
+              ]}
+            />
           </div>
           <div className={styles['right-container']}>
             <Tabs items={[{ label: '推文列表', children: <TweetList />, key: 'tweet-list' }]} />

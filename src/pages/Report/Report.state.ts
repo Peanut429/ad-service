@@ -10,6 +10,8 @@ export interface ReportInitialState {
   userType: UserType[];
   sentiment: number[];
   wordcloudData?: ReportApi.WordcloudData;
+  tweetTrendData?: ReportApi.TweetTrendData;
+  adNode?: ReportApi.AdNodeItem[];
 }
 
 const initialState: ReportInitialState = {
