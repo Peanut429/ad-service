@@ -71,7 +71,7 @@ declare namespace ReportApi {
   type TweetListItem = {
     id: string;
     createdAtTimestamp: number;
-    sentiment: number;
+    sentiment: 1 | 2 | 3;
     userType: string;
     avatar: string;
     nickname: string;
