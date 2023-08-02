@@ -7,6 +7,7 @@ import initialState, { ReportInitialState } from './Report.state';
 import Keywords from './Keywords';
 import { chartData } from '@/services/report';
 import TweetList from './TweetList';
+import CommentList from './CommentList';
 import styles from './index.module.scss';
 import Popularity from './Popularity';
 
@@ -61,7 +62,12 @@ const Report = () => {
             />
           </div>
           <div className={styles['right-container']}>
-            <Tabs items={[{ label: '推文列表', children: <TweetList />, key: 'tweet-list' }]} />
+            <Tabs
+              items={[
+                { label: '推文列表', children: <TweetList />, key: 'tweet-list' },
+                { label: '评论', children: <CommentList />, key: 'comment-list' },
+              ]}
+            />
           </div>
         </div>
       </div>

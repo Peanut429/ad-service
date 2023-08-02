@@ -86,4 +86,34 @@ declare namespace ReportApi {
     count: number;
     data: TweetListItem[];
   }>;
+  type CommentListReq = {
+    timeLimit: {
+      gte: number;
+      lte: number;
+    };
+    platforms: string[];
+    tasksId: string[];
+    limit: number;
+    page: number;
+    sortKey: string;
+    sortOrder: string;
+    includeWords?: string[][];
+    excludeWords?: string[];
+    userType?: string[];
+    sentiment?: number[];
+  };
+  type CommentListRes = Response<{
+    count: number;
+    data: CommentListItem[];
+  }>;
+  type CommentListItem = {
+    id: string;
+    createdAtTimestamp: number;
+    sentiment: 1 | 2 | 3;
+    userType: string;
+    avatar: string;
+    nickname: string;
+    content: string;
+    likeNum: number;
+  };
 }
