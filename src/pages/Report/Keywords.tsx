@@ -1,6 +1,8 @@
 import { Space } from 'antd';
 import ChartCard from '@/components/ChartCard';
 import WordCloudChart from './Charts/WordCloud';
+import HeatmapChart from './Charts/Heatmap';
+import AppearTogetherChart from './Charts/AppearTogetherChart';
 // import KeywordCategoryChart from './Charts/KeywordCategoryChart';
 
 const Keywords = () => {
@@ -9,9 +11,12 @@ const Keywords = () => {
       <ChartCard title="关键词词云">
         <WordCloudChart />
       </ChartCard>
-      {/* <ChartCard title="关键词词云">
-        <KeywordCategoryChart />
-      </ChartCard> */}
+      <ChartCard title="TOP 10 高频词热力图">
+        <HeatmapChart />
+      </ChartCard>
+      <ChartCard title="高频词共现关系图">
+        <AppearTogetherChart />
+      </ChartCard>
     </Space>
   );
 };

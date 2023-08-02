@@ -10,7 +10,7 @@ import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
 import { CommentOutlined, LikeOutlined, RetweetOutlined } from '@ant-design/icons';
 import { Platform } from '../Report.state';
-import './index.less';
+import styles from './index.module.scss';
 
 type TweetListItemProps = {
   data: ReportApi.TweetListItem & {
@@ -80,11 +80,11 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
       // overlay={<Menu items={menuItems} onClick={({ key }) => handleMenuClick(key)} />}
       trigger={['contextMenu']}
     >
-      <div className="tweet">
-        <div className="tweet__left">
+      <div className={styles.tweet}>
+        <div className={styles.tweet__left}>
           {
             <img
-              className="avatar"
+              className={styles.avatar}
               src={
                 tweet.avatar && tweet.avatar !== 'None'
                   ? decodeURIComponent(tweet.avatar)
@@ -93,16 +93,16 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               alt="头像"
             />
           }
-          <div className="tweet__sentiment" onClick={() => changeTweetSentiment()}>
+          <div className={styles.tweet__sentiment} onClick={() => changeTweetSentiment()}>
             <img src={sentimentIcon[tweet.sentiment]} width={24} height={24} />
           </div>
           <span>{sentimentText[tweet.sentiment]}</span>
         </div>
-        <div className="tweet__right">
-          <div className="tweet__head">
+        <div className={styles.tweet__right}>
+          <div className={styles.tweet__head}>
             <div style={{ display: 'flex', alignItems: 'center', columnGap: 10, marginBottom: 8 }}>
               <span
-                className="nickname"
+                className={styles.nickname}
                 onClick={() => {
                   window.open(`https://www.xiaohongshu.com/user/profile/${tweet.id}`);
                   // if (tweet.platform === 'weibo') {
@@ -118,7 +118,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               </span>
               {/* <Tag onClick={() => setUserTypeModalVisible(true)}>{tweet.userType}</Tag> */}
               <Tag>{tweet.userType}</Tag>
-              <span className="tweet__time">{formatDate(tweet.createdAtTimestamp)}</span>
+              <span className={styles.tweet__time}>{formatDate(tweet.createdAtTimestamp)}</span>
               {tweet.type && TweetTypeEnum[tweet.type] ? (
                 <Tag color="cyan">{TweetTypeEnum[tweet.type]}</Tag>
               ) : null}
@@ -142,13 +142,13 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
             </Space> */}
             </div>
           </div>
-          <div className="tweet__content">
-            <div className="content-left">
+          <div className={styles.tweet__content}>
+            <div className={styles['content-left']}>
               {tweet.platform !== 'weibo' ? (
-                <span className="tweet__title">{tweet.title}</span>
+                <span className={styles.tweet__title}>{tweet.title}</span>
               ) : null}
-              <div className="tweet__text">{tweet.content} </div>
-              <Space className="tweet__data" size={20}>
+              <div className={styles.tweet__text}>{tweet.content} </div>
+              <Space className={styles.tweet__data} size={20}>
                 <span>
                   <RetweetOutlined />
                   {tweet.repostNum || 0}
@@ -180,7 +180,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               </Space>
             </div>
             {tweet.image ? (
-              <div className="tweet__image">
+              <div className={styles.tweet__image}>
                 <img src={tweet.image} alt="图片" />
               </div>
             ) : null}

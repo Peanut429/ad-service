@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from 'react';
-import classNames from 'classnames';
 import { Timeline } from 'antd';
 import { FireOutlined, MinusSquareOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import ReportContext from '../Report.context';
@@ -7,7 +6,7 @@ import { Platform } from '../Report.state';
 import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
-import styles from './index.scss';
+import styles from './index.module.scss';
 
 const EventsTimeline: React.FC = () => {
   const {

@@ -12,6 +12,8 @@ export interface ReportInitialState {
   wordcloudData?: ReportApi.WordcloudData;
   tweetTrendData?: ReportApi.TweetTrendData;
   adNode?: ReportApi.AdNodeItem[];
+  tweetWordTrendData?: ReportApi.TweetWordTrendData;
+  tweetAppearTogetherData?: ReportApi.TweetAppearTogetherData;
 }
 
 const initialState: ReportInitialState = {

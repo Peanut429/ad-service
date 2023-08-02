@@ -43,6 +43,8 @@ const Report = () => {
     dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
     dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
     dispatch({ field: 'adNode', value: res.data.adNode });
+    dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
+    dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
   };
 
   useEffect(() => {

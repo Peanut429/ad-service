@@ -34,6 +34,21 @@ declare namespace ReportApi {
     heat: { key: string; value: number }[];
   };
 
+  type TweetWordTrendData = {
+    frequency: {
+      date: string;
+      value: number;
+      word: string;
+      colorValue: number;
+    }[];
+    heat: {
+      date: string;
+      value: number;
+      word: string;
+      colorValue: number;
+    }[];
+  };
+
   type AdNodeItem = {
     id: string;
     heat: number;
@@ -45,10 +60,26 @@ declare namespace ReportApi {
     title?: string;
   };
 
+  type Edge = {
+    source: string;
+    target: string;
+    sentiment: {
+      key: number;
+      value: number;
+    }[];
+    times: number;
+  };
+  type TweetAppearTogetherData = {
+    edges: Edge[];
+    nodes: { id: string; size: number }[];
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
     adNode: AdNodeItem[];
+    tweetWordTrend: TweetWordTrendData;
+    tweetAppearTogether: TweetAppearTogetherData;
   }>;
 
   type TweetListReq = {
@@ -86,6 +117,7 @@ declare namespace ReportApi {
     count: number;
     data: TweetListItem[];
   }>;
+
   type CommentListReq = {
     timeLimit: {
       gte: number;
@@ -102,10 +134,12 @@ declare namespace ReportApi {
     userType?: string[];
     sentiment?: number[];
   };
+
   type CommentListRes = Response<{
     count: number;
     data: CommentListItem[];
   }>;
+
   type CommentListItem = {
     id: string;
     createdAtTimestamp: number;
