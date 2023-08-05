@@ -74,12 +74,39 @@ declare namespace ReportApi {
     nodes: { id: string; size: number }[];
   };
 
+  type PortraitData = {
+    age: {
+      count: number;
+      data: { key: string; value: number }[];
+    };
+    fanLevel: {
+      count: number;
+      data: { key: string; value: number }[];
+    };
+    gender: {
+      count: number;
+      data: { key: string; value: number }[];
+    };
+    region: {
+      count: number;
+      data: { key: string; value: number }[];
+    };
+    type: {
+      count: number;
+      data: { key: string; value: number }[];
+    };
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
     adNode: AdNodeItem[];
     tweetWordTrend: TweetWordTrendData;
     tweetAppearTogether: TweetAppearTogetherData;
+    userPortrait: {
+      comment: PortraitData;
+      tweet: PortraitData;
+    };
   }>;
 
   type TweetListReq = {

@@ -10,6 +10,7 @@ import TweetList from './TweetList';
 import CommentList from './CommentList';
 import styles from './index.module.scss';
 import Popularity from './Popularity';
+import PortraitAnalysis from './PortraitAnalysis';
 
 const Report = () => {
   const contextValue = useCreateReducer<ReportInitialState>({
@@ -45,6 +46,7 @@ const Report = () => {
     dispatch({ field: 'adNode', value: res.data.adNode });
     dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
     dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
+    dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
   };
 
   useEffect(() => {
@@ -60,6 +62,7 @@ const Report = () => {
               items={[
                 { label: '相关词分析', children: <Keywords />, key: 'keyword' },
                 { label: '声量分析', children: <Popularity />, key: 'popularity' },
+                { label: '画像分析', children: <PortraitAnalysis />, key: 'portrait' },
               ]}
             />
           </div>

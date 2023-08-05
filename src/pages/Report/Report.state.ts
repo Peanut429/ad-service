@@ -14,6 +14,10 @@ export interface ReportInitialState {
   adNode?: ReportApi.AdNodeItem[];
   tweetWordTrendData?: ReportApi.TweetWordTrendData;
   tweetAppearTogetherData?: ReportApi.TweetAppearTogetherData;
+  userPortraitData?: {
+    comment: ReportApi.PortraitData;
+    tweet: ReportApi.PortraitData;
+  };
 }
 
 const initialState: ReportInitialState = {
