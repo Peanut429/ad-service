@@ -3,6 +3,7 @@ import { Segmented, Space } from 'antd';
 import AgeAndGenderChart from './Charts/AgeAndGenderChart';
 import { useState } from 'react';
 import IdentityChart from './Charts/IdentityChart';
+import FanLevelChart from './Charts/FanLevel';
 
 const PortraitAnalysis = () => {
   const [dataSource, setDataSource] = useState<'tweet' | 'comment'>('tweet');
@@ -24,6 +25,9 @@ const PortraitAnalysis = () => {
         </ChartCard>
         <ChartCard title="身份占比">
           <IdentityChart dataSource={dataSource} />
+        </ChartCard>
+        <ChartCard title="粉丝量级">
+          <FanLevelChart dataSource={dataSource} />
         </ChartCard>
       </Space>
     </>
