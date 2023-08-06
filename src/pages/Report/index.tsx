@@ -8,9 +8,10 @@ import Keywords from './Keywords';
 import { chartData } from '@/services/report';
 import TweetList from './TweetList';
 import CommentList from './CommentList';
-import styles from './index.module.scss';
 import Popularity from './Popularity';
 import PortraitAnalysis from './PortraitAnalysis';
+import TopicAnalysis from './TopicAnalysis';
+import styles from './index.module.scss';
 
 const Report = () => {
   const contextValue = useCreateReducer<ReportInitialState>({
@@ -47,6 +48,7 @@ const Report = () => {
     dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
     dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
     dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
+    dispatch({ field: 'topicData', value: res.data.topic });
   };
 
   useEffect(() => {
@@ -63,6 +65,7 @@ const Report = () => {
                 { label: '相关词分析', children: <Keywords />, key: 'keyword' },
                 { label: '声量分析', children: <Popularity />, key: 'popularity' },
                 { label: '画像分析', children: <PortraitAnalysis />, key: 'portrait' },
+                { label: '话题分析', children: <TopicAnalysis />, key: 'topic' },
               ]}
             />
           </div>

@@ -97,6 +97,13 @@ declare namespace ReportApi {
     };
   };
 
+  type TopicData = {
+    id: string;
+    name: string;
+    heat: number;
+    frequency: number;
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
@@ -107,6 +114,7 @@ declare namespace ReportApi {
       comment: PortraitData;
       tweet: PortraitData;
     };
+    topic: TopicData[];
   }>;
 
   type TweetListReq = {

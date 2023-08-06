@@ -18,6 +18,7 @@ export interface ReportInitialState {
     comment: ReportApi.PortraitData;
     tweet: ReportApi.PortraitData;
   };
+  topicData?: ReportApi.TopicData[];
 }
 
 const initialState: ReportInitialState = {
