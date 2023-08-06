@@ -29,6 +29,17 @@ export default [
     component: './Welcome',
   },
   {
+    path: '/brands',
+    name: '品牌列表',
+    icon: 'trademarkOutlined',
+    component: './Brands',
+  },
+  {
+    path: '/task',
+    name: '创建任务',
+    component: './Task',
+  },
+  {
     path: '/report',
     name: '数据报告',
     icon: 'lineChartOutlined',
