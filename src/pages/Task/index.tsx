@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Button, Space, Table, Tag } from 'antd';
+import { Button, Space, Table, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import TaskCreator from './Create';
 import { Link, useRequest, useSearchParams } from '@umijs/max';
-import { keywordsInfo, taskList } from '@/services/brands';
+import { keywordsInfo, stopTask, taskList } from '@/services/brands';
 import dayjs from 'dayjs';
 
 const Task = () => {
   const [searchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [keywords, setKeywords] = useState<Record<string, BrandsApi.KeywordInfo>>({});
+  const { data, run } = useRequest(taskList, { manual: true });
+  const { run: stopTaskApi } = useRequest(stopTask, {
+    manual: true,
+    onSuccess: () => message.success('操作成功'),
+  });
+
   const columns: ColumnsType<BrandsApi.TaskInfo> = [
     { title: '项目名称', dataIndex: 'name', width: 300, ellipsis: true },
     {
@@ -31,13 +37,21 @@ const Task = () => {
     {
       title: '操作',
       width: 200,
-      render: (_, record) => (
-        <Link to={`/report?ids=${record.wordTasksId.join(',')}`}>查看详情</Link>
-      ),
+      render: (_, record) => [
+        <Button
+          key="stop"
+          danger
+          type="text"
+          onClick={() => stopTaskApi({ tasksId: [record.projectId], stop: true })}
+        >
+          停止任务
+        </Button>,
+        <Link key="detail" to={`/report?ids=${record.wordTasksId.join(',')}`}>
+          查看详情
+        </Link>,
+      ],
     },
   ];
-
-  const { data, run } = useRequest(taskList, { manual: true });
 
   useEffect(() => {
     run({ brandId: searchParams.get('brandId')! });

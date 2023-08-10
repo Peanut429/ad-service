@@ -7,7 +7,7 @@ declare namespace BrandsApi {
   type KeywordInfo = {
     taskId: string;
     word: string;
-    pattern: (string | null)[];
+    pattern: (string | null)[][];
     dataRetrieverTime: {
       gte: number;
       lte: number;
@@ -47,7 +47,7 @@ declare namespace BrandsApi {
   type CreateTaskReq = {
     wordTasks: {
       word: string;
-      pattern: string[];
+      pattern: string[][];
       platforms: string[];
     }[];
     dataRetrieverTime: {

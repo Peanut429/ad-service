@@ -39,7 +39,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ open, onCancel, onCreate }) =
         },
         wordTasks: data.wordTasks.map((item) => ({
           word: item.word,
-          pattern: item.pattern as string[],
+          pattern: item.pattern as string[][],
           platforms: [item.platform],
         })),
       });

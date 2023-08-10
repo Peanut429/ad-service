@@ -23,3 +23,7 @@ export async function createBrand(data: { brandName: string; avatar: string }) {
 export async function taskList(data: { brandId?: string; projectsId?: string[] }) {
   return request<BrandsApi.TaskListRes>('/api/task/getProject', { method: 'POST', data });
 }
+
+export async function stopTask(data: { tasksId: string[]; stop: boolean }) {
+  return request('/api/task/stop', { method: 'POST', data });
+}
