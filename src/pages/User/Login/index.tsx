@@ -53,10 +53,16 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: API.LoginParams) => {
+  // const handleSubmit = async (values: API.LoginParams) => {
+  const handleSubmit = async () => {
     try {
       // 登录
-      const msg = await login({ ...values, type });
+      // const msg = await login({ ...values, type });
+      const msg = {
+        status: 'ok',
+        type,
+        currentAuthority: 'admin',
+      };
       if (msg.status === 'ok') {
         message.success('登录成功！');
         await fetchUserInfo();

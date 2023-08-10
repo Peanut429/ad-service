@@ -178,7 +178,7 @@ declare namespace ReportApi {
   type CommentListItem = {
     id: string;
     createdAtTimestamp: number;
-    sentiment: 1 | 2 | 3;
+    sentiment: 0 | 1 | 2 | 3;
     userType: string;
     avatar: string;
     nickname: string;

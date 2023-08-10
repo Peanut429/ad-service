@@ -22,12 +22,12 @@ export default [
       },
     ],
   },
-  {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
-  },
+  // {
+  //   path: '/welcome',
+  //   name: 'welcome',
+  //   icon: 'smile',
+  //   component: './Welcome',
+  // },
   {
     path: '/brands',
     name: '品牌列表',
@@ -36,13 +36,21 @@ export default [
   },
   {
     path: '/task',
-    name: '创建任务',
-    component: './Task',
+    name: '任务',
+    hideInMenu: true,
+    routes: [
+      {
+        path: '/task/list',
+        name: '任务列表',
+        component: './Task',
+      },
+    ],
   },
   {
     path: '/report',
     name: '数据报告',
     icon: 'lineChartOutlined',
+    hideInMenu: true,
     component: './Report',
   },
   // {
@@ -70,7 +78,7 @@ export default [
   // },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/brands',
   },
   {
     path: '*',

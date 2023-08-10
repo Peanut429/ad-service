@@ -4,6 +4,7 @@ import ReportContext from '../Report.context';
 import bad from './bad.png';
 import normal from './normal.png';
 import smile from './smile.png';
+import { Spin } from 'antd';
 
 const SentimentEnum = {
   1: '负面',
@@ -119,7 +120,9 @@ const AppearTogetherChart = () => {
 
   return (
     <div>
-      <div ref={divRef} />
+      <Spin size="large" spinning={!tweetAppearTogetherData}>
+        <div ref={divRef} style={{ height: 500 }} />
+      </Spin>
     </div>
   );
 };

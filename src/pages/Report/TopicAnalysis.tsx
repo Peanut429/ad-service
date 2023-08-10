@@ -10,13 +10,15 @@ const TopicAnalysis = () => {
       dataIndex: 'name',
       title: '话题名称',
     },
-    // {
-    //   dataIndex: 'name',
-    //   title: '相关贴数',
-    // },
+    {
+      dataIndex: 'frequency',
+      title: '相关贴数量',
+      sorter: (a, b) => a.frequency - b.frequency,
+    },
     {
       dataIndex: 'heat',
       title: '热度',
+      sorter: (a, b) => a.heat - b.heat,
     },
     // {
     //   dataIndex: 'name',

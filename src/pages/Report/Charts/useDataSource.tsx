@@ -10,7 +10,7 @@ const useDataSource = () => {
       key="node"
       value={source}
       options={[
-        { label: '全部', value: 'total' },
+        // { label: '全部', value: 'total' },
         { label: '推文', value: 'tweet' },
         { label: '评论', value: 'comment' },
       ]}

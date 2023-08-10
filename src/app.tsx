@@ -1,16 +1,16 @@
 // import Footer from '@/components/Footer';
-import { Question } from '@/components/RightContent';
-import { LinkOutlined } from '@ant-design/icons';
+// import { Question } from '@/components/RightContent';
+// import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
-import { history, Link } from '@umijs/max';
+import { history } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './requestErrorConfig';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
+// import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 import React from 'react';
 import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
-const isDev = process.env.NODE_ENV === 'development';
+// const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
 /**
@@ -24,10 +24,61 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
+      // const msg = await queryCurrentUser({
+      //   skipErrorHandler: true,
+      // });
+      // return msg.data;
+      return {
+        name: 'Serati Ma',
+        avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+        userid: '00000001',
+        email: 'antdesign@alipay.com',
+        signature: '海纳百川，有容乃大',
+        title: '交互专家',
+        group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+        tags: [
+          {
+            key: '0',
+            label: '很有想法的',
+          },
+          {
+            key: '1',
+            label: '专注设计',
+          },
+          {
+            key: '2',
+            label: '辣~',
+          },
+          {
+            key: '3',
+            label: '大长腿',
+          },
+          {
+            key: '4',
+            label: '川妹子',
+          },
+          {
+            key: '5',
+            label: '海纳百川',
+          },
+        ],
+        notifyCount: 12,
+        unreadCount: 11,
+        country: 'China',
+        access: 'admin',
+        geographic: {
+          province: {
+            label: '浙江省',
+            key: '330000',
+          },
+          city: {
+            label: '杭州市',
+            key: '330100',
+          },
+        },
+        address: '西湖区工专路 77 号',
+        phone: '0752-268888888',
+      };
     } catch (error) {
       history.push(loginPath);
     }
@@ -52,7 +103,7 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
-    actionsRender: () => [<Question key="doc" />],
+    // actionsRender: () => [<Question key="doc" />],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
@@ -60,9 +111,9 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
       },
     },
-    waterMarkProps: {
-      content: initialState?.currentUser?.name,
-    },
+    // waterMarkProps: {
+    //   content: initialState?.currentUser?.name,
+    // },
     // footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
@@ -91,14 +142,14 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         width: '331px',
       },
     ],
-    links: isDev
-      ? [
-          <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>OpenAPI 文档</span>
-          </Link>,
-        ]
-      : [],
+    // links: isDev
+    //   ? [
+    //       <Link key="openapi" to="/umi/plugin/openapi" target="_blank">
+    //         <LinkOutlined />
+    //         <span>OpenAPI 文档</span>
+    //       </Link>,
+    //     ]
+    //   : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,

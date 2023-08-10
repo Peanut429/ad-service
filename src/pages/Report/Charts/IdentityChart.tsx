@@ -21,7 +21,7 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
   const chartData = useMemo(() => {
     const data = [
       {
-        name: '普通用户',
+        name: '素人',
         value: 0,
         children: [
           { name: '微博', value: 0 },
@@ -30,7 +30,7 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
         ],
       },
       {
-        name: 'KOC',
+        name: '尾部KOL',
         value: 0,
         children: [
           { name: '微博', value: 0 },
@@ -39,7 +39,7 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
         ],
       },
       {
-        name: '明星',
+        name: '腰部KOL',
         value: 0,
         children: [
           { name: '微博', value: 0 },
@@ -48,7 +48,7 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
         ],
       },
       {
-        name: '企业账号',
+        name: '头部KOL',
         value: 0,
         children: [
           { name: '微博', value: 0 },
@@ -57,16 +57,7 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
         ],
       },
       {
-        name: '媒体账号',
-        value: 0,
-        children: [
-          { name: '微博', value: 0 },
-          { name: '小红书', value: 0 },
-          { name: '抖音', value: 0 },
-        ],
-      },
-      {
-        name: 'KOL',
+        name: '企业',
         value: 0,
         children: [
           { name: '微博', value: 0 },
@@ -81,18 +72,16 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
       typeData.forEach((item) => {
         let index: number = 0;
         let subIndex: number = 0;
-        if (item.key === 'normal') {
+        if (item.key === '素人') {
           index = 0;
-        } else if (item.key === 'koc') {
+        } else if (item.key === '尾部KOL') {
           index = 1;
-        } else if (item.key === 'star') {
+        } else if (item.key === '腰部KOL') {
           index = 2;
-        } else if (item.key === 'enterprise') {
+        } else if (item.key === '头部KOL') {
           index = 3;
-        } else if (item.key === 'media') {
+        } else if (item.key === '企业') {
           index = 4;
-        } else if (item.key === 'kol') {
-          index = 5;
         }
         subIndex = 1;
         // if (item.platform === 'redbook') {

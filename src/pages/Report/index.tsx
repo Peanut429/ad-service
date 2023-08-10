@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
-import { Tabs } from 'antd';
-// import dayjs from 'dayjs';
+import { useSearchParams } from '@umijs/max';
+import { DatePicker, Form, Tabs } from 'antd';
+import dayjs, { Dayjs } from 'dayjs';
+import { RangePickerDateProps } from 'antd/es/date-picker/generatePicker';
 import useCreateReducer from '@/hooks/useCreateReducer';
 import ReportContext from './Report.context';
 import initialState, { ReportInitialState } from './Report.state';
@@ -14,14 +16,14 @@ import TopicAnalysis from './TopicAnalysis';
 import styles from './index.module.scss';
 
 const Report = () => {
+  const [searchParams] = useSearchParams();
   const contextValue = useCreateReducer<ReportInitialState>({
     initialState: {
       ...initialState,
+      tasksId: searchParams.get('ids')!.split(','),
       timeLimit: {
-        // gte: dayjs().subtract(30, 'day').startOf('day').valueOf(),
-        // lte: dayjs().endOf('day').valueOf(),
-        gte: 1685548800000,
-        lte: 1690819200000,
+        gte: dayjs('2022-07-01').subtract(30, 'day').startOf('day').valueOf(),
+        lte: dayjs('2023-07-31').endOf('day').valueOf(),
       },
     },
   });
@@ -51,6 +53,17 @@ const Report = () => {
     dispatch({ field: 'topicData', value: res.data.topic });
   };
 
+  const handleDateRangeChange: RangePickerDateProps<Dayjs>['onChange'] = (value) => {
+    if (!value) return;
+    dispatch({
+      field: 'timeLimit',
+      value: {
+        gte: value[0]!.startOf('day').valueOf(),
+        lte: value[1]!.endOf('day').valueOf(),
+      },
+    });
+  };
+
   useEffect(() => {
     fetchChatData();
   }, [timeLimit, platforms, tasksId, includeWords, excludeWords, userType, sentiment]);
@@ -58,6 +71,14 @@ const Report = () => {
   return (
     <ReportContext.Provider value={{ ...contextValue }}>
       <div>
+        <Form>
+          <Form.Item label="时间范围">
+            <DatePicker.RangePicker
+              defaultValue={[dayjs('2022-07-01'), dayjs('2023-07-31')]}
+              onChange={handleDateRangeChange}
+            />
+          </Form.Item>
+        </Form>
         <div className={styles.main}>
           <div className={styles['left-container']}>
             <Tabs

@@ -34,7 +34,7 @@ const EventsTimeline: React.FC = () => {
           expanded: false,
           size: 1,
           platform: 'redbook',
-          mergeContent: '这是一段文案',
+          mergeContent: item.title || '',
         };
       }),
     );

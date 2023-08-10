@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { WordCloud } from '@antv/g2plot';
-import { Segmented, Space } from 'antd';
+import { Segmented, Space, Spin } from 'antd';
 // import { WordCloud } from '@antv/g2plot'
 
 const WordCloudChart = () => {
@@ -18,7 +18,7 @@ const WordCloudChart = () => {
 
     const chart = new WordCloud(divRef.current, {
       data: wordcloudData[dataSource][dataType],
-      height: 300,
+      height: 400,
       wordField: 'word',
       weightField: dataType,
       colorField: 'word',
@@ -37,7 +37,7 @@ const WordCloudChart = () => {
         <Segmented
           value={dataSource}
           options={[
-            { label: '全部', value: 'total' },
+            // { label: '全部', value: 'total' },
             { label: '推文', value: 'tweet' },
             { label: '评论', value: 'comment' },
           ]}
@@ -53,7 +53,9 @@ const WordCloudChart = () => {
         />
       </Space>
 
-      <div ref={divRef} style={{ marginTop: 20 }} />
+      <Spin size="large" spinning={!wordcloudData}>
+        <div ref={divRef} style={{ marginTop: 20, height: 400 }} />
+      </Spin>
     </div>
   );
 };

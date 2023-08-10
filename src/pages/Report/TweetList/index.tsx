@@ -1,14 +1,21 @@
 import { tweetList } from '@/services/report';
 import { useContext, useEffect, useState } from 'react';
+// import { read, utils } from 'xlsx';
 import ReportContext from '../Report.context';
 import { Dropdown, Pagination, PaginationProps, Tag, Space } from 'antd';
 import sentimentBad from './sentiment_bad.png';
 import sentimentGood from './sentiment_good.png';
 import sentimentNeutral from './sentiment_neutral.png';
+import sentimentUnknow from './question.png';
 import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
-import { CommentOutlined, LikeOutlined, RetweetOutlined } from '@ant-design/icons';
+import {
+  // CloudUploadOutlined,
+  CommentOutlined,
+  LikeOutlined,
+  RetweetOutlined,
+} from '@ant-design/icons';
 import { Platform } from '../Report.state';
 import styles from './index.module.scss';
 
@@ -46,19 +53,20 @@ const platformIcon = {
 // };
 
 const sentimentIcon = {
+  '0': sentimentUnknow,
   '1': sentimentBad,
   '2': sentimentNeutral,
   '3': sentimentGood,
 };
 
 const sentimentText = {
+  '0': '未知',
   '1': '负面',
   '2': '中性',
   '3': '正面',
 };
 
 //时间格式化
-
 const formatDate = (date: number) => {
   const dateObj = new Date(date);
   const year = dateObj.getFullYear();
@@ -75,12 +83,21 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
   async function changeTweetSentiment() {
     // setVisible(true);
   }
+
   return (
     <Dropdown
-      // overlay={<Menu items={menuItems} onClick={({ key }) => handleMenuClick(key)} />}
+      menu={{
+        items: [],
+        onClick: () => {},
+      }}
       trigger={['contextMenu']}
     >
-      <div className={styles.tweet}>
+      <div
+        className={styles.tweet}
+        onClick={() => {
+          window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
+        }}
+      >
         <div className={styles.tweet__left}>
           {
             <img
@@ -104,7 +121,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               <span
                 className={styles.nickname}
                 onClick={() => {
-                  window.open(`https://www.xiaohongshu.com/user/profile/${tweet.id}`);
+                  // window.open(`https://www.xiaohongshu.com/user/profile/${tweet.id}`);
                   // if (tweet.platform === 'weibo') {
                   //   window.open(`https://weibo.com/u/${tweet.id}`);
                   // } else if (tweet.platform === 'redbook') {
@@ -147,7 +164,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               {tweet.platform !== 'weibo' ? (
                 <span className={styles.tweet__title}>{tweet.title}</span>
               ) : null}
-              <div className={styles.tweet__text}>{tweet.content} </div>
+              <div className={styles.tweet__text}>{tweet.content}</div>
               <Space className={styles.tweet__data} size={20}>
                 <span>
                   <RetweetOutlined />

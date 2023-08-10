@@ -2,14 +2,18 @@ import { commentList } from '@/services/report';
 import { useContext, useEffect, useState } from 'react';
 import ReportContext from '../Report.context';
 import usePageInfo from '../usePageInfo';
-import classNames from 'classnames';
+// import classNames from 'classnames';
 import { Dropdown, Space } from 'antd';
 import { LikeOutlined } from '@ant-design/icons';
 import sentimentBad from '../TweetList/sentiment_bad.png';
 import sentimentGood from '../TweetList/sentiment_good.png';
 import sentimentNeutral from '../TweetList/sentiment_neutral.png';
+import sentimentUnknow from '../TweetList/question.png';
 import { Platform } from '../Report.state';
+
 import './index.less';
+// import SortComponent from '../SortComponent';
+
 type CommentListItemProps = {
   data: ReportApi.CommentListItem & {
     platform?: Platform;
@@ -29,15 +33,16 @@ const formatDate = (date: number) => {
 };
 
 const sentimentIcon = {
+  '0': sentimentUnknow,
   '1': sentimentBad,
   '2': sentimentNeutral,
   '3': sentimentGood,
 };
 
 const sentimentText = {
+  '0': '未知',
   '1': '负面',
-  '0': '中性',
-  '2': '正面',
+  '2': '中性',
   '3': '正面',
 };
 
@@ -72,8 +77,8 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
           </div>
           {/* <div className="works__sentiment" onClick={() => setVisible(true) */}
           <div className="works__sentiment">
-            <img src={data.sentiment && sentimentIcon[data.sentiment]} alt="情感" />
-            <div>{data.sentiment && sentimentText[data.sentiment]}</div>
+            <img src={sentimentIcon[data.sentiment || 0]} alt="情感" />
+            <div>{sentimentText[data.sentiment || 0]}</div>
           </div>
         </div>
         <div className="works__center">
@@ -121,18 +126,16 @@ const CommentList = () => {
     state: { timeLimit, userType, platforms, tasksId, excludeWords, includeWords, sentiment },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
-  // const [pageInfo, setPageInfo] = useState({ page: 1, limit: 10 });
   const [sortKey] = useState('heat');
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
-  const [params, setParams] = useState({
-    order_key: 'createdAtTimestamp',
+  const [sortParams] = useState({
+    order_key: 'heat',
     order_direction: 1, // 1降序，0正序
-    page: 1,
-    limit: 10,
   });
+
   const fetchData = async () => {
     const res = await commentList({
       timeLimit,
@@ -144,8 +147,8 @@ const CommentList = () => {
       sentiment,
       page: currentPage,
       limit: pageSize,
-      sortKey: sortKey,
-      sortOrder: sortOrder,
+      sortKey: sortParams.order_key,
+      sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
     });
 
     setDataList(res.data.data);
@@ -155,7 +158,6 @@ const CommentList = () => {
   useEffect(() => {
     fetchData();
   }, [
-    //   pageInfo,
     pageSize,
     currentPage,
     sortKey,
@@ -167,75 +169,22 @@ const CommentList = () => {
     excludeWords,
     includeWords,
     sentiment,
+    sortParams,
   ]);
 
   return (
     <div>
-      <div className="sort-wrapper">
-        <div
-          className="sort__item"
-          onClick={() => {
-            setParams((prev) => ({
-              ...prev,
-              order_key: 'created_at_timestamp',
-              order_direction:
-                prev.order_key === 'created_at_timestamp' ? 1 - prev.order_direction : 1,
-            }));
-          }}
-        >
-          <span>发布时间</span>
-          <span className="sort-icon-wrapper">
-            <span
-              className={classNames('sort-icon__up', {
-                active: params.order_key === 'created_at_timestamp' && !params.order_direction,
-              })}
-            />
-            <span
-              className={classNames('sort-icon__down', {
-                active: params.order_key === 'created_at_timestamp' && params.order_direction,
-              })}
-            />
-          </span>
-        </div>
-        <div
-          className="sort__item"
-          onClick={() => {
-            setParams((prev) => ({
-              ...prev,
-              order_key: 'heat',
-              order_direction: prev.order_key === 'heat' ? 1 - prev.order_direction : 1,
-            }));
-          }}
-        >
-          <span>互动量</span>
-          <span className="sort-icon-wrapper">
-            <span
-              className={classNames('sort-icon__up', {
-                active: params.order_key === 'heat' && !params.order_direction,
-              })}
-            />
-            <span
-              className={classNames('sort-icon__down', {
-                active: params.order_key === 'heat' && params.order_direction,
-              })}
-            />
-          </span>
-        </div>
-      </div>
+      {/* <SortComponent
+        onChange={(value) => {
+          setSortParams(value);
+        }}
+      /> */}
       <div>
         {dataList.map((item) => {
           return <CommentListItem key={item.id} data={item} />;
         })}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
-        {/* <Pagination
-            current={pageInfo.page}
-            pageSize={pageInfo.limit}
-            total={total}
-            onChange={handleChange}
-          /> */}
-        {Pagination}
-      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>
   );
 };

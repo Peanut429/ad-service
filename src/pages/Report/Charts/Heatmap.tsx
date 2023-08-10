@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Heatmap } from '@antv/g2plot';
-import { Segmented } from 'antd';
+import { Segmented, Spin } from 'antd';
 
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
@@ -15,7 +15,7 @@ const HeatmapChart = () => {
 
     const chart = new Heatmap(divRef.current, {
       data: tweetWordTrendData[dataType],
-      height: 300,
+      height: 400,
       xField: 'date',
       yField: 'word',
       colorField: 'colorValue',
@@ -65,7 +65,9 @@ const HeatmapChart = () => {
           onChange={(value) => setDataType(value as 'frequency' | 'heat')}
         />
       </div>
-      <div ref={divRef} />
+      <Spin size="large" spinning={!tweetWordTrendData}>
+        <div ref={divRef} style={{ height: 400 }} />
+      </Spin>
     </div>
   );
 };

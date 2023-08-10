@@ -24,9 +24,9 @@ export interface ReportInitialState {
 const initialState: ReportInitialState = {
   timeLimit: { gte: 0, lte: 0 },
   platforms: ['redbook'],
-  tasksId: ['avbfsdf'],
-  includeWords: [['威露士', '洗衣液'], ['洗衣液']],
-  excludeWords: ['好闻'],
+  tasksId: [],
+  includeWords: [],
+  excludeWords: [],
   userType: [],
   sentiment: [],
 };

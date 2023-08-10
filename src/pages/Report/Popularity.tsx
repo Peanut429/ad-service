@@ -40,7 +40,7 @@ const Popularity = () => {
             padding: '20px 10px 0 ',
             overflowY: 'auto',
             overflowX: 'hidden',
-            maxHeight: 400,
+            maxHeight: 600,
           }}
         >
           <EventsTimeline />
