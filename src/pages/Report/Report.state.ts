@@ -19,6 +19,12 @@ export interface ReportInitialState {
     tweet: ReportApi.PortraitData;
   };
   topicData?: ReportApi.TopicData[];
+  listTimeLimit: { gte: number; lte: number };
+  listPlatforms: Platform[];
+  listIncludeWords: string[][];
+  listExcludeWords: string[];
+  listUserType: UserType[];
+  listSentiment: number[];
 }
 
 const initialState: ReportInitialState = {
@@ -29,6 +35,12 @@ const initialState: ReportInitialState = {
   excludeWords: [],
   userType: [],
   sentiment: [],
+  listTimeLimit: { gte: 0, lte: 0 },
+  listPlatforms: ['redbook'],
+  listIncludeWords: [],
+  listExcludeWords: [],
+  listUserType: [],
+  listSentiment: [],
 };
 
 export default initialState;

@@ -7,6 +7,7 @@ const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
     state: { tweetWordTrendData },
+    addListKeyword,
   } = useContext(ReportContext);
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
 
@@ -48,10 +49,18 @@ const HeatmapChart = () => {
       },
     });
 
+    chart.on('element:click', (ev: any) => {
+      const element = ev.target.get('element');
+      if (element) {
+        const data = element.getModel().data;
+        addListKeyword(data.word);
+      }
+    });
+
     chart.render();
 
     return () => chart?.destroy();
-  }, [tweetWordTrendData, dataType]);
+  }, [tweetWordTrendData, dataType, addListKeyword]);
 
   return (
     <div>
@@ -66,7 +75,9 @@ const HeatmapChart = () => {
         />
       </div>
       <Spin size="large" spinning={!tweetWordTrendData}>
+        {/* <Dropdown menu={{ items: [] }}> */}
         <div ref={divRef} style={{ height: 400 }} />
+        {/* </Dropdown> */}
       </Spin>
     </div>
   );

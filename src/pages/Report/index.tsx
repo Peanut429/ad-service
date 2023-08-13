@@ -17,11 +17,16 @@ import styles from './index.module.scss';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
+  const tasksIdInQuery = searchParams.get('ids')!.split(',');
   const contextValue = useCreateReducer<ReportInitialState>({
     initialState: {
       ...initialState,
-      tasksId: searchParams.get('ids')!.split(','),
+      tasksId: tasksIdInQuery,
       timeLimit: {
+        gte: dayjs('2022-07-01').subtract(30, 'day').startOf('day').valueOf(),
+        lte: dayjs('2023-07-31').endOf('day').valueOf(),
+      },
+      listTimeLimit: {
         gte: dayjs('2022-07-01').subtract(30, 'day').startOf('day').valueOf(),
         lte: dayjs('2023-07-31').endOf('day').valueOf(),
       },
@@ -29,7 +34,17 @@ const Report = () => {
   });
 
   const {
-    state: { timeLimit, platforms, tasksId, includeWords, excludeWords, userType, sentiment },
+    state: {
+      timeLimit,
+      platforms,
+      tasksId,
+      includeWords,
+      excludeWords,
+      userType,
+      sentiment,
+      listIncludeWords,
+      listExcludeWords,
+    },
     dispatch,
   } = contextValue;
 
@@ -64,12 +79,43 @@ const Report = () => {
     });
   };
 
+  const addListKeyword = (keyword: string) => {
+    console.log(listIncludeWords);
+    const existIncludeWord = listIncludeWords.findIndex((item) => {
+      return item.length === 1 && item[0] === keyword;
+    });
+    const existExcludeWord = listExcludeWords.includes(keyword);
+    if (existIncludeWord === -1) {
+      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [keyword]] });
+    }
+    if (existExcludeWord) {
+      dispatch({
+        field: 'listExcludeWords',
+        value: listExcludeWords.filter((item) => item !== keyword),
+      });
+    }
+  };
+
+  const addListExcludeWords = (keyword: string) => {
+    const existIncludeWord = listIncludeWords.findIndex((item) => {
+      return item.length === 1 && item[0] === keyword;
+    });
+    const existExcludeWord = listExcludeWords.includes(keyword);
+    if (existIncludeWord > -1) {
+      listIncludeWords.splice(existIncludeWord, 1);
+      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+    }
+    if (!existExcludeWord) {
+      dispatch({ field: 'listExcludeWords', value: [...listExcludeWords, keyword] });
+    }
+  };
+
   useEffect(() => {
     fetchChatData();
   }, [timeLimit, platforms, tasksId, includeWords, excludeWords, userType, sentiment]);
 
   return (
-    <ReportContext.Provider value={{ ...contextValue }}>
+    <ReportContext.Provider value={{ ...contextValue, addListKeyword, addListExcludeWords }}>
       <div>
         <Form>
           <Form.Item label="时间范围">

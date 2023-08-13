@@ -18,8 +18,9 @@ const WordCloudChart = () => {
   ]);
 
   const {
-    state: { wordcloudData, includeWords, excludeWords },
-    dispatch,
+    state: { wordcloudData },
+    addListKeyword,
+    addListExcludeWords,
   } = useContext(ReportContext);
 
   const handleOpenChange = (open: boolean) => {
@@ -29,25 +30,14 @@ const WordCloudChart = () => {
   };
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
-    const existWord = includeWords.findIndex((item) => {
-      return item.length === 1 && item[0] === currentWord;
-    });
     if (key === 'add') {
-      if (existWord === -1) {
-        dispatch({ field: 'includeWords', value: [...includeWords, [currentWord]] });
-      }
+      addListKeyword(currentWord);
     } else if (key === 'hide') {
       if (!hiddenWords.includes(currentWord)) {
         setHiddenWords([...hiddenWords, currentWord]);
       }
     } else if (key === 'delete') {
-      if (existWord > -1) {
-        includeWords.splice(existWord, 1);
-        dispatch({ field: 'includeWords', value: [...includeWords] });
-      }
-      if (!excludeWords.includes(currentWord)) {
-        dispatch({ field: 'excludeWords', value: [...excludeWords, currentWord] });
-      }
+      addListExcludeWords(currentWord);
     }
     setMenuVisible(false);
   };
@@ -78,7 +68,7 @@ const WordCloudChart = () => {
     });
 
     return () => chart.destroy();
-  }, [wordcloudData, dataSource, dataType, hiddenWords]);
+  }, [wordcloudData, dataSource, dataType, hiddenWords, addListKeyword, addListExcludeWords]);
 
   return (
     <div>
@@ -114,7 +104,7 @@ const WordCloudChart = () => {
       </Spin>
       {hiddenWords.length > 0 && (
         <div>
-          隐藏的关键词：
+          <span>隐藏的关键词：</span>
           {hiddenWords.map((item) => (
             <Tag
               key={item}

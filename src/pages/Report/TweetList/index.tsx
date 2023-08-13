@@ -210,7 +210,15 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
 
 const TweetList = () => {
   const {
-    state: { timeLimit, userType, platforms, tasksId, excludeWords, includeWords, sentiment },
+    state: {
+      listTimeLimit,
+      listUserType,
+      listPlatforms,
+      tasksId,
+      listExcludeWords,
+      listIncludeWords,
+      listSentiment,
+    },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.TweetListItem[]>([]);
   const [pageInfo, setPageInfo] = useState({ page: 1, limit: 10 });
@@ -224,13 +232,13 @@ const TweetList = () => {
 
   const fetchData = async () => {
     const res = await tweetList({
-      timeLimit,
-      userType,
-      platforms,
+      timeLimit: listTimeLimit,
+      userType: listUserType,
+      platforms: listPlatforms,
       tasksId,
-      excludeWords,
-      includeWords,
-      sentiment,
+      excludeWords: listExcludeWords,
+      includeWords: listIncludeWords,
+      sentiment: listSentiment,
       page: pageInfo.page,
       limit: pageInfo.limit,
       sortKey: sortKey,
@@ -247,13 +255,13 @@ const TweetList = () => {
     pageInfo,
     sortKey,
     sortOrder,
-    timeLimit,
-    userType,
-    platforms,
+    listTimeLimit,
+    listUserType,
+    listPlatforms,
     tasksId,
-    excludeWords,
-    includeWords,
-    sentiment,
+    listExcludeWords,
+    listIncludeWords,
+    listSentiment,
   ]);
 
   return (

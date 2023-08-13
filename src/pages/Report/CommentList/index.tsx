@@ -123,7 +123,15 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
 
 const CommentList = () => {
   const {
-    state: { timeLimit, userType, platforms, tasksId, excludeWords, includeWords, sentiment },
+    state: {
+      listTimeLimit,
+      listUserType,
+      listPlatforms,
+      tasksId,
+      listExcludeWords,
+      listIncludeWords,
+      listSentiment,
+    },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
   const [sortKey] = useState('heat');
@@ -138,13 +146,13 @@ const CommentList = () => {
 
   const fetchData = async () => {
     const res = await commentList({
-      timeLimit,
-      userType,
-      platforms,
+      timeLimit: listTimeLimit,
+      userType: listUserType,
+      platforms: listPlatforms,
       tasksId,
-      excludeWords,
-      includeWords,
-      sentiment,
+      excludeWords: listExcludeWords,
+      includeWords: listIncludeWords,
+      sentiment: listSentiment,
       page: currentPage,
       limit: pageSize,
       sortKey: sortParams.order_key,
@@ -162,13 +170,13 @@ const CommentList = () => {
     currentPage,
     sortKey,
     sortOrder,
-    timeLimit,
-    userType,
-    platforms,
+    listTimeLimit,
+    listUserType,
+    listPlatforms,
     tasksId,
-    excludeWords,
-    includeWords,
-    sentiment,
+    listExcludeWords,
+    listIncludeWords,
+    listSentiment,
     sortParams,
   ]);
 
