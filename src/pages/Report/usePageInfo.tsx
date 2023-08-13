@@ -13,6 +13,7 @@ const usePageInfo = (total: number) => {
       current={pageInfo.page}
       pageSize={pageInfo.limit}
       total={total}
+      showTotal={(total) => `共 ${total} 条`}
       onChange={handleChange}
     />
   );

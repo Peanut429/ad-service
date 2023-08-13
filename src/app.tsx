@@ -159,7 +159,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       return (
         <>
           {children}
-          <SettingDrawer
+          {/* <SettingDrawer
             disableUrlParams
             enableDarkTheme
             settings={initialState?.settings}
@@ -169,7 +169,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
                 settings,
               }));
             }}
-          />
+          /> */}
         </>
       );
     },

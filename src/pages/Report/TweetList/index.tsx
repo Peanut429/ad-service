@@ -1,8 +1,7 @@
 import { tweetList } from '@/services/report';
 import { useContext, useEffect, useState } from 'react';
-// import { read, utils } from 'xlsx';
 import ReportContext from '../Report.context';
-import { Dropdown, Pagination, PaginationProps, Tag, Space } from 'antd';
+import { Dropdown, PaginationProps, Tag, Space } from 'antd';
 import sentimentBad from './sentiment_bad.png';
 import sentimentGood from './sentiment_good.png';
 import sentimentNeutral from './sentiment_neutral.png';
@@ -10,13 +9,9 @@ import sentimentUnknow from './question.png';
 import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
-import {
-  // CloudUploadOutlined,
-  CommentOutlined,
-  LikeOutlined,
-  RetweetOutlined,
-} from '@ant-design/icons';
+import { CommentOutlined, LikeOutlined, RetweetOutlined } from '@ant-design/icons';
 import { Platform } from '../Report.state';
+import usePageInfo from '../usePageInfo';
 import styles from './index.module.scss';
 
 type TweetListItemProps = {
@@ -215,20 +210,24 @@ const TweetList = () => {
       listUserType,
       listPlatforms,
       tasksId,
+      excludeWords,
       listExcludeWords,
+      includeWords,
       listIncludeWords,
       listSentiment,
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.TweetListItem[]>([]);
-  const [pageInfo, setPageInfo] = useState({ page: 1, limit: 10 });
+  // const [pageInfo, setPageInfo] = useState({ page: 1, limit: 10 });
   const [sortKey] = useState('heat');
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
 
-  const handleChange: PaginationProps['onChange'] = (page, pageSize) => {
-    setPageInfo({ page, limit: pageSize });
-  };
+  const { currentPage, pageSize, Pagination } = usePageInfo(total);
+
+  // const handleChange: PaginationProps['onChange'] = (page, pageSize) => {
+  //   setPageInfo({ page, limit: pageSize });
+  // };
 
   const fetchData = async () => {
     const res = await tweetList({
@@ -236,11 +235,11 @@ const TweetList = () => {
       userType: listUserType,
       platforms: listPlatforms,
       tasksId,
-      excludeWords: listExcludeWords,
-      includeWords: listIncludeWords,
+      excludeWords: [...excludeWords, ...listExcludeWords],
+      includeWords: [...includeWords, ...listIncludeWords],
       sentiment: listSentiment,
-      page: pageInfo.page,
-      limit: pageInfo.limit,
+      page: currentPage,
+      limit: pageSize,
       sortKey: sortKey,
       sortOrder: sortOrder,
     });
@@ -252,7 +251,8 @@ const TweetList = () => {
   useEffect(() => {
     fetchData();
   }, [
-    pageInfo,
+    pageSize,
+    currentPage,
     sortKey,
     sortOrder,
     listTimeLimit,
@@ -269,14 +269,7 @@ const TweetList = () => {
       {dataList.map((item) => {
         return <TweetListItem key={item.id} data={item} />;
       })}
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
-        <Pagination
-          current={pageInfo.page}
-          pageSize={pageInfo.limit}
-          total={total}
-          onChange={handleChange}
-        />
-      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>
   );
 };

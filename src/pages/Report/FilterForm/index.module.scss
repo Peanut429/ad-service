@@ -1,0 +1,15 @@
+.trigger {
+  position: fixed;
+  top: 300px;
+  right: 0;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border-start-start-radius: 8px;
+  border-end-start-radius: 8px;
+  background-color: #1890ff;
+  cursor: pointer;
+}

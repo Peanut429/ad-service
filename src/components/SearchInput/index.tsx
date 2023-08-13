@@ -8,17 +8,18 @@ type SearchInputProps = {
   placeholder?: string;
   style?: React.CSSProperties;
   value?: string;
+  editAble?: boolean;
   onChange?: (value: WordInfo[]) => void;
 };
 
-type WordInfo = {
+export type WordInfo = {
   taskId?: string;
   word: string;
   pattern: string[][];
   platforms: string[];
 };
 
-const SearchInput: React.FC<SearchInputProps> = (props) => {
+const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble, onChange }) => {
   const inputRef = useRef<InputRef>(null);
   const [data, setData] = useState<BrandsApi.KeywordInfo[]>([]);
   const [selectedValue, setSelectedValue] = useState<string>();
@@ -34,18 +35,20 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
       width: 200,
       align: 'center',
       render: (_, record) => [
-        <Button
-          type="text"
-          key="edit"
-          size="small"
-          disabled={!!record.taskId}
-          onClick={() => {
-            setVisible(true);
-            setEditValue(record);
-          }}
-        >
-          拆分设置
-        </Button>,
+        editAble ? (
+          <Button
+            type="text"
+            key="edit"
+            size="small"
+            disabled={!!record.taskId}
+            onClick={() => {
+              setVisible(true);
+              setEditValue(record);
+            }}
+          >
+            拆分设置
+          </Button>
+        ) : null,
         <Button
           type="text"
           danger
@@ -127,7 +130,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
   };
 
   useEffect(() => {
-    props.onChange?.(value);
+    onChange?.(value);
   }, [value]);
 
   return (
@@ -136,8 +139,8 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
         <Select
           showSearch
           value={selectedValue}
-          placeholder={props.placeholder}
-          style={props.style}
+          placeholder={placeholder}
+          style={style}
           defaultActiveFirstOption={false}
           suffixIcon={null}
           filterOption={false}

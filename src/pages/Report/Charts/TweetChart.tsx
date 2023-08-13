@@ -33,7 +33,7 @@ const TweetChart = () => {
     return () => {
       chart.destroy();
     };
-  }, [tweetTrendData]);
+  }, [tweetTrendData, dataType]);
 
   return (
     <div>

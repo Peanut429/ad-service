@@ -10,6 +10,7 @@ const Popularity = () => {
   const {
     state: { adNode },
   } = useContext(ReportContext);
+
   return (
     <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
       <ChartCard title="推文数量/热度趋势">

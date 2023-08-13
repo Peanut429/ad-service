@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from '@umijs/max';
-import { DatePicker, Form, Tabs } from 'antd';
+import { DatePicker, Form, Tabs, Tag } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { RangePickerDateProps } from 'antd/es/date-picker/generatePicker';
 import useCreateReducer from '@/hooks/useCreateReducer';
@@ -14,6 +14,7 @@ import Popularity from './Popularity';
 import PortraitAnalysis from './PortraitAnalysis';
 import TopicAnalysis from './TopicAnalysis';
 import styles from './index.module.scss';
+import FilterForm from './FilterForm';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
@@ -114,12 +115,27 @@ const Report = () => {
   return (
     <ReportContext.Provider value={{ ...contextValue, addListKeyword, addListExcludeWords }}>
       <div>
-        <Form>
+        <Form labelCol={{ flex: '80px' }} size="small">
           <Form.Item label="时间范围">
             <DatePicker.RangePicker
               defaultValue={[dayjs('2022-07-01'), dayjs('2023-07-31')]}
               onChange={handleDateRangeChange}
             />
+          </Form.Item>
+          <Form.Item label="关键词">
+            {listIncludeWords.map((item, index) => (
+              <Tag
+                key={index}
+                closable
+                onClose={() => {
+                  listIncludeWords.splice(index, 1);
+                  dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+                }}
+                style={{ fontSize: 14 }}
+              >
+                {item.join(' + ')}
+              </Tag>
+            ))}
           </Form.Item>
         </Form>
         <div className={styles.main}>
@@ -142,6 +158,7 @@ const Report = () => {
             />
           </div>
         </div>
+        <FilterForm />
       </div>
     </ReportContext.Provider>
   );
