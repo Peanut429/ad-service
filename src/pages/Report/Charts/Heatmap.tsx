@@ -53,7 +53,7 @@ const HeatmapChart = () => {
       const element = ev.target.get('element');
       if (element) {
         const data = element.getModel().data;
-        addListKeyword(data.word);
+        addListKeyword([data.word as string]);
       }
     });
 

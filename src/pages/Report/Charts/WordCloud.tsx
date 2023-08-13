@@ -31,7 +31,7 @@ const WordCloudChart = () => {
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
-      addListKeyword(currentWord);
+      addListKeyword([currentWord]);
     } else if (key === 'hide') {
       if (!hiddenWords.includes(currentWord)) {
         setHiddenWords([...hiddenWords, currentWord]);

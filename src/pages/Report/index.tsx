@@ -79,21 +79,18 @@ const Report = () => {
     });
   };
 
-  const addListKeyword = (keyword: string) => {
-    console.log(listIncludeWords);
+  const addListKeyword = (keywords: string[]) => {
     const existIncludeWord = listIncludeWords.findIndex((item) => {
-      return item.length === 1 && item[0] === keyword;
+      return item.sort().toString() === keywords.sort().toString();
     });
-    const existExcludeWord = listExcludeWords.includes(keyword);
+    // const existExcludeWord = listExcludeWords.includes(keywords);
     if (existIncludeWord === -1) {
-      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [keyword]] });
+      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [...keywords]] });
     }
-    if (existExcludeWord) {
-      dispatch({
-        field: 'listExcludeWords',
-        value: listExcludeWords.filter((item) => item !== keyword),
-      });
-    }
+    dispatch({
+      field: 'listExcludeWords',
+      value: listExcludeWords.filter((item) => !keywords.includes(item)),
+    });
   };
 
   const addListExcludeWords = (keyword: string) => {

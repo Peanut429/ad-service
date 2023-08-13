@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Edge, Graph, Tooltip } from '@antv/g6';
 import ReportContext from '../Report.context';
 import bad from './bad.png';
@@ -18,14 +18,51 @@ const SentimentImgEnum = {
   1: bad,
 };
 
+function getNodeSize(value: number, max: number, min: number) {
+  // max与min的差值分平均15档，返回value属于第几档
+  const range = max - min;
+  const step = range / 15;
+  const index = Math.floor((value - min) / step);
+  return index * 5 + 50;
+}
+
 const AppearTogetherChart = () => {
   const {
     state: { tweetAppearTogetherData },
+    addListKeyword,
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
+  const [chart, setChart] = useState<Graph | null>(null);
+
+  const handleMouseenter = (ev: any) => {
+    const edge = ev.item! as Edge;
+    chart!.setItemState(edge, 'highlight', true);
+    chart!.setItemState(edge.getSource(), 'highlight', true);
+    chart!.setItemState(edge.getTarget(), 'highlight', true);
+  };
+
+  const handleMouseleave = (ev: any) => {
+    const edge = ev.item! as Edge;
+    chart!.setItemState(edge, 'highlight', false);
+    chart!.setItemState(edge.getSource(), 'highlight', false);
+    chart!.setItemState(edge.getTarget(), 'highlight', false);
+  };
+
+  const handleNodeClick = (ev: any) => {
+    const { id } = ev.item.getModel();
+    addListKeyword([id]);
+  };
+
+  const handleEdgeClick = (ev: any) => {
+    const { source, target } = ev.item.getModel();
+    addListKeyword([source, target]);
+  };
 
   useEffect(() => {
     if (!divRef.current || !tweetAppearTogetherData) return;
+
+    const maxValue = Math.max(...tweetAppearTogetherData.nodes.map((item) => item.size));
+    const minValue = Math.min(...tweetAppearTogetherData.nodes.map((item) => item.size));
 
     const tooltip = new Tooltip({
       offsetX: 10,
@@ -103,7 +140,11 @@ const AppearTogetherChart = () => {
     });
 
     chart.data({
-      nodes: tweetAppearTogetherData.nodes.map((item) => ({ ...item, label: item.id })),
+      nodes: tweetAppearTogetherData.nodes.map((item) => ({
+        ...item,
+        label: item.id,
+        size: getNodeSize(item.size, maxValue, minValue),
+      })),
       edges: tweetAppearTogetherData.edges.map((item) => ({
         ...item,
         type: 'cubic',
@@ -112,11 +153,27 @@ const AppearTogetherChart = () => {
     });
 
     chart.render();
+    setChart(chart);
 
     return () => {
       chart?.destroy();
     };
   }, [tweetAppearTogetherData]);
+
+  useEffect(() => {
+    if (!chart) return;
+    chart.on('edge:mouseenter', handleMouseenter);
+    chart.on('edge:mouseleave', handleMouseleave);
+    chart.on('edge:click', handleEdgeClick);
+    chart.on('node:click', handleNodeClick);
+
+    return () => {
+      chart.off('edge:mouseenter', handleMouseenter);
+      chart.off('edge:mouseleave', handleMouseleave);
+      chart.off('edge:click', handleEdgeClick);
+      chart.off('node:click', handleNodeClick);
+    };
+  }, [chart, addListKeyword]);
 
   return (
     <div>
