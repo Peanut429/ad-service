@@ -1,7 +1,17 @@
-import { tweetList } from '@/services/report';
+import dayjs from 'dayjs';
 import { useContext, useEffect, useState } from 'react';
 import ReportContext from '../Report.context';
-import { Dropdown, PaginationProps, Tag, Space } from 'antd';
+import { Dropdown, Tag, Space, Button, message } from 'antd';
+import {
+  CommentOutlined,
+  DownloadOutlined,
+  LikeOutlined,
+  RetweetOutlined,
+} from '@ant-design/icons';
+import { utils, writeFile } from 'xlsx';
+import { tweetList } from '@/services/report';
+import { Platform } from '../Report.state';
+import usePageInfo from '../usePageInfo';
 import sentimentBad from './sentiment_bad.png';
 import sentimentGood from './sentiment_good.png';
 import sentimentNeutral from './sentiment_neutral.png';
@@ -9,9 +19,6 @@ import sentimentUnknow from './question.png';
 import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
-import { CommentOutlined, LikeOutlined, RetweetOutlined } from '@ant-design/icons';
-import { Platform } from '../Report.state';
-import usePageInfo from '../usePageInfo';
 import styles from './index.module.scss';
 
 type TweetListItemProps = {
@@ -218,16 +225,12 @@ const TweetList = () => {
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.TweetListItem[]>([]);
-  // const [pageInfo, setPageInfo] = useState({ page: 1, limit: 10 });
   const [sortKey] = useState('heat');
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
-
-  // const handleChange: PaginationProps['onChange'] = (page, pageSize) => {
-  //   setPageInfo({ page, limit: pageSize });
-  // };
 
   const fetchData = async () => {
     const res = await tweetList({
@@ -248,6 +251,57 @@ const TweetList = () => {
     setTotal(res.data.count);
   };
 
+  const downloadExcel = async () => {
+    const params = {
+      timeLimit: listTimeLimit,
+      userType: listUserType,
+      platforms: listPlatforms,
+      tasksId,
+      excludeWords: [...excludeWords, ...listExcludeWords],
+      includeWords: [...includeWords, ...listIncludeWords],
+      sentiment: listSentiment,
+      page: 1,
+      limit: 10000,
+      sortKey: sortKey,
+      sortOrder: sortOrder,
+    };
+    setDownloadLoading(true);
+    try {
+      const res = await tweetList(params);
+      const data = res.data.data.map((item) => ({
+        id: item.id,
+        nickname: item.nickname,
+        title: item.title,
+        likeNum: item.likeNum,
+        repostNum: item.repostNum,
+        commentNum: item.commentNum,
+        content: item.content,
+        userType: item.userType,
+        sentiment: sentimentText[item.sentiment] || '未知',
+        createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
+      }));
+      const headers = {
+        id: '笔记ID',
+        nickname: '用户昵称',
+        title: '标题',
+        likeNum: '点赞数',
+        repostNum: '转发数',
+        commentNum: '评论数',
+        content: '笔记内容',
+        userType: '用户类型',
+        sentiment: '情感',
+        createdAtTimestamp: '发布时间',
+      };
+      const workbook = utils.book_new();
+      const worksheet = utils.json_to_sheet([headers, ...data], { skipHeader: true });
+      utils.book_append_sheet(workbook, worksheet, '推文列表');
+      writeFile(workbook, '推文.xlsx');
+    } catch (error) {
+      message.error('导出数据失败');
+    }
+    setDownloadLoading(false);
+  };
+
   useEffect(() => {
     fetchData();
   }, [
@@ -266,6 +320,11 @@ const TweetList = () => {
 
   return (
     <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
+          下载为Excel
+        </Button>
+      </div>
       {dataList.map((item) => {
         return <TweetListItem key={item.id} data={item} />;
       })}

@@ -1,15 +1,16 @@
-import { commentList } from '@/services/report';
 import { useContext, useEffect, useState } from 'react';
-import ReportContext from '../Report.context';
+import dayjs from 'dayjs';
+import { Button, Dropdown, Space, message } from 'antd';
+import { DownloadOutlined, LikeOutlined } from '@ant-design/icons';
+import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
-// import classNames from 'classnames';
-import { Dropdown, Space } from 'antd';
-import { LikeOutlined } from '@ant-design/icons';
+import { Platform } from '../Report.state';
+import ReportContext from '../Report.context';
+import { commentList } from '@/services/report';
 import sentimentBad from '../TweetList/sentiment_bad.png';
 import sentimentGood from '../TweetList/sentiment_good.png';
 import sentimentNeutral from '../TweetList/sentiment_neutral.png';
 import sentimentUnknow from '../TweetList/question.png';
-import { Platform } from '../Report.state';
 
 import './index.less';
 // import SortComponent from '../SortComponent';
@@ -139,6 +140,7 @@ const CommentList = () => {
   const [sortKey] = useState('heat');
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
   const [sortParams] = useState({
@@ -165,6 +167,47 @@ const CommentList = () => {
     setTotal(res.data.count);
   };
 
+  const downloadExcel = async () => {
+    const params = {
+      timeLimit: listTimeLimit,
+      userType: listUserType,
+      platforms: listPlatforms,
+      tasksId,
+      excludeWords: [...excludeWords, ...listExcludeWords],
+      includeWords: [...includeWords, ...listIncludeWords],
+      sentiment: listSentiment,
+      page: 1,
+      limit: 10000,
+      sortKey: sortParams.order_key,
+      sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
+    };
+    setDownloadLoading(true);
+    try {
+      const res = await commentList(params);
+      const data = res.data.data.map((item) => ({
+        nickname: item.nickname,
+        content: item.content,
+        likeNum: item.likeNum,
+        sentiment: sentimentText[item.sentiment] || '未知',
+        createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
+      }));
+      const headers = {
+        nickname: '用户昵称',
+        content: '评论内容',
+        likeNum: '点赞数',
+        sentiment: '情感',
+        createdAtTimestamp: '发布时间',
+      };
+      const workbook = utils.book_new();
+      const worksheet = utils.json_to_sheet([headers, ...data], { skipHeader: true });
+      utils.book_append_sheet(workbook, worksheet, '评论列表');
+      writeFile(workbook, '评论.xlsx');
+    } catch (error) {
+      message.error('导出数据失败');
+    }
+    setDownloadLoading(false);
+  };
+
   useEffect(() => {
     fetchData();
   }, [
@@ -189,6 +232,11 @@ const CommentList = () => {
           setSortParams(value);
         }}
       /> */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
+          下载为Excel
+        </Button>
+      </div>
       <div>
         {dataList.map((item) => {
           return <CommentListItem key={item.id} data={item} />;
