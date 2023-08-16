@@ -1,4 +1,4 @@
-import SearchInput from '@/components/SearchInput';
+import SearchInput, { WordInfo } from '@/components/SearchInput';
 import { brandsList, createTask } from '@/services/brands';
 import { useRequest } from '@umijs/max';
 import { DatePicker, Form, Input, Modal, Select, message } from 'antd';
@@ -16,7 +16,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ open, onCancel, onCreate }) =
     projectName: string;
     brandId: string;
     dataRetrieverTime: [Dayjs, Dayjs];
-    wordTasks: BrandsApi.KeywordInfo[];
+    wordTasks: WordInfo[];
   }>();
   const [loading, setLoading] = useState(false);
 
@@ -39,8 +39,8 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ open, onCancel, onCreate }) =
         },
         wordTasks: data.wordTasks.map((item) => ({
           word: item.word,
-          pattern: item.pattern as string[][],
-          platforms: [item.platform],
+          pattern: item.pattern,
+          platforms: item.platforms,
         })),
       });
       message.success('创建成功');
@@ -97,7 +97,7 @@ const TaskCreator: React.FC<TaskCreatorProps> = ({ open, onCancel, onCreate }) =
             valuePropName="taskId"
             rules={[{ required: true, message: '请设置关键词' }]}
           >
-            <SearchInput />
+            <SearchInput editAble />
           </Form.Item>
         </Form>
       </Modal>

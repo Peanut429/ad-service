@@ -98,11 +98,13 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
 
   const handleSplitWord = () => {
     if (!inputRef.current?.input?.value) return;
+
     const value = inputRef.current?.input?.value?.trim();
     if (value) {
       setValue((prev) => {
         const target = prev.find((item) => item.word === editValue?.word);
         if (target) {
+          // 查询所有 () 包裹的组合词
           const groupRegExp = /\(.*?\)/g;
           const groups = value.match(groupRegExp);
           let groupsData: string[][] = [];
@@ -114,12 +116,14 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
                 .map((s) => s.trim()),
             );
           }
+          // 剩余的词
           const restText = value.replace(groupRegExp, '');
           target.pattern = [
-            restText
+            ...restText
               .split(',')
               .map((s) => s.trim())
-              .filter(Boolean),
+              .filter(Boolean)
+              .map((item) => [item]),
             ...groupsData,
           ];
         }
@@ -154,6 +158,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
           onInputKeyDown={(e) => {
             if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
               const word = e.currentTarget.value;
+              if (value.find((item) => item.word === word) || !word) return;
               setValue((prev) => [
                 ...prev,
                 {

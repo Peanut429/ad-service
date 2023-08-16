@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
+import { Dropdown, MenuProps, Spin, Tag } from 'antd';
 import { Edge, Graph, Tooltip } from '@antv/g6';
 import ReportContext from '../Report.context';
 import bad from './bad.png';
 import normal from './normal.png';
 import smile from './smile.png';
-import { Spin } from 'antd';
 
 const SentimentEnum = {
   1: '负面',
@@ -33,6 +33,9 @@ const AppearTogetherChart = () => {
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
   const [chart, setChart] = useState<Graph | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [hiddenWords, setHiddenWords] = useState<string[]>([]);
+  const [currentWord, setCurrentWord] = useState('');
 
   const handleMouseenter = (ev: any) => {
     const edge = ev.item! as Edge;
@@ -58,11 +61,29 @@ const AppearTogetherChart = () => {
     addListKeyword([source, target]);
   };
 
+  const handleNodeRightClick = (ev: any) => {
+    const { id } = ev.item.getModel();
+    setMenuVisible(true);
+    setCurrentWord(id);
+  };
+
+  const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'hide') {
+      setHiddenWords((prev) => [...prev, currentWord]);
+    }
+    setMenuVisible(false);
+  };
+
   useEffect(() => {
     if (!divRef.current || !tweetAppearTogetherData) return;
 
-    const maxValue = Math.max(...tweetAppearTogetherData.nodes.map((item) => item.size));
-    const minValue = Math.min(...tweetAppearTogetherData.nodes.map((item) => item.size));
+    const nodes = tweetAppearTogetherData.nodes.filter((item) => !hiddenWords.includes(item.id));
+    const edges = tweetAppearTogetherData.edges.filter(
+      (item) => !hiddenWords.includes(item.source) && !hiddenWords.includes(item.target),
+    );
+
+    const maxValue = Math.max(...nodes.map((item) => item.size));
+    const minValue = Math.min(...nodes.map((item) => item.size));
 
     const tooltip = new Tooltip({
       offsetX: 10,
@@ -140,16 +161,12 @@ const AppearTogetherChart = () => {
     });
 
     chart.data({
-      nodes: tweetAppearTogetherData.nodes.map((item) => ({
+      nodes: nodes.map((item) => ({
         ...item,
         label: item.id,
         size: getNodeSize(item.size, maxValue, minValue),
       })),
-      edges: tweetAppearTogetherData.edges.map((item) => ({
-        ...item,
-        type: 'cubic',
-        lineWidth: 2,
-      })),
+      edges: edges.map((item) => ({ ...item, type: 'cubic', lineWidth: 2 })),
     });
 
     chart.render();
@@ -158,7 +175,7 @@ const AppearTogetherChart = () => {
     return () => {
       chart?.destroy();
     };
-  }, [tweetAppearTogetherData]);
+  }, [tweetAppearTogetherData, hiddenWords]);
 
   useEffect(() => {
     if (!chart) return;
@@ -166,6 +183,7 @@ const AppearTogetherChart = () => {
     chart.on('edge:mouseleave', handleMouseleave);
     chart.on('edge:click', handleEdgeClick);
     chart.on('node:click', handleNodeClick);
+    chart.on('node:contextmenu', handleNodeRightClick);
 
     return () => {
       chart.off('edge:mouseenter', handleMouseenter);
@@ -178,8 +196,28 @@ const AppearTogetherChart = () => {
   return (
     <div>
       <Spin size="large" spinning={!tweetAppearTogetherData}>
-        <div ref={divRef} style={{ height: 500 }} />
+        <Dropdown
+          open={menuVisible}
+          trigger={['contextMenu']}
+          menu={{ items: [{ label: '隐藏', key: 'hide' }], onClick: handleMenuClick }}
+        >
+          <div ref={divRef} style={{ height: 500 }} />
+        </Dropdown>
       </Spin>
+      {hiddenWords.length > 0 && (
+        <div>
+          <span>隐藏的关键词：</span>
+          {hiddenWords.map((item) => (
+            <Tag
+              key={item}
+              closable
+              onClose={() => setHiddenWords(hiddenWords.filter((i) => i !== item))}
+            >
+              {item}
+            </Tag>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
