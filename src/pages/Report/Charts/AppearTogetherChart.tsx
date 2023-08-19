@@ -78,9 +78,19 @@ const AppearTogetherChart = () => {
     if (!divRef.current || !tweetAppearTogetherData) return;
 
     const nodes = tweetAppearTogetherData.nodes.filter((item) => !hiddenWords.includes(item.id));
-    const edges = tweetAppearTogetherData.edges.filter(
-      (item) => !hiddenWords.includes(item.source) && !hiddenWords.includes(item.target),
-    );
+    const edges = tweetAppearTogetherData.edges
+      .filter((item) => !hiddenWords.includes(item.source) && !hiddenWords.includes(item.target))
+      .map((item) => {
+        const total = item.sentiment.reduce((total, item) => {
+          return total + item.value;
+        }, 0);
+        return {
+          ...item,
+          sentiment: item.sentiment.map((item) => {
+            return { ...item, value: item.value / total };
+          }),
+        };
+      });
 
     const maxValue = Math.max(...nodes.map((item) => item.size));
     const minValue = Math.min(...nodes.map((item) => item.size));
@@ -94,16 +104,15 @@ const AppearTogetherChart = () => {
         let content = '';
         const item = e?.item;
         const model = item?.getModel();
-        // console.log(item?.getType(), item.getModel());
+
         if (item?.getType() === 'node') {
           content = `
             <div class="title">词频 - ${model?.id}</div>
-            <div class="text">小红书: ${model?.size}</div>
+            <div class="text">小红书: ${model?.value}</div>
             <!--<div class="text">微博: ${model?.weibo}</div>
             <div class="text">抖音: ${model?.tiktok}</div>-->
           `;
         } else {
-          // console.log(model);
           // content = `
           //   <div class="title">${(item as Edge).getSource().getModel().label} - ${
           //   (item as Edge).getTarget().getModel().label
@@ -165,8 +174,9 @@ const AppearTogetherChart = () => {
         ...item,
         label: item.id,
         size: getNodeSize(item.size, maxValue, minValue),
+        value: item.size,
       })),
-      edges: edges.map((item) => ({ ...item, type: 'cubic', lineWidth: 2 })),
+      edges: edges.map((item) => ({ ...item, type: 'cubic', lineWidth: 2, value: item.times })),
     });
 
     chart.render();

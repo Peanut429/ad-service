@@ -22,9 +22,16 @@ const Task = () => {
       title: '关键词',
       dataIndex: 'word',
       render: (_, record) => {
-        return record.wordTasksId.map((item) => (
+        const words = new Set<string>();
+        for (const item of record.wordTasksId) {
+          const keyword = keywords[item];
+          if (keyword) {
+            words.add(keyword.word);
+          }
+        }
+        return Array.from(words).map((item) => (
           <Tag color="#3b5999" key={item} style={{ fontSize: 14 }}>
-            {keywords[item]?.word}
+            {item}
           </Tag>
         ));
       },

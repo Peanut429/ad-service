@@ -44,7 +44,8 @@ const Brands = () => {
               <Card
                 key={brand.brandId}
                 hoverable
-                cover={<img src={brand.avatar} />}
+                // cover={<img src={brand.avatar} />}
+                cover={<img src="/dsm-firmenich.jpeg" />}
                 style={{ width: 220 }}
                 onClick={() => {
                   history.push('/task/list?brandId=' + brand.brandId);
