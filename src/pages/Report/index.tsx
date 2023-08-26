@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useSearchParams } from '@umijs/max';
+import { useCallback, useEffect, useState } from 'react';
+import { useRequest, useSearchParams } from '@umijs/max';
 import { DatePicker, Form, Tabs, Tag } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { RangePickerDateProps } from 'antd/es/date-picker/generatePicker';
@@ -15,24 +15,18 @@ import PortraitAnalysis from './PortraitAnalysis';
 import TopicAnalysis from './TopicAnalysis';
 import styles from './index.module.scss';
 import FilterForm from './FilterForm';
+import { keywordsInfo, taskList } from '@/services/brands';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
-  const tasksIdInQuery = searchParams.get('ids')!.split(',');
+  // const tasksIdInQuery = searchParams.get('ids')!.split(',');
   const contextValue = useCreateReducer<ReportInitialState>({
     initialState: {
       ...initialState,
-      tasksId: tasksIdInQuery,
-      timeLimit: {
-        gte: dayjs('2022-07-01').subtract(30, 'day').startOf('day').valueOf(),
-        lte: dayjs('2023-07-31').endOf('day').valueOf(),
-      },
-      listTimeLimit: {
-        gte: dayjs('2022-07-01').subtract(30, 'day').startOf('day').valueOf(),
-        lte: dayjs('2023-07-31').endOf('day').valueOf(),
-      },
     },
   });
+
+  const [keywords, setKeywords] = useState<string[]>([]);
 
   const {
     state: {
@@ -45,9 +39,21 @@ const Report = () => {
       sentiment,
       listIncludeWords,
       listExcludeWords,
+      listTimeLimit,
     },
     dispatch,
   } = contextValue;
+
+  useRequest(() => taskList({ projectsId: [searchParams.get('projectId')!] }), {
+    onSuccess: (res) => {
+      if (res.length) {
+        const data = res[0];
+        dispatch({ field: 'tasksId', value: data.wordTasksId });
+        dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
+        dispatch({ field: 'listTimeLimit', value: data.dataRetrieverTime });
+      }
+    },
+  });
 
   const fetchChatData = async () => {
     const res = await chartData({
@@ -67,12 +73,14 @@ const Report = () => {
     dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
     dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
     dispatch({ field: 'topicData', value: res.data.topic });
+    dispatch({ field: 'brandBarData', value: res.data.brandBar });
+    dispatch({ field: 'wordClassData', value: res.data.wordClass });
   };
 
   const handleDateRangeChange: RangePickerDateProps<Dayjs>['onChange'] = (value) => {
     if (!value) return;
     dispatch({
-      field: 'timeLimit',
+      field: 'listTimeLimit',
       value: {
         gte: value[0]!.startOf('day').valueOf(),
         lte: value[1]!.endOf('day').valueOf(),
@@ -80,45 +88,70 @@ const Report = () => {
     });
   };
 
-  const addListKeyword = (keywords: string[]) => {
-    const existIncludeWord = listIncludeWords.findIndex((item) => {
-      return item.sort().toString() === keywords.sort().toString();
-    });
-    // const existExcludeWord = listExcludeWords.includes(keywords);
-    if (existIncludeWord === -1) {
-      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [...keywords]] });
-    }
-    dispatch({
-      field: 'listExcludeWords',
-      value: listExcludeWords.filter((item) => !keywords.includes(item)),
-    });
-  };
+  const addListKeyword = useCallback(
+    (keywords: string[]) => {
+      const existIncludeWord = listIncludeWords.findIndex((item) => {
+        return item.sort().toString() === keywords.sort().toString();
+      });
+      // const existExcludeWord = listExcludeWords.includes(keywords);
+      if (existIncludeWord === -1) {
+        dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [...keywords]] });
+      }
+      dispatch({
+        field: 'listExcludeWords',
+        value: listExcludeWords.filter((item) => !keywords.includes(item)),
+      });
+    },
+    [listIncludeWords, listExcludeWords],
+  );
 
-  const addListExcludeWords = (keyword: string) => {
-    const existIncludeWord = listIncludeWords.findIndex((item) => {
-      return item.length === 1 && item[0] === keyword;
-    });
-    const existExcludeWord = listExcludeWords.includes(keyword);
-    if (existIncludeWord > -1) {
-      listIncludeWords.splice(existIncludeWord, 1);
-      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
-    }
-    if (!existExcludeWord) {
-      dispatch({ field: 'listExcludeWords', value: [...listExcludeWords, keyword] });
-    }
-  };
+  const addListExcludeWords = useCallback(
+    (keyword: string) => {
+      const existIncludeWord = listIncludeWords.findIndex((item) => {
+        return item.length === 1 && item[0] === keyword;
+      });
+      const existExcludeWord = listExcludeWords.includes(keyword);
+      if (existIncludeWord > -1) {
+        listIncludeWords.splice(existIncludeWord, 1);
+        dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+      }
+      if (!existExcludeWord) {
+        dispatch({ field: 'listExcludeWords', value: [...listExcludeWords, keyword] });
+      }
+    },
+    [listIncludeWords, listExcludeWords],
+  );
 
   useEffect(() => {
+    if (!tasksId.length) return;
     fetchChatData();
   }, [timeLimit, platforms, tasksId, includeWords, excludeWords, userType, sentiment]);
+
+  useEffect(() => {
+    if (!tasksId.length) return;
+
+    keywordsInfo({ tasksId }).then((res) => {
+      const result = new Set(res.data.map((item) => item.word));
+      setKeywords([...result]);
+    });
+  }, [tasksId]);
 
   return (
     <ReportContext.Provider value={{ ...contextValue, addListKeyword, addListExcludeWords }}>
       <div>
-        <Form labelCol={{ flex: '80px' }} size="small">
+        <h4>
+          任务关键词：
+          {keywords.map((item) => (
+            <Tag color="#3b5999" key={item} style={{ fontSize: 14 }}>
+              {item}
+            </Tag>
+          ))}
+        </h4>
+        <h4>列表筛选条件：</h4>
+        <Form size="small" layout="inline">
           <Form.Item label="时间范围">
             <DatePicker.RangePicker
-              defaultValue={[dayjs('2022-07-01'), dayjs('2023-07-31')]}
+              value={[dayjs(listTimeLimit.gte), dayjs(listTimeLimit.lte)]}
               onChange={handleDateRangeChange}
             />
           </Form.Item>

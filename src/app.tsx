@@ -2,7 +2,7 @@
 // import { Question } from '@/components/RightContent';
 // import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
-import { SettingDrawer } from '@ant-design/pro-components';
+// import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history } from '@umijs/max';
 import defaultSettings from '../config/defaultSettings';
@@ -28,56 +28,64 @@ export async function getInitialState(): Promise<{
       //   skipErrorHandler: true,
       // });
       // return msg.data;
+      // return {
+      //   name: 'Serati Ma',
+      //   avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+      //   userid: '00000001',
+      //   email: 'antdesign@alipay.com',
+      //   signature: '海纳百川，有容乃大',
+      //   title: '交互专家',
+      //   group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+      //   tags: [
+      //     {
+      //       key: '0',
+      //       label: '很有想法的',
+      //     },
+      //     {
+      //       key: '1',
+      //       label: '专注设计',
+      //     },
+      //     {
+      //       key: '2',
+      //       label: '辣~',
+      //     },
+      //     {
+      //       key: '3',
+      //       label: '大长腿',
+      //     },
+      //     {
+      //       key: '4',
+      //       label: '川妹子',
+      //     },
+      //     {
+      //       key: '5',
+      //       label: '海纳百川',
+      //     },
+      //   ],
+      //   notifyCount: 12,
+      //   unreadCount: 11,
+      //   country: 'China',
+      //   access: 'admin',
+      //   geographic: {
+      //     province: {
+      //       label: '浙江省',
+      //       key: '330000',
+      //     },
+      //     city: {
+      //       label: '杭州市',
+      //       key: '330100',
+      //     },
+      //   },
+      //   address: '西湖区工专路 77 号',
+      //   phone: '0752-268888888',
+      // };
+      if (!localStorage.getItem('token')) {
+        throw new Error('请先登录');
+      }
       return {
-        name: 'Serati Ma',
-        avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
-        userid: '00000001',
-        email: 'antdesign@alipay.com',
-        signature: '海纳百川，有容乃大',
-        title: '交互专家',
-        group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
-        tags: [
-          {
-            key: '0',
-            label: '很有想法的',
-          },
-          {
-            key: '1',
-            label: '专注设计',
-          },
-          {
-            key: '2',
-            label: '辣~',
-          },
-          {
-            key: '3',
-            label: '大长腿',
-          },
-          {
-            key: '4',
-            label: '川妹子',
-          },
-          {
-            key: '5',
-            label: '海纳百川',
-          },
-        ],
-        notifyCount: 12,
-        unreadCount: 11,
-        country: 'China',
-        access: 'admin',
-        geographic: {
-          province: {
-            label: '浙江省',
-            key: '330000',
-          },
-          city: {
-            label: '杭州市',
-            key: '330100',
-          },
-        },
-        address: '西湖区工专路 77 号',
-        phone: '0752-268888888',
+        name: localStorage.getItem('name')!,
+        avatar: localStorage.getItem('avatar')!,
+        userid: localStorage.getItem('userId')!,
       };
     } catch (error) {
       history.push(loginPath);
@@ -101,9 +109,9 @@ export async function getInitialState(): Promise<{
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
-export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
-    // actionsRender: () => [<Question key="doc" />],
+    actionsRender: () => [],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
       title: <AvatarName />,
@@ -122,26 +130,26 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         history.push(loginPath);
       }
     },
-    layoutBgImgList: [
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
-        left: 85,
-        bottom: 100,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
-        bottom: -68,
-        right: -45,
-        height: '303px',
-      },
-      {
-        src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
-        bottom: 0,
-        left: 0,
-        width: '331px',
-      },
-    ],
+    // layoutBgImgList: [
+    //   {
+    //     src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/D2LWSqNny4sAAAAAAAAAAAAAFl94AQBr',
+    //     left: 85,
+    //     bottom: 100,
+    //     height: '303px',
+    //   },
+    //   {
+    //     src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/C2TWRpJpiC0AAAAAAAAAAAAAFl94AQBr',
+    //     bottom: -68,
+    //     right: -45,
+    //     height: '303px',
+    //   },
+    //   {
+    //     src: 'https://mdn.alipayobjects.com/yuyan_qk0oxh/afts/img/F6vSTbj8KpYAAAAAAAAAAAAAFl94AQBr',
+    //     bottom: 0,
+    //     left: 0,
+    //     width: '331px',
+    //   },
+    // ],
     // links: isDev
     //   ? [
     //       <Link key="openapi" to="/umi/plugin/openapi" target="_blank">

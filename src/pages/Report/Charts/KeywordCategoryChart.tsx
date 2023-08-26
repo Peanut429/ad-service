@@ -1,13 +1,19 @@
 import { useRef } from 'react';
-import useDataSource from './useDataSource';
+import useSegmented from './useSegmented';
 
 const KeywordCategoryChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
-  const [source, contextHolder] = useDataSource();
+  const { ComponentNode } = useSegmented(
+    [
+      { label: '推文', value: 'tweet' },
+      { label: '评论', value: 'comment' },
+    ],
+    'tweet',
+  );
 
   return (
     <div>
-      {contextHolder}
+      <ComponentNode />
       <div ref={divRef} style={{ marginTop: 20 }} />
     </div>
   );

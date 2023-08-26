@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { useContext, useEffect, useState } from 'react';
 import ReportContext from '../Report.context';
-import { Dropdown, Tag, Space, Button, message } from 'antd';
+import { Dropdown, Tag, Space, Button, message, Spin } from 'antd';
 import {
   CommentOutlined,
   DownloadOutlined,
@@ -97,7 +97,11 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
       <div
         className={styles.tweet}
         onClick={() => {
-          window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
+          if (tweet.platform === 'redbook') {
+            window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
+          } else if (tweet.platform === 'tiktok') {
+            window.open(`https://www.douyin.com/video/${tweet.id}`);
+          }
         }}
       >
         <div className={styles.tweet__left}>
@@ -141,7 +145,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               {tweet.type && TweetTypeEnum[tweet.type] ? (
                 <Tag color="cyan">{TweetTypeEnum[tweet.type]}</Tag>
               ) : null}
-              <img src={platformIcon[tweet.platform || 'redbook']} style={{ width: 20 }} />
+              <img src={platformIcon[tweet.platform]} style={{ width: 20 }} />
             </div>
             <div>
               {/* <Space size={10}>
@@ -163,9 +167,9 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
           </div>
           <div className={styles.tweet__content}>
             <div className={styles['content-left']}>
-              {tweet.platform !== 'weibo' ? (
+              {/* {tweet.platform !== 'weibo' ? (
                 <span className={styles.tweet__title}>{tweet.title}</span>
-              ) : null}
+              ) : null} */}
               <div className={styles.tweet__text}>{tweet.content}</div>
               <Space className={styles.tweet__data} size={20}>
                 <span>
@@ -229,26 +233,34 @@ const TweetList = () => {
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
 
   const fetchData = async () => {
-    const res = await tweetList({
-      timeLimit: listTimeLimit,
-      userType: listUserType,
-      platforms: listPlatforms,
-      tasksId,
-      excludeWords: [...excludeWords, ...listExcludeWords],
-      includeWords: [...includeWords, ...listIncludeWords],
-      sentiment: listSentiment,
-      page: currentPage,
-      limit: pageSize,
-      sortKey: sortKey,
-      sortOrder: sortOrder,
-    });
+    setLoading(true);
+    try {
+      const res = await tweetList({
+        timeLimit: listTimeLimit,
+        userType: listUserType,
+        platforms: listPlatforms,
+        tasksId,
+        excludeWords: [...excludeWords, ...listExcludeWords],
+        includeWords: [...includeWords, ...listIncludeWords],
+        sentiment: listSentiment,
+        page: currentPage,
+        limit: pageSize,
+        sortKey: sortKey,
+        sortOrder: sortOrder,
+      });
 
-    setDataList(res.data.data);
-    setTotal(res.data.count);
+      setDataList(res.data.data);
+      setTotal(res.data.count);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const downloadExcel = async () => {
@@ -303,16 +315,19 @@ const TweetList = () => {
   };
 
   useEffect(() => {
+    if (!tasksId.length) return;
     fetchData();
   }, [
     pageSize,
     currentPage,
     sortKey,
     sortOrder,
+    excludeWords,
+    includeWords,
     listTimeLimit,
+    tasksId,
     listUserType,
     listPlatforms,
-    tasksId,
     listExcludeWords,
     listIncludeWords,
     listSentiment,
@@ -325,9 +340,11 @@ const TweetList = () => {
           下载为Excel
         </Button>
       </div>
-      {dataList.map((item) => {
-        return <TweetListItem key={item.id} data={item} />;
-      })}
+      <Spin spinning={loading}>
+        {dataList.map((item) => {
+          return <TweetListItem key={item.id} data={item} />;
+        })}
+      </Spin>
       <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>
   );

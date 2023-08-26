@@ -16,6 +16,7 @@ const WordCloudChart = () => {
     { label: '隐藏关键词', key: 'hide' },
     { label: '删除关键词', key: 'delete' },
   ]);
+  const [chart, setChart] = useState<WordCloud>();
 
   const {
     state: { wordcloudData },
@@ -46,8 +47,8 @@ const WordCloudChart = () => {
     if (!divRef.current || !wordcloudData) return;
 
     const chart = new WordCloud(divRef.current, {
-      data: wordcloudData[dataSource][dataType].filter((item) => !hiddenWords.includes(item.word)),
-      height: 400,
+      data: wordcloudData[dataSource].filter((item) => !hiddenWords.includes(item.word)),
+      height: 300,
       wordField: 'word',
       weightField: dataType,
       colorField: 'word',
@@ -57,7 +58,14 @@ const WordCloudChart = () => {
 
     chart.render();
 
-    chart.on('contextmenu', (ev: any) => {
+    setChart(chart);
+
+    return () => chart.destroy();
+  }, [wordcloudData, dataSource, dataType, hiddenWords]);
+
+  useEffect(() => {
+    if (!chart) return;
+    function handleContextmenu(ev: any) {
       const element = ev.target.get('element');
 
       if (element) {
@@ -65,10 +73,13 @@ const WordCloudChart = () => {
         setCurrentWord(data.text);
         setMenuVisible(true);
       }
-    });
+    }
+    chart.on('contextmenu', handleContextmenu);
 
-    return () => chart.destroy();
-  }, [wordcloudData, dataSource, dataType, hiddenWords, addListKeyword, addListExcludeWords]);
+    return () => {
+      chart.off('contextmenu', handleContextmenu);
+    };
+  }, [chart, addListKeyword, addListExcludeWords]);
 
   return (
     <div>
@@ -99,7 +110,7 @@ const WordCloudChart = () => {
           trigger={['contextMenu']}
           onOpenChange={handleOpenChange}
         >
-          <div ref={divRef} style={{ marginTop: 20, height: 400 }} />
+          <div ref={divRef} style={{ marginTop: 20, height: 300 }} />
         </Dropdown>
       </Spin>
       {hiddenWords.length > 0 && (

@@ -53,7 +53,8 @@ const Task = () => {
         >
           停止任务
         </Button>,
-        <Link key="detail" to={`/report?ids=${record.wordTasksId.join(',')}`}>
+        // <Link key="detail" to={`/report?ids=${record.wordTasksId.join(',')}`}>
+        <Link key="detail" to={`/report?projectId=${record.projectId}`}>
           查看详情
         </Link>,
       ],

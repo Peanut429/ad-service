@@ -53,6 +53,13 @@ export default [
     hideInMenu: true,
     component: './Report',
   },
+  {
+    path: '/account',
+    name: '账号管理',
+    icon: 'user',
+    hideInMenu: true,
+    component: './Account',
+  },
   // {
   //   path: '/admin',
   //   name: 'admin',

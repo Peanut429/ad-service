@@ -2,11 +2,13 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Heatmap } from '@antv/g2plot';
 import { Segmented, Spin } from 'antd';
+import dayjs from 'dayjs';
 
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
     state: { tweetWordTrendData },
+    dispatch,
     addListKeyword,
   } = useContext(ReportContext);
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
@@ -53,7 +55,15 @@ const HeatmapChart = () => {
       const element = ev.target.get('element');
       if (element) {
         const data = element.getModel().data;
+        console.log(data);
         addListKeyword([data.word as string]);
+        dispatch({
+          field: 'listTimeLimit',
+          value: {
+            gte: dayjs(data.date).startOf('month').valueOf(),
+            lte: dayjs(data.date).endOf('month').valueOf(),
+          },
+        });
       }
     });
 

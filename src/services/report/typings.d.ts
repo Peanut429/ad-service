@@ -19,14 +19,16 @@ declare namespace ReportApi {
   };
 
   type WordcloudData = {
-    comment: {
-      heat: { word: string; heat: number; frequency: number }[];
-      frequency: { word: string; heat: number; frequency: number }[];
-    };
-    tweet: {
-      heat: { word: string; heat: number; frequency: number }[];
-      frequency: { word: string; heat: number; frequency: number }[];
-    };
+    comment: { word: string; heat: number; frequency: number }[];
+    tweet: { word: string; heat: number; frequency: number }[];
+    // comment: {
+    //   heat: { word: string; heat: number; frequency: number }[];
+    //   frequency: { word: string; heat: number; frequency: number }[];
+    // };
+    // tweet: {
+    //   heat: { word: string; heat: number; frequency: number }[];
+    //   frequency: { word: string; heat: number; frequency: number }[];
+    // };
   };
 
   type TweetTrendData = {
@@ -104,6 +106,32 @@ declare namespace ReportApi {
     frequency: number;
   };
 
+  type BrandBarData = {
+    comment: { word: string; heat: number; frequency: number }[];
+    tweet: { word: string; heat: number; frequency: number }[];
+  };
+
+  type WordClassData = {
+    tweet: {
+      mainWord: string;
+      frequency: number;
+      subWords: {
+        heat: number;
+        word: string;
+        frequency: number;
+      }[];
+    }[];
+    comment: {
+      mainWord: string;
+      frequency: number;
+      subWords: {
+        heat: number;
+        word: string;
+        frequency: number;
+      }[];
+    }[];
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
@@ -115,6 +143,8 @@ declare namespace ReportApi {
       tweet: PortraitData;
     };
     topic: TopicData[];
+    brandBar: BrandBarData;
+    wordClass: WordClassData;
   }>;
 
   type TweetListReq = {
@@ -146,6 +176,7 @@ declare namespace ReportApi {
     commentNum: number;
     likeNum: number;
     repostNum: number;
+    platform: 'redbook' | 'tiktok';
   };
 
   type TweetListRes = Response<{
@@ -184,5 +215,6 @@ declare namespace ReportApi {
     nickname: string;
     content: string;
     likeNum: number;
+    platform: 'redbook' | 'tiktok';
   };
 }

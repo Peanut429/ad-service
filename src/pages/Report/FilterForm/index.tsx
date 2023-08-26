@@ -117,7 +117,10 @@ const FilterForm = () => {
               allowClear={false}
               value={platforms}
               mode="tags"
-              options={[{ label: '小红书', value: 'redbook' }]}
+              options={[
+                { label: '小红书', value: 'redbook' },
+                { label: '抖音', value: 'tiktok' },
+              ]}
               onChange={(value) => {
                 dispatch({ field: 'platforms', value });
                 dispatch({ field: 'listPlatforms', value });
@@ -128,9 +131,9 @@ const FilterForm = () => {
           <Form.Item label="推文情感">
             <Select
               value={sentiment}
-              mode="tags"
+              mode="multiple"
               options={[
-                { label: '未知', value: 0 },
+                // { label: '未知', value: 0 },
                 { label: '负面', value: 1 },
                 { label: '中性', value: 2 },
                 { label: '正面', value: 3 },

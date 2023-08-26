@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Dropdown, Space, message } from 'antd';
+import { Button, Dropdown, Space, Spin, message } from 'antd';
 import { DownloadOutlined, LikeOutlined } from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
@@ -141,6 +141,7 @@ const CommentList = () => {
   const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
   const [sortParams] = useState({
@@ -149,22 +150,29 @@ const CommentList = () => {
   });
 
   const fetchData = async () => {
-    const res = await commentList({
-      timeLimit: listTimeLimit,
-      userType: listUserType,
-      platforms: listPlatforms,
-      tasksId,
-      excludeWords: [...excludeWords, ...listExcludeWords],
-      includeWords: [...includeWords, ...listIncludeWords],
-      sentiment: listSentiment,
-      page: currentPage,
-      limit: pageSize,
-      sortKey: sortParams.order_key,
-      sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
-    });
+    setLoading(true);
+    try {
+      const res = await commentList({
+        timeLimit: listTimeLimit,
+        userType: listUserType,
+        platforms: listPlatforms,
+        tasksId,
+        excludeWords: [...excludeWords, ...listExcludeWords],
+        includeWords: [...includeWords, ...listIncludeWords],
+        sentiment: listSentiment,
+        page: currentPage,
+        limit: pageSize,
+        sortKey: sortParams.order_key,
+        sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
+      });
 
-    setDataList(res.data.data);
-    setTotal(res.data.count);
+      setDataList(res.data.data);
+      setTotal(res.data.count);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const downloadExcel = async () => {
@@ -209,16 +217,19 @@ const CommentList = () => {
   };
 
   useEffect(() => {
+    if (!tasksId.length) return;
     fetchData();
   }, [
     pageSize,
     currentPage,
     sortKey,
     sortOrder,
+    excludeWords,
+    includeWords,
+    tasksId,
     listTimeLimit,
     listUserType,
     listPlatforms,
-    tasksId,
     listExcludeWords,
     listIncludeWords,
     listSentiment,
@@ -238,9 +249,11 @@ const CommentList = () => {
         </Button>
       </div>
       <div>
-        {dataList.map((item) => {
-          return <CommentListItem key={item.id} data={item} />;
-        })}
+        <Spin spinning={loading}>
+          {dataList.map((item) => {
+            return <CommentListItem key={item.id} data={item} />;
+          })}
+        </Spin>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>

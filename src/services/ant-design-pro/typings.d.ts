@@ -2,6 +2,12 @@
 /* eslint-disable */
 
 declare namespace API {
+  type ApiResponse<T> = {
+    code: number;
+    data: T;
+    message: string;
+  };
+
   type CurrentUser = {
     name?: string;
     avatar?: string;
@@ -23,11 +29,14 @@ declare namespace API {
     phone?: string;
   };
 
-  type LoginResult = {
-    status?: string;
-    type?: string;
-    currentAuthority?: string;
-  };
+  type LoginResult = ApiResponse<{
+    token: string;
+    userInfo: {
+      role: 'admin' | 'editor' | 'viewer';
+      userId: string;
+      username: string;
+    };
+  }>;
 
   type PageParams = {
     current?: number;

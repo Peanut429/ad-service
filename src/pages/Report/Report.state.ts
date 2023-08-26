@@ -9,6 +9,12 @@ export interface ReportInitialState {
   excludeWords: string[];
   userType: UserType[];
   sentiment: number[];
+  listTimeLimit: { gte: number; lte: number };
+  listPlatforms: Platform[];
+  listIncludeWords: string[][];
+  listExcludeWords: string[];
+  listUserType: UserType[];
+  listSentiment: number[];
   wordcloudData?: ReportApi.WordcloudData;
   tweetTrendData?: ReportApi.TweetTrendData;
   adNode?: ReportApi.AdNodeItem[];
@@ -19,12 +25,8 @@ export interface ReportInitialState {
     tweet: ReportApi.PortraitData;
   };
   topicData?: ReportApi.TopicData[];
-  listTimeLimit: { gte: number; lte: number };
-  listPlatforms: Platform[];
-  listIncludeWords: string[][];
-  listExcludeWords: string[];
-  listUserType: UserType[];
-  listSentiment: number[];
+  brandBarData?: ReportApi.BrandBarData;
+  wordClassData?: ReportApi.WordClassData;
 }
 
 const initialState: ReportInitialState = {

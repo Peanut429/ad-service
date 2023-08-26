@@ -81,12 +81,15 @@ const AppearTogetherChart = () => {
     const edges = tweetAppearTogetherData.edges
       .filter((item) => !hiddenWords.includes(item.source) && !hiddenWords.includes(item.target))
       .map((item) => {
-        const total = item.sentiment.reduce((total, item) => {
+        if (!item.sentiment) {
+          console.log(item);
+        }
+        const total = (item.sentiment || []).reduce((total, item) => {
           return total + item.value;
         }, 0);
         return {
           ...item,
-          sentiment: item.sentiment.map((item) => {
+          sentiment: (item.sentiment || []).map((item) => {
             return { ...item, value: item.value / total };
           }),
         };
@@ -150,7 +153,7 @@ const AppearTogetherChart = () => {
     const chart = new Graph({
       container: divRef.current,
       width: divRef.current.clientWidth,
-      height: 500,
+      height: 400,
       plugins: [tooltip],
       layout: {
         type: 'force',
@@ -211,7 +214,7 @@ const AppearTogetherChart = () => {
           trigger={['contextMenu']}
           menu={{ items: [{ label: '隐藏', key: 'hide' }], onClick: handleMenuClick }}
         >
-          <div ref={divRef} style={{ height: 500 }} />
+          <div ref={divRef} style={{ height: 400 }} />
         </Dropdown>
       </Spin>
       {hiddenWords.length > 0 && (

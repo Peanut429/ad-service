@@ -1,5 +1,5 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
+import { history, type RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
 
 // 错误处理方案： 错误类型
@@ -14,8 +14,8 @@ enum ErrorShowType {
 interface ResponseStructure {
   success: boolean;
   data: any;
-  errorCode?: number;
-  errorMessage?: string;
+  code?: number;
+  message?: string;
   showType?: ErrorShowType;
 }
 
@@ -29,8 +29,14 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
-        res as unknown as ResponseStructure;
+      const {
+        success,
+        data,
+        code: errorCode,
+        message: errorMessage,
+        showType,
+      } = res as unknown as ResponseStructure;
+      console.log(errorMessage);
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
@@ -45,7 +51,7 @@ export const errorConfig: RequestConfig = {
       if (error.name === 'BizError') {
         const errorInfo: ResponseStructure | undefined = error.info;
         if (errorInfo) {
-          const { errorMessage, errorCode } = errorInfo;
+          const { message: errorMessage, code: errorCode } = errorInfo;
           switch (errorInfo.showType) {
             case ErrorShowType.SILENT:
               // do nothing
@@ -72,7 +78,14 @@ export const errorConfig: RequestConfig = {
       } else if (error.response) {
         // Axios 的错误
         // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
+        if (error.response.status === 401) {
+          // TODO: redirect
+          message.error(error.response.data.message);
+          localStorage.clear();
+          history.push('/user/login');
+        } else {
+          message.error(`Response status:${error.response.status}`);
+        }
       } else if (error.request) {
         // 请求已经成功发起，但没有收到响应
         // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
@@ -90,6 +103,12 @@ export const errorConfig: RequestConfig = {
     (config: RequestOptions) => {
       // 拦截请求配置，进行个性化处理。
       const url = config?.url;
+      const token = localStorage.getItem('token');
+      if (url !== '/auth/sign') {
+        config.headers = {
+          Authorization: token || '',
+        };
+      }
       return { ...config, url };
     },
   ],
@@ -100,7 +119,8 @@ export const errorConfig: RequestConfig = {
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
 
-      if (data?.success === false) {
+      if (data?.code !== 200) {
+        data.success = false;
         message.error('请求失败！');
       }
       return response;
