@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
 import { useContext, useState } from 'react';
-import { Button, DatePicker, Drawer, Form, Input, Modal, Select, Space, Tag } from 'antd';
+import { Button, DatePicker, Drawer, Form, Input, Modal, Select, Space, Tag, message } from 'antd';
 import { CheckOutlined, CloseOutlined, SettingOutlined } from '@ant-design/icons';
 import SearchInput, { WordInfo } from '@/components/SearchInput';
 import ReportContext from '../Report.context';
 import styles from './index.module.scss';
+import { useRequest } from '@umijs/max';
+import { industryList, updateTaskInfo } from '@/services/brands';
 
 const FilterForm = () => {
   const [open, setOpen] = useState(false);
@@ -14,9 +16,33 @@ const FilterForm = () => {
   const [excludeWordValue, setExcludeWordValue] = useState('');
 
   const {
-    state: { includeWords, excludeWords, timeLimit, sentiment, platforms },
+    state: {
+      category,
+      projectId,
+      tasksId,
+      includeWords,
+      excludeWords,
+      timeLimit,
+      sentiment,
+      platforms,
+      wordCloudHiddenWord,
+      brandBarHiddenWord,
+      wordTrendHiddenWord,
+      appearTogetherHiddenWord,
+      wordClassHiddenWord,
+    },
     dispatch,
   } = useContext(ReportContext);
+
+  const { run: updateApi } = useRequest(updateTaskInfo, {
+    manual: true,
+    onSuccess: () => {
+      message.success('保存成功');
+    },
+  });
+
+  const { data: industryListData } = useRequest(industryList);
+  console.log(industryListData);
 
   const handleUpdateIncludeWords = () => {
     dispatch({
@@ -144,7 +170,47 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
+          <Form.Item label="行业">
+            <Select
+              value={category}
+              mode="multiple"
+              options={(industryListData || []).map((item) => ({
+                label: item.category,
+                value: item.category,
+              }))}
+              placeholder="选择行业"
+              onChange={(value) => {
+                dispatch({ field: 'category', value });
+              }}
+            />
+          </Form.Item>
           {/* <Form.Item label="帖子类型"></Form.Item> */}
+          <Form.Item>
+            <Button
+              type="primary"
+              onClick={() =>
+                updateApi({
+                  projectId,
+                  wordTasksId: tasksId,
+                  condition: JSON.stringify({
+                    includeWords,
+                    excludeWords,
+                    timeLimit,
+                    platforms,
+                    sentiment,
+                    category,
+                    wordCloudHiddenWord,
+                    wordClassHiddenWord,
+                    wordTrendHiddenWord,
+                    appearTogetherHiddenWord,
+                    brandBarHiddenWord,
+                  }),
+                })
+              }
+            >
+              保存当前条件
+            </Button>
+          </Form.Item>
         </Form>
       </Drawer>
 

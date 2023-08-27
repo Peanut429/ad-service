@@ -10,7 +10,7 @@ const WordCloudChart = () => {
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
   const [currentWord, setCurrentWord] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
-  const [hiddenWords, setHiddenWords] = useState<string[]>([]);
+  // const [hiddenWords, setHiddenWords] = useState<string[]>([]);
   const [menuItems] = useState<MenuProps['items']>([
     { label: '添加关键词', key: 'add' },
     { label: '隐藏关键词', key: 'hide' },
@@ -19,7 +19,8 @@ const WordCloudChart = () => {
   const [chart, setChart] = useState<WordCloud>();
 
   const {
-    state: { wordcloudData },
+    state: { wordcloudData, wordCloudHiddenWord },
+    dispatch,
     addListKeyword,
     addListExcludeWords,
   } = useContext(ReportContext);
@@ -34,8 +35,8 @@ const WordCloudChart = () => {
     if (key === 'add') {
       addListKeyword([currentWord]);
     } else if (key === 'hide') {
-      if (!hiddenWords.includes(currentWord)) {
-        setHiddenWords([...hiddenWords, currentWord]);
+      if (!wordCloudHiddenWord.includes(currentWord)) {
+        dispatch({ field: 'wordCloudHiddenWord', value: [...wordCloudHiddenWord, currentWord] });
       }
     } else if (key === 'delete') {
       addListExcludeWords(currentWord);
@@ -47,7 +48,7 @@ const WordCloudChart = () => {
     if (!divRef.current || !wordcloudData) return;
 
     const chart = new WordCloud(divRef.current, {
-      data: wordcloudData[dataSource].filter((item) => !hiddenWords.includes(item.word)),
+      data: wordcloudData[dataSource].filter((item) => !wordCloudHiddenWord.includes(item.word)),
       height: 300,
       wordField: 'word',
       weightField: dataType,
@@ -61,7 +62,7 @@ const WordCloudChart = () => {
     setChart(chart);
 
     return () => chart.destroy();
-  }, [wordcloudData, dataSource, dataType, hiddenWords]);
+  }, [wordcloudData, dataSource, dataType]);
 
   useEffect(() => {
     if (!chart) return;
@@ -113,14 +114,17 @@ const WordCloudChart = () => {
           <div ref={divRef} style={{ marginTop: 20, height: 300 }} />
         </Dropdown>
       </Spin>
-      {hiddenWords.length > 0 && (
+      {wordCloudHiddenWord.length > 0 && (
         <div>
           <span>隐藏的关键词：</span>
-          {hiddenWords.map((item) => (
+          {wordCloudHiddenWord.map((item) => (
             <Tag
               key={item}
               closable
-              onClose={() => setHiddenWords(hiddenWords.filter((i) => i !== item))}
+              onClose={() => {
+                wordCloudHiddenWord.splice(wordCloudHiddenWord.indexOf(item), 1);
+                dispatch({ field: 'wordCloudHiddenWord', value: [...wordCloudHiddenWord] });
+              }}
             >
               {item}
             </Tag>

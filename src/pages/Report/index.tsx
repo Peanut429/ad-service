@@ -23,6 +23,7 @@ const Report = () => {
   const contextValue = useCreateReducer<ReportInitialState>({
     initialState: {
       ...initialState,
+      projectId: searchParams.get('projectId')!,
     },
   });
 
@@ -30,6 +31,8 @@ const Report = () => {
 
   const {
     state: {
+      category,
+      projectId,
       timeLimit,
       platforms,
       tasksId,
@@ -40,17 +43,62 @@ const Report = () => {
       listIncludeWords,
       listExcludeWords,
       listTimeLimit,
+      wordClassHiddenWord,
+      brandBarHiddenWord,
+      wordTrendHiddenWord,
+      appearTogetherHiddenWord,
+      wordCloudHiddenWord,
     },
     dispatch,
   } = contextValue;
 
-  useRequest(() => taskList({ projectsId: [searchParams.get('projectId')!] }), {
+  useRequest(() => taskList({ projectsId: [projectId] }), {
     onSuccess: (res) => {
       if (res.length) {
         const data = res[0];
+        const condition = JSON.parse(data.condition || '{}');
         dispatch({ field: 'tasksId', value: data.wordTasksId });
-        dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
-        dispatch({ field: 'listTimeLimit', value: data.dataRetrieverTime });
+        // 加载保存的筛选条件
+        if (condition.includeWords) {
+          dispatch({ field: 'includeWords', value: condition.includeWords });
+        }
+        if (condition.excludeWords) {
+          dispatch({ field: 'excludeWords', value: condition.excludeWords });
+        }
+        if (condition.timeLimit) {
+          dispatch({ field: 'timeLimit', value: condition.timeLimit });
+          dispatch({ field: 'listTimeLimit', value: condition.timeLimit });
+        } else {
+          dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
+          dispatch({ field: 'listTimeLimit', value: data.dataRetrieverTime });
+        }
+        if (condition.sentiment) {
+          dispatch({ field: 'sentiment', value: condition.sentiment });
+        }
+        if (condition.platforms) {
+          dispatch({ field: 'platforms', value: condition.platforms });
+        }
+        if (condition.wordCloudHiddenWord) {
+          dispatch({ field: 'wordCloudHiddenWord', value: condition.wordCloudHiddenWord });
+        }
+        if (condition.brandBarHiddenWord) {
+          dispatch({ field: 'brandBarHiddenWord', value: condition.brandBarHiddenWord });
+        }
+        if (condition.wordTrendHiddenWord) {
+          dispatch({ field: 'wordTrendHiddenWord', value: condition.wordTrendHiddenWord });
+        }
+        if (condition.appearTogetherHiddenWord) {
+          dispatch({
+            field: 'appearTogetherHiddenWord',
+            value: condition.appearTogetherHiddenWord,
+          });
+        }
+        if (condition.wordClassHiddenWord) {
+          dispatch({ field: 'wordClassHiddenWord', value: condition.wordClassHiddenWord });
+        }
+        if (condition.category) {
+          dispatch({ field: 'category', value: condition.category });
+        }
       }
     },
   });
@@ -64,6 +112,15 @@ const Report = () => {
       excludeWords,
       userType,
       sentiment,
+      hiddenWord: {
+        wordCloud: wordCloudHiddenWord,
+        brandBar: brandBarHiddenWord,
+        appearTogether: appearTogetherHiddenWord,
+        wordClass: wordClassHiddenWord,
+        wordTrend: wordTrendHiddenWord,
+      },
+      mappingWord: {},
+      category,
     });
 
     dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
@@ -125,7 +182,21 @@ const Report = () => {
   useEffect(() => {
     if (!tasksId.length) return;
     fetchChatData();
-  }, [timeLimit, platforms, tasksId, includeWords, excludeWords, userType, sentiment]);
+  }, [
+    timeLimit,
+    platforms,
+    tasksId,
+    includeWords,
+    excludeWords,
+    userType,
+    sentiment,
+    category,
+    wordClassHiddenWord,
+    brandBarHiddenWord,
+    wordTrendHiddenWord,
+    appearTogetherHiddenWord,
+    wordCloudHiddenWord,
+  ]);
 
   useEffect(() => {
     if (!tasksId.length) return;

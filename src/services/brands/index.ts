@@ -27,3 +27,19 @@ export async function taskList(data: { brandId?: string; projectsId?: string[] }
 export async function stopTask(data: { tasksId: string[]; stop: boolean }) {
   return request('/api/task/stop', { method: 'POST', data });
 }
+
+export async function updateTaskInfo(data: {
+  projectId: string;
+  name?: string;
+  wordTasksId?: string[];
+  condition?: string;
+}) {
+  return request('/api/task/updateProject', { method: 'POST', data });
+}
+
+export async function industryList(data?: { category: string }) {
+  return request<BrandsApi.IndustryListRes>('/api/functional/category', {
+    method: 'GET',
+    params: data,
+  });
+}

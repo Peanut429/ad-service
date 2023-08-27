@@ -16,6 +16,15 @@ declare namespace ReportApi {
     excludeWords?: string[];
     userType?: string[];
     sentiment?: number[];
+    hiddenWord?: Partial<{
+      wordCloud: string[];
+      brandBar: string[];
+      appearTogether: string[];
+      wordClass: string[];
+      wordTrend: string[];
+    }>;
+    mappingWord?: Record<string, string>;
+    category?: string[];
   };
 
   type WordcloudData = {

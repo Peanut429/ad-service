@@ -40,6 +40,7 @@ declare namespace BrandsApi {
     createdAtTimestamp: number;
     updatedAtTimestamp: number;
     brandId: string;
+    condition: string; // json string
   };
 
   type TaskListRes = Api.Response<TaskInfo[]>;
@@ -57,4 +58,10 @@ declare namespace BrandsApi {
     projectName: string;
     brandId: string;
   };
+
+  type IndustryListRes = Api.Response<
+    {
+      category: string;
+    }[]
+  >;
 }

@@ -2,6 +2,8 @@ export type Platform = 'weibo' | 'redbook' | 'tiktok';
 export type UserType = 'normal' | 'koc' | 'kol' | 'star' | 'enterprise' | 'media';
 
 export interface ReportInitialState {
+  projectId: string;
+  category: string[]; // 行业信息
   timeLimit: { gte: number; lte: number };
   platforms: Platform[];
   tasksId: string[];
@@ -27,9 +29,16 @@ export interface ReportInitialState {
   topicData?: ReportApi.TopicData[];
   brandBarData?: ReportApi.BrandBarData;
   wordClassData?: ReportApi.WordClassData;
+  wordCloudHiddenWord: string[];
+  brandBarHiddenWord: string[];
+  wordClassHiddenWord: string[];
+  appearTogetherHiddenWord: string[];
+  wordTrendHiddenWord: string[];
 }
 
 const initialState: ReportInitialState = {
+  projectId: '',
+  category: [],
   timeLimit: { gte: 0, lte: 0 },
   platforms: ['redbook'],
   tasksId: [],
@@ -43,6 +52,11 @@ const initialState: ReportInitialState = {
   listExcludeWords: [],
   listUserType: [],
   listSentiment: [],
+  wordCloudHiddenWord: [],
+  brandBarHiddenWord: [],
+  wordClassHiddenWord: [],
+  appearTogetherHiddenWord: [],
+  wordTrendHiddenWord: [],
 };
 
 export default initialState;

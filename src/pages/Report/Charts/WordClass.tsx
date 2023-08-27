@@ -31,7 +31,6 @@ const WordClass = () => {
       return {
         name: item.mainWord,
         children: item.subWords.map((sub) => {
-          console.log(sub);
           return {
             name: sub.word,
             value: sub[dataType as 'frequency' | 'heat'],
@@ -39,8 +38,6 @@ const WordClass = () => {
         }),
       };
     });
-
-    console.log(chartData);
 
     const chart = new Treemap(divRef.current, {
       data: {

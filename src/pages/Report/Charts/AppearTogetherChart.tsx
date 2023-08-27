@@ -28,13 +28,14 @@ function getNodeSize(value: number, max: number, min: number) {
 
 const AppearTogetherChart = () => {
   const {
-    state: { tweetAppearTogetherData },
+    state: { tweetAppearTogetherData, appearTogetherHiddenWord },
+    dispatch,
     addListKeyword,
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
   const [chart, setChart] = useState<Graph | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [hiddenWords, setHiddenWords] = useState<string[]>([]);
+  // const [hiddenWords, setHiddenWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState('');
 
   const handleMouseenter = (ev: any) => {
@@ -69,21 +70,31 @@ const AppearTogetherChart = () => {
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'hide') {
-      setHiddenWords((prev) => [...prev, currentWord]);
+      dispatch({
+        field: 'appearTogetherHiddenWord',
+        value: [...appearTogetherHiddenWord, currentWord],
+      });
     }
+    setMenuVisible(false);
+  };
+
+  const handleCloseMenu = () => {
     setMenuVisible(false);
   };
 
   useEffect(() => {
     if (!divRef.current || !tweetAppearTogetherData) return;
 
-    const nodes = tweetAppearTogetherData.nodes.filter((item) => !hiddenWords.includes(item.id));
+    const nodes = tweetAppearTogetherData.nodes.filter(
+      (item) => !appearTogetherHiddenWord.includes(item.id),
+    );
     const edges = tweetAppearTogetherData.edges
-      .filter((item) => !hiddenWords.includes(item.source) && !hiddenWords.includes(item.target))
+      .filter(
+        (item) =>
+          !appearTogetherHiddenWord.includes(item.source) &&
+          !appearTogetherHiddenWord.includes(item.target),
+      )
       .map((item) => {
-        if (!item.sentiment) {
-          console.log(item);
-        }
         const total = (item.sentiment || []).reduce((total, item) => {
           return total + item.value;
         }, 0);
@@ -188,7 +199,7 @@ const AppearTogetherChart = () => {
     return () => {
       chart?.destroy();
     };
-  }, [tweetAppearTogetherData, hiddenWords]);
+  }, [tweetAppearTogetherData]);
 
   useEffect(() => {
     if (!chart) return;
@@ -197,12 +208,14 @@ const AppearTogetherChart = () => {
     chart.on('edge:click', handleEdgeClick);
     chart.on('node:click', handleNodeClick);
     chart.on('node:contextmenu', handleNodeRightClick);
+    document.addEventListener('click', handleCloseMenu);
 
     return () => {
       chart.off('edge:mouseenter', handleMouseenter);
       chart.off('edge:mouseleave', handleMouseleave);
       chart.off('edge:click', handleEdgeClick);
       chart.off('node:click', handleNodeClick);
+      document.removeEventListener('click', handleCloseMenu);
     };
   }, [chart, addListKeyword]);
 
@@ -217,14 +230,20 @@ const AppearTogetherChart = () => {
           <div ref={divRef} style={{ height: 400 }} />
         </Dropdown>
       </Spin>
-      {hiddenWords.length > 0 && (
+      {appearTogetherHiddenWord.length > 0 && (
         <div>
           <span>隐藏的关键词：</span>
-          {hiddenWords.map((item) => (
+          {appearTogetherHiddenWord.map((item) => (
             <Tag
               key={item}
               closable
-              onClose={() => setHiddenWords(hiddenWords.filter((i) => i !== item))}
+              onClose={() => {
+                appearTogetherHiddenWord.splice(appearTogetherHiddenWord.indexOf(item), 1);
+                dispatch({
+                  field: 'appearTogetherHiddenWord',
+                  value: [...appearTogetherHiddenWord],
+                });
+              }}
             >
               {item}
             </Tag>

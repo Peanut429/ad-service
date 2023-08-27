@@ -133,7 +133,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     },
   ];
 
-  console.log(menuItems);
   return (
     <HeaderDropdown
       menu={{
