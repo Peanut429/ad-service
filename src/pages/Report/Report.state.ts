@@ -31,7 +31,8 @@ export interface ReportInitialState {
   wordClassData?: ReportApi.WordClassData;
   wordCloudHiddenWord: string[];
   brandBarHiddenWord: string[];
-  wordClassHiddenWord: string[];
+  wordClassHiddenWord: string[]; // 关键词类别中隐藏的关键词
+  wordClassDeleteWord: string[]; // 关键词类别中删除的关键词
   appearTogetherHiddenWord: string[];
   wordTrendHiddenWord: string[]; // 高频词热力图中隐藏的关键词
   wordTrendDeleteWord: string[]; // 高频词热力图中删除的关键词
@@ -59,6 +60,7 @@ const initialState: ReportInitialState = {
   wordCloudHiddenWord: [],
   brandBarHiddenWord: [],
   wordClassHiddenWord: [],
+  wordClassDeleteWord: [],
   appearTogetherHiddenWord: [],
   wordTrendHiddenWord: [],
   wordTrendDeleteWord: [],
