@@ -59,6 +59,7 @@ export default [
     icon: 'user',
     hideInMenu: true,
     component: './Account',
+    access: 'accountRouterFilter',
   },
   // {
   //   path: '/admin',

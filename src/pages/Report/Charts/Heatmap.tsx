@@ -1,17 +1,59 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Heatmap } from '@antv/g2plot';
-import { Segmented, Spin } from 'antd';
+import { Dropdown, MenuProps, Segmented, Spin } from 'antd';
 import dayjs from 'dayjs';
 
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { tweetWordTrendData },
+    state: { tweetWordTrendData, wordTrendHiddenWord, wordTrendDeleteWord },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
+  const [chart, setChart] = useState<Heatmap>();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [currentWord, setCurrentWord] = useState('');
+
+  const handleElementClick = (ev: any) => {
+    setMenuVisible(false);
+    const element = ev.target.get('element');
+    if (element) {
+      const data = element.getModel().data;
+
+      addListKeyword([data.word as string]);
+      dispatch({
+        field: 'listTimeLimit',
+        value: {
+          gte: dayjs(data.date).startOf('month').valueOf(),
+          lte: dayjs(data.date).endOf('month').valueOf(),
+        },
+      });
+    }
+  };
+
+  const handleContextmenu = (ev: any) => {
+    if (ev.gEvent.delegateObject.axis.cfg.position !== 'left') return;
+    const label = ev.target.attrs.text;
+    setMenuVisible(true);
+    setCurrentWord(label);
+  };
+
+  const handleCloseContextmenu = () => {
+    setMenuVisible(false);
+  };
+
+  const handleContextmenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'delete') {
+      dispatch({ field: 'wordTrendHiddenWord', value: [...wordTrendDeleteWord, currentWord] });
+    } else if (key === 'hide') {
+      dispatch({
+        field: 'wordTrendHiddenWord',
+        value: [...wordTrendHiddenWord, currentWord],
+      });
+    }
+  };
 
   useEffect(() => {
     if (!divRef.current || !tweetWordTrendData) return;
@@ -51,26 +93,26 @@ const HeatmapChart = () => {
       },
     });
 
-    chart.on('element:click', (ev: any) => {
-      const element = ev.target.get('element');
-      if (element) {
-        const data = element.getModel().data;
-        console.log(data);
-        addListKeyword([data.word as string]);
-        dispatch({
-          field: 'listTimeLimit',
-          value: {
-            gte: dayjs(data.date).startOf('month').valueOf(),
-            lte: dayjs(data.date).endOf('month').valueOf(),
-          },
-        });
-      }
-    });
+    setChart(chart);
 
     chart.render();
 
     return () => chart?.destroy();
   }, [tweetWordTrendData, dataType, addListKeyword]);
+
+  useEffect(() => {
+    if (!chart) return;
+
+    chart.on('element:click', handleElementClick);
+    chart.on('axis-label:contextmenu', handleContextmenu);
+    document.addEventListener('click', handleCloseContextmenu);
+
+    return () => {
+      chart.off('element:click', handleElementClick);
+      chart.off('axis-label:contentmenu', handleContextmenu);
+      document.removeEventListener('click', handleCloseContextmenu);
+    };
+  }, [chart, wordTrendDeleteWord, wordTrendHiddenWord]);
 
   return (
     <div>
@@ -85,9 +127,19 @@ const HeatmapChart = () => {
         />
       </div>
       <Spin size="large" spinning={!tweetWordTrendData}>
-        {/* <Dropdown menu={{ items: [] }}> */}
-        <div ref={divRef} style={{ height: 400 }} />
-        {/* </Dropdown> */}
+        <Dropdown
+          open={menuVisible}
+          trigger={['contextMenu']}
+          menu={{
+            items: [
+              { label: '隐藏关键词', key: 'hide' },
+              { label: '删除关键词', key: 'delete' },
+            ],
+            onClick: handleContextmenuClick,
+          }}
+        >
+          <div ref={divRef} style={{ height: 400 }} />
+        </Dropdown>
       </Spin>
     </div>
   );

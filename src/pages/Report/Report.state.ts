@@ -33,7 +33,10 @@ export interface ReportInitialState {
   brandBarHiddenWord: string[];
   wordClassHiddenWord: string[];
   appearTogetherHiddenWord: string[];
-  wordTrendHiddenWord: string[];
+  wordTrendHiddenWord: string[]; // 高频词热力图中隐藏的关键词
+  wordTrendDeleteWord: string[]; // 高频词热力图中删除的关键词
+  wordCloudDeleteWord: string[]; // 词云中删除的关键词
+  appearTogetherDeleteWord: string[]; // 共现关系图中删除的关键词
   wordMap: Record<string, string>; // 关键词映射
 }
 
@@ -48,7 +51,7 @@ const initialState: ReportInitialState = {
   userType: [],
   sentiment: [],
   listTimeLimit: { gte: 0, lte: 0 },
-  listPlatforms: ['redbook'],
+  listPlatforms: ['redbook', 'tiktok'],
   listIncludeWords: [],
   listExcludeWords: [],
   listUserType: [],
@@ -58,6 +61,9 @@ const initialState: ReportInitialState = {
   wordClassHiddenWord: [],
   appearTogetherHiddenWord: [],
   wordTrendHiddenWord: [],
+  wordTrendDeleteWord: [],
+  wordCloudDeleteWord: [],
+  appearTogetherDeleteWord: [],
   wordMap: {},
 };
 

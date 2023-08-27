@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRequest, useSearchParams } from '@umijs/max';
-import { DatePicker, Form, Tabs, Tag } from 'antd';
+import { Affix, Card, DatePicker, Form, Tabs, Tag } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { RangePickerDateProps } from 'antd/es/date-picker/generatePicker';
 import useCreateReducer from '@/hooks/useCreateReducer';
@@ -46,8 +46,11 @@ const Report = () => {
       wordClassHiddenWord,
       brandBarHiddenWord,
       wordTrendHiddenWord,
+      wordTrendDeleteWord,
       appearTogetherHiddenWord,
       wordCloudHiddenWord,
+      wordCloudDeleteWord,
+      appearTogetherDeleteWord,
       wordMap,
     },
     dispatch,
@@ -103,6 +106,9 @@ const Report = () => {
         if (condition.wordMap) {
           dispatch({ field: 'wordMap', value: condition.wordMap });
         }
+        if (condition.wordCloudDeleteWord) {
+          dispatch({ field: 'wordCloudDeleteWord', value: condition.wordCloudDeleteWord });
+        }
       }
     },
   });
@@ -117,9 +123,9 @@ const Report = () => {
       userType,
       sentiment,
       hiddenWord: {
-        wordCloud: wordCloudHiddenWord,
+        wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
         brandBar: brandBarHiddenWord,
-        appearTogether: appearTogetherHiddenWord,
+        appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
         wordClass: wordClassHiddenWord,
         wordTrend: wordTrendHiddenWord,
       },
@@ -195,11 +201,14 @@ const Report = () => {
     userType,
     sentiment,
     category,
+    wordCloudHiddenWord,
+    wordCloudDeleteWord,
     wordClassHiddenWord,
     brandBarHiddenWord,
     wordTrendHiddenWord,
+    wordTrendDeleteWord,
     appearTogetherHiddenWord,
-    wordCloudHiddenWord,
+    appearTogetherDeleteWord,
     wordMap,
   ]);
 
@@ -215,38 +224,43 @@ const Report = () => {
   return (
     <ReportContext.Provider value={{ ...contextValue, addListKeyword, addListExcludeWords }}>
       <div>
-        <h4>
-          任务关键词：
-          {keywords.map((item) => (
-            <Tag color="#3b5999" key={item} style={{ fontSize: 14 }}>
-              {item}
-            </Tag>
-          ))}
-        </h4>
-        <h4>列表筛选条件：</h4>
-        <Form size="small" layout="inline">
-          <Form.Item label="时间范围">
-            <DatePicker.RangePicker
-              value={[dayjs(listTimeLimit.gte), dayjs(listTimeLimit.lte)]}
-              onChange={handleDateRangeChange}
-            />
-          </Form.Item>
-          <Form.Item label="关键词">
-            {listIncludeWords.map((item, index) => (
-              <Tag
-                key={index}
-                closable
-                onClose={() => {
-                  listIncludeWords.splice(index, 1);
-                  dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
-                }}
-                style={{ fontSize: 14 }}
-              >
-                {item.join(' + ')}
-              </Tag>
-            ))}
-          </Form.Item>
-        </Form>
+        <Affix offsetTop={0}>
+          <Card>
+            <h4>
+              任务关键词：
+              {keywords.map((item) => (
+                <Tag color="#3b5999" key={item} style={{ fontSize: 14 }}>
+                  {item}
+                </Tag>
+              ))}
+            </h4>
+            <h4>列表筛选条件：</h4>
+            <Form size="small" layout="inline">
+              <Form.Item label="时间范围">
+                <DatePicker.RangePicker
+                  value={[dayjs(listTimeLimit.gte), dayjs(listTimeLimit.lte)]}
+                  onChange={handleDateRangeChange}
+                />
+              </Form.Item>
+              <Form.Item label="筛选关键词">
+                {listIncludeWords.map((item, index) => (
+                  <Tag
+                    key={item.join(',')}
+                    closable
+                    onClose={() => {
+                      listIncludeWords.splice(index, 1);
+                      console.log(listIncludeWords);
+                      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+                    }}
+                    style={{ fontSize: 14 }}
+                  >
+                    {item.join(' + ')}
+                  </Tag>
+                ))}
+              </Form.Item>
+            </Form>
+          </Card>
+        </Affix>
         <div className={styles.main}>
           <div className={styles['left-container']}>
             <Tabs

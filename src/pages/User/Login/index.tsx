@@ -63,7 +63,7 @@ const Login: React.FC = () => {
             currentUser: {
               userid: msg.data.userInfo.userId,
               name: msg.data.userInfo.username,
-              role: msg.data.userInfo.role,
+              access: msg.data.userInfo.role,
               avatar:
                 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
             },

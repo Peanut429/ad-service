@@ -19,7 +19,7 @@ const WordCloudChart = () => {
   const [chart, setChart] = useState<WordCloud>();
 
   const {
-    state: { wordcloudData, wordCloudHiddenWord },
+    state: { wordcloudData, wordCloudHiddenWord, wordCloudDeleteWord },
     dispatch,
     addListKeyword,
     addListExcludeWords,
@@ -39,7 +39,7 @@ const WordCloudChart = () => {
         dispatch({ field: 'wordCloudHiddenWord', value: [...wordCloudHiddenWord, currentWord] });
       }
     } else if (key === 'delete') {
-      addListExcludeWords(currentWord);
+      dispatch({ field: 'wordCloudDeleteWord', value: [...wordCloudDeleteWord, currentWord] });
     }
     setMenuVisible(false);
   };

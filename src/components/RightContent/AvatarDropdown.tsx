@@ -1,4 +1,4 @@
-import { outLogin } from '@/services/ant-design-pro/api';
+// import { outLogin } from '@/services/ant-design-pro/api';
 import {
   ApartmentOutlined,
   LogoutOutlined,
@@ -121,11 +121,13 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           },
         ]
       : []),
-    {
-      key: 'account',
-      icon: <ApartmentOutlined />,
-      label: '账号管理',
-    },
+    currentUser.access !== 'viewer'
+      ? {
+          key: 'account',
+          icon: <ApartmentOutlined />,
+          label: '账号管理',
+        }
+      : null,
     {
       key: 'logout',
       icon: <LogoutOutlined />,

@@ -86,6 +86,7 @@ export async function getInitialState(): Promise<{
         name: localStorage.getItem('name')!,
         avatar: localStorage.getItem('avatar')!,
         userid: localStorage.getItem('userId')!,
+        access: localStorage.getItem('role')!,
       };
     } catch (error) {
       history.push(loginPath);
