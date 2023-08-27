@@ -34,6 +34,7 @@ export interface ReportInitialState {
   wordClassHiddenWord: string[];
   appearTogetherHiddenWord: string[];
   wordTrendHiddenWord: string[];
+  wordMap: Record<string, string>; // 关键词映射
 }
 
 const initialState: ReportInitialState = {
@@ -57,6 +58,7 @@ const initialState: ReportInitialState = {
   wordClassHiddenWord: [],
   appearTogetherHiddenWord: [],
   wordTrendHiddenWord: [],
+  wordMap: {},
 };
 
 export default initialState;

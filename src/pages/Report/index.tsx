@@ -48,6 +48,7 @@ const Report = () => {
       wordTrendHiddenWord,
       appearTogetherHiddenWord,
       wordCloudHiddenWord,
+      wordMap,
     },
     dispatch,
   } = contextValue;
@@ -99,6 +100,9 @@ const Report = () => {
         if (condition.category) {
           dispatch({ field: 'category', value: condition.category });
         }
+        if (condition.wordMap) {
+          dispatch({ field: 'wordMap', value: condition.wordMap });
+        }
       }
     },
   });
@@ -119,7 +123,7 @@ const Report = () => {
         wordClass: wordClassHiddenWord,
         wordTrend: wordTrendHiddenWord,
       },
-      mappingWord: {},
+      mappingWord: wordMap,
       category,
     });
 
@@ -196,6 +200,7 @@ const Report = () => {
     wordTrendHiddenWord,
     appearTogetherHiddenWord,
     wordCloudHiddenWord,
+    wordMap,
   ]);
 
   useEffect(() => {

@@ -1,7 +1,12 @@
 import dayjs from 'dayjs';
 import { useContext, useState } from 'react';
 import { Button, DatePicker, Drawer, Form, Input, Modal, Select, Space, Tag, message } from 'antd';
-import { CheckOutlined, CloseOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  CloseOutlined,
+  DoubleRightOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import SearchInput, { WordInfo } from '@/components/SearchInput';
 import ReportContext from '../Report.context';
 import styles from './index.module.scss';
@@ -14,6 +19,9 @@ const FilterForm = () => {
   const [selectedWords, setSelectedWords] = useState<WordInfo[]>([]);
   const [showExcludeWordsInput, setShowExcludeWordsInput] = useState(false);
   const [excludeWordValue, setExcludeWordValue] = useState('');
+  const [showWordMapInput, setShowWordMapInput] = useState(false);
+  const [originWord, setOriginWord] = useState('');
+  const [targetWord, setTargetWord] = useState('');
 
   const {
     state: {
@@ -30,6 +38,7 @@ const FilterForm = () => {
       wordTrendHiddenWord,
       appearTogetherHiddenWord,
       wordClassHiddenWord,
+      wordMap,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -42,7 +51,6 @@ const FilterForm = () => {
   });
 
   const { data: industryListData } = useRequest(industryList);
-  console.log(industryListData);
 
   const handleUpdateIncludeWords = () => {
     dispatch({
@@ -66,12 +74,25 @@ const FilterForm = () => {
     dispatch({ field: 'excludeWords', value: [...excludeWords] });
   };
 
+  const handleAddWordMap = () => {
+    if (!originWord.trim || !targetWord.trim()) return;
+    dispatch({ field: 'wordMap', value: { ...wordMap, [originWord.trim()]: targetWord.trim() } });
+    setOriginWord('');
+    setTargetWord('');
+    setShowWordMapInput(false);
+  };
+
+  const handleRemoveWordMap = (key: string) => {
+    delete wordMap[key];
+    dispatch({ field: 'wordMap', value: { ...wordMap } });
+  };
+
   return (
     <>
       <div className={styles.trigger} onClick={() => setOpen(true)}>
         <SettingOutlined style={{ fontSize: 20, color: '#fff' }} />
       </div>
-      <Drawer title="设置" placement="right" open={open} onClose={() => setOpen(false)}>
+      <Drawer title="设置" placement="right" open={open} width={500} onClose={() => setOpen(false)}>
         <Form layout="vertical">
           <Form.Item label="组合关键词">
             {includeWords.map((item, index) => (
@@ -124,6 +145,38 @@ const FilterForm = () => {
               </Button>
             )}
           </Form.Item>
+          <Form.Item label="关键词映射">
+            {Object.entries(wordMap).map(([key, value]) => (
+              <Tag key={key} closable onClick={() => handleRemoveWordMap(key)}>
+                {key} → {value}
+              </Tag>
+            ))}
+            {showWordMapInput ? (
+              <Space>
+                <Space>
+                  <Input
+                    value={originWord}
+                    placeholder="原词"
+                    onChange={(e) => setOriginWord(e.target.value)}
+                  />
+                  <DoubleRightOutlined />
+                  <Input
+                    value={targetWord}
+                    placeholder="目标词"
+                    onChange={(e) => setTargetWord(e.target.value)}
+                  />
+                </Space>
+                <Button>取消</Button>
+                <Button type="primary" onClick={handleAddWordMap}>
+                  确定
+                </Button>
+              </Space>
+            ) : (
+              <Button size="small" onClick={() => setShowWordMapInput(true)}>
+                添加
+              </Button>
+            )}
+          </Form.Item>
           <Form.Item label="时间范围">
             <DatePicker.RangePicker
               allowClear={false}
@@ -153,13 +206,11 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
-          {/* <Form.Item label="账号类型"></Form.Item> */}
           <Form.Item label="推文情感">
             <Select
               value={sentiment}
               mode="multiple"
               options={[
-                // { label: '未知', value: 0 },
                 { label: '负面', value: 1 },
                 { label: '中性', value: 2 },
                 { label: '正面', value: 3 },
@@ -184,7 +235,6 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
-          {/* <Form.Item label="帖子类型"></Form.Item> */}
           <Form.Item>
             <Button
               type="primary"
@@ -204,6 +254,7 @@ const FilterForm = () => {
                     wordTrendHiddenWord,
                     appearTogetherHiddenWord,
                     brandBarHiddenWord,
+                    wordMap,
                   }),
                 })
               }
