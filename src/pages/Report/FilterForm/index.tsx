@@ -10,7 +10,7 @@ import {
 import SearchInput, { WordInfo } from '@/components/SearchInput';
 import ReportContext from '../Report.context';
 import styles from './index.module.scss';
-import { useRequest } from '@umijs/max';
+import { Access, useAccess, useRequest } from '@umijs/max';
 import { industryList, updateTaskInfo } from '@/services/brands';
 
 const FilterForm = () => {
@@ -39,11 +39,13 @@ const FilterForm = () => {
       wordTrendHiddenWord,
       wordTrendDeleteWord,
       appearTogetherHiddenWord,
+      appearTogetherDeleteWord,
       wordClassHiddenWord,
       wordMap,
     },
     dispatch,
   } = useContext(ReportContext);
+  const access = useAccess();
 
   const { run: updateApi } = useRequest(updateTaskInfo, {
     manual: true,
@@ -237,35 +239,38 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              onClick={() =>
-                updateApi({
-                  projectId,
-                  wordTasksId: tasksId,
-                  condition: JSON.stringify({
-                    includeWords,
-                    excludeWords,
-                    timeLimit,
-                    platforms,
-                    sentiment,
-                    category,
-                    wordCloudHiddenWord,
-                    wordCloudDeleteWord,
-                    wordClassHiddenWord,
-                    wordTrendHiddenWord,
-                    wordTrendDeleteWord,
-                    appearTogetherHiddenWord,
-                    brandBarHiddenWord,
-                    wordMap,
-                  }),
-                })
-              }
-            >
-              保存当前条件
-            </Button>
-          </Form.Item>
+          <Access accessible={access.canEdit}>
+            <Form.Item>
+              <Button
+                type="primary"
+                onClick={() =>
+                  updateApi({
+                    projectId,
+                    wordTasksId: tasksId,
+                    condition: JSON.stringify({
+                      includeWords,
+                      excludeWords,
+                      timeLimit,
+                      platforms,
+                      sentiment,
+                      category,
+                      wordCloudHiddenWord,
+                      wordCloudDeleteWord,
+                      wordClassHiddenWord,
+                      wordTrendHiddenWord,
+                      wordTrendDeleteWord,
+                      appearTogetherHiddenWord,
+                      appearTogetherDeleteWord,
+                      brandBarHiddenWord,
+                      wordMap,
+                    }),
+                  })
+                }
+              >
+                保存当前条件
+              </Button>
+            </Form.Item>
+          </Access>
         </Form>
       </Drawer>
 

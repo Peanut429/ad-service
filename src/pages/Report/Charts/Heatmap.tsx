@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Heatmap } from '@antv/g2plot';
-import { Dropdown, MenuProps, Segmented, Spin } from 'antd';
+import { Dropdown, MenuProps, Segmented, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
 
 const HeatmapChart = () => {
@@ -141,6 +141,23 @@ const HeatmapChart = () => {
           <div ref={divRef} style={{ height: 400 }} />
         </Dropdown>
       </Spin>
+      {wordTrendHiddenWord.length > 0 && (
+        <div>
+          <span>隐藏的关键词：</span>
+          {wordTrendHiddenWord.map((item) => (
+            <Tag
+              key={item}
+              closable
+              onClose={() => {
+                wordTrendHiddenWord.splice(wordTrendHiddenWord.indexOf(item), 1);
+                dispatch({ field: 'wordTrendHiddenWord', value: [...wordTrendHiddenWord] });
+              }}
+            >
+              {item}
+            </Tag>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { history, useRequest } from '@umijs/max';
+import { Access, history, useAccess, useRequest } from '@umijs/max';
 import { Button, Card, Form, Input, Modal, Space, message } from 'antd';
 import { brandsList, createBrand } from '@/services/brands';
 
@@ -7,6 +7,7 @@ const Brands = () => {
   const [form] = Form.useForm<{ brandName: string; avatar: string }>();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { canEdit } = useAccess();
 
   const { data: brands, run } = useRequest(brandsList, { manual: true });
 
@@ -34,9 +35,11 @@ const Brands = () => {
       <Space direction="vertical" size="large">
         <Space>
           <Input.Search size="large" />
-          <Button type="primary" size="large" onClick={() => setOpen(true)}>
-            创建品牌
-          </Button>
+          <Access accessible={canEdit}>
+            <Button type="primary" size="large" onClick={() => setOpen(true)}>
+              创建品牌
+            </Button>
+          </Access>
         </Space>
         <Space size="large">
           {brands?.map((brand) => {

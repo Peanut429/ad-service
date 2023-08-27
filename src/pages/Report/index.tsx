@@ -44,13 +44,15 @@ const Report = () => {
       listExcludeWords,
       listTimeLimit,
       wordClassHiddenWord,
+      wordClassDeleteWord,
       brandBarHiddenWord,
+      brandBarDeleteWord,
       wordTrendHiddenWord,
       wordTrendDeleteWord,
       appearTogetherHiddenWord,
+      appearTogetherDeleteWord,
       wordCloudHiddenWord,
       wordCloudDeleteWord,
-      appearTogetherDeleteWord,
       wordMap,
     },
     dispatch,
@@ -85,11 +87,20 @@ const Report = () => {
         if (condition.wordCloudHiddenWord) {
           dispatch({ field: 'wordCloudHiddenWord', value: condition.wordCloudHiddenWord });
         }
+        if (condition.wordCloudDeleteWord) {
+          dispatch({ field: 'wordCloudDeleteWord', value: condition.wordCloudDeleteWord });
+        }
         if (condition.brandBarHiddenWord) {
           dispatch({ field: 'brandBarHiddenWord', value: condition.brandBarHiddenWord });
         }
+        if (condition.brandBarDeleteWord) {
+          dispatch({ field: 'brandBarDeleteWord', value: condition.brandBarDeleteWord });
+        }
         if (condition.wordTrendHiddenWord) {
           dispatch({ field: 'wordTrendHiddenWord', value: condition.wordTrendHiddenWord });
+        }
+        if (condition.wordTrendDeleteWord) {
+          dispatch({ field: 'wordTrendDeleteWord', value: condition.wordTrendDeleteWord });
         }
         if (condition.appearTogetherHiddenWord) {
           dispatch({
@@ -97,17 +108,23 @@ const Report = () => {
             value: condition.appearTogetherHiddenWord,
           });
         }
+        if (condition.appearTogetherDeleteWord) {
+          dispatch({
+            field: 'appearTogetherDeleteWord',
+            value: condition.appearTogetherDeleteWord,
+          });
+        }
         if (condition.wordClassHiddenWord) {
           dispatch({ field: 'wordClassHiddenWord', value: condition.wordClassHiddenWord });
+        }
+        if (condition.wordClassDeleteWord) {
+          dispatch({ field: 'wordClassDeleteWord', value: condition.wordClassDeleteWord });
         }
         if (condition.category) {
           dispatch({ field: 'category', value: condition.category });
         }
         if (condition.wordMap) {
           dispatch({ field: 'wordMap', value: condition.wordMap });
-        }
-        if (condition.wordCloudDeleteWord) {
-          dispatch({ field: 'wordCloudDeleteWord', value: condition.wordCloudDeleteWord });
         }
       }
     },
@@ -204,7 +221,9 @@ const Report = () => {
     wordCloudHiddenWord,
     wordCloudDeleteWord,
     wordClassHiddenWord,
+    wordClassDeleteWord,
     brandBarHiddenWord,
+    brandBarDeleteWord,
     wordTrendHiddenWord,
     wordTrendDeleteWord,
     appearTogetherHiddenWord,

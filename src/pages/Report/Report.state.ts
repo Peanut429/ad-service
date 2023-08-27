@@ -29,15 +29,16 @@ export interface ReportInitialState {
   topicData?: ReportApi.TopicData[];
   brandBarData?: ReportApi.BrandBarData;
   wordClassData?: ReportApi.WordClassData;
-  wordCloudHiddenWord: string[];
-  brandBarHiddenWord: string[];
+  wordCloudHiddenWord: string[]; // 词云中隐藏的关键词
+  wordCloudDeleteWord: string[]; // 词云中删除的关键词
+  brandBarHiddenWord: string[]; // 品牌类别中隐藏的品牌
+  brandBarDeleteWord: string[]; // 品牌类别中删除的品牌
   wordClassHiddenWord: string[]; // 关键词类别中隐藏的关键词
   wordClassDeleteWord: string[]; // 关键词类别中删除的关键词
-  appearTogetherHiddenWord: string[];
+  appearTogetherHiddenWord: string[]; // 共现关系图中隐藏的关键词
+  appearTogetherDeleteWord: string[]; // 共现关系图中删除的关键词
   wordTrendHiddenWord: string[]; // 高频词热力图中隐藏的关键词
   wordTrendDeleteWord: string[]; // 高频词热力图中删除的关键词
-  wordCloudDeleteWord: string[]; // 词云中删除的关键词
-  appearTogetherDeleteWord: string[]; // 共现关系图中删除的关键词
   wordMap: Record<string, string>; // 关键词映射
 }
 
@@ -59,6 +60,7 @@ const initialState: ReportInitialState = {
   listSentiment: [],
   wordCloudHiddenWord: [],
   brandBarHiddenWord: [],
+  brandBarDeleteWord: [],
   wordClassHiddenWord: [],
   wordClassDeleteWord: [],
   appearTogetherHiddenWord: [],

@@ -28,7 +28,7 @@ function getNodeSize(value: number, max: number, min: number) {
 
 const AppearTogetherChart = () => {
   const {
-    state: { tweetAppearTogetherData, appearTogetherHiddenWord },
+    state: { tweetAppearTogetherData, appearTogetherHiddenWord, appearTogetherDeleteWord },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
@@ -73,6 +73,11 @@ const AppearTogetherChart = () => {
       dispatch({
         field: 'appearTogetherHiddenWord',
         value: [...appearTogetherHiddenWord, currentWord],
+      });
+    } else if (key === 'delete') {
+      dispatch({
+        field: 'appearTogetherDeleteWord',
+        value: [...appearTogetherDeleteWord, currentWord],
       });
     }
     setMenuVisible(false);
@@ -217,7 +222,7 @@ const AppearTogetherChart = () => {
       chart.off('node:click', handleNodeClick);
       document.removeEventListener('click', handleCloseMenu);
     };
-  }, [chart, addListKeyword]);
+  }, [chart, addListKeyword, appearTogetherDeleteWord, appearTogetherHiddenWord]);
 
   return (
     <div>
@@ -225,7 +230,13 @@ const AppearTogetherChart = () => {
         <Dropdown
           open={menuVisible}
           trigger={['contextMenu']}
-          menu={{ items: [{ label: '隐藏', key: 'hide' }], onClick: handleMenuClick }}
+          menu={{
+            items: [
+              { label: '隐藏关键词', key: 'hide' },
+              { label: '删除关键词', key: 'delete' },
+            ],
+            onClick: handleMenuClick,
+          }}
         >
           <div ref={divRef} style={{ height: 400 }} />
         </Dropdown>

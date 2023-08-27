@@ -1,16 +1,17 @@
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { Access, Link, useAccess, useRequest, useSearchParams } from '@umijs/max';
 import { Button, Space, Table, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import TaskCreator from './Create';
-import { Link, useRequest, useSearchParams } from '@umijs/max';
 import { keywordsInfo, stopTask, taskList } from '@/services/brands';
-import dayjs from 'dayjs';
 
 const Task = () => {
   const [searchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
   const [keywords, setKeywords] = useState<Record<string, BrandsApi.KeywordInfo>>({});
   const { data, run } = useRequest(taskList, { manual: true });
+  const { canEdit } = useAccess();
   const { run: stopTaskApi } = useRequest(stopTask, {
     manual: true,
     onSuccess: () => message.success('操作成功'),
@@ -45,14 +46,15 @@ const Task = () => {
       title: '操作',
       width: 200,
       render: (_, record) => [
-        <Button
-          key="stop"
-          danger
-          type="text"
-          onClick={() => stopTaskApi({ tasksId: [record.projectId], stop: true })}
-        >
-          停止任务
-        </Button>,
+        <Access accessible={canEdit} key="stop">
+          <Button
+            danger
+            type="text"
+            onClick={() => stopTaskApi({ tasksId: [record.projectId], stop: true })}
+          >
+            停止任务
+          </Button>
+        </Access>,
         // <Link key="detail" to={`/report?ids=${record.wordTasksId.join(',')}`}>
         <Link key="detail" to={`/report?projectId=${record.projectId}`}>
           查看详情
@@ -83,9 +85,11 @@ const Task = () => {
     <>
       <Space direction="vertical" size="large">
         <Space>
-          <Button type="primary" size="large" onClick={() => setOpen(true)}>
-            创建项目
-          </Button>
+          <Access accessible={canEdit}>
+            <Button type="primary" size="large" onClick={() => setOpen(true)}>
+              创建项目
+            </Button>
+          </Access>
         </Space>
 
         <Table
