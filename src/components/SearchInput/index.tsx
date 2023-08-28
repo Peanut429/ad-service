@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Input, InputRef, Modal, Select, Space, Table } from 'antd';
+import { Alert, Button, Input, InputRef, Modal, Select, Space, Table } from 'antd';
 import { keywordsInfo } from '@/services/brands';
 import { useRequest } from '@umijs/max';
 import { ColumnsType } from 'antd/es/table';
@@ -170,7 +170,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
             }
           }}
         />
-
         <Table size="small" columns={columns} dataSource={value} rowKey="word" />
       </Space>
 
@@ -186,6 +185,12 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
           ref={inputRef}
           defaultValue={editValue?.word}
           placeholder="一组词用()包裹，多个词/组之间用英文逗号分割"
+        />
+        <Alert
+          showIcon
+          message="请用英文,分割所有词组，(A,B)表示A且B，否则表示A或B"
+          type="info"
+          style={{ marginBlockStart: 10, paddingBlock: 0, paddingInline: 5 }}
         />
       </Modal>
     </>
