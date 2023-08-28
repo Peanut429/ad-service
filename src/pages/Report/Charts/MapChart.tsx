@@ -11,6 +11,7 @@ import {
 } from 'echarts/components';
 import ReportContext from '../Report.context';
 import mapJsonData from './100000_full.json';
+import { Spin } from 'antd';
 
 echarts.use([
   GeoComponent,
@@ -40,7 +41,7 @@ const locationMap = {
 const UserAreaChart: React.FC<UserAreaChartProps> = ({ dataSource }) => {
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { userPortraitData },
+    state: { userPortraitData, chartLoading },
   } = useContext(ReportContext);
 
   useEffect(() => {
@@ -114,7 +115,11 @@ const UserAreaChart: React.FC<UserAreaChartProps> = ({ dataSource }) => {
     return () => mapChart.dispose();
   }, [userPortraitData, dataSource]);
 
-  return <div ref={mapDivRef} style={{ height: 400 }} />;
+  return (
+    <Spin spinning={chartLoading}>
+      <div ref={mapDivRef} style={{ height: 400 }} />
+    </Spin>
+  );
 };
 
 export default UserAreaChart;

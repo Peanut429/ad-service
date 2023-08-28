@@ -3,6 +3,7 @@ export type UserType = 'normal' | 'koc' | 'kol' | 'star' | 'enterprise' | 'media
 
 export interface ReportInitialState {
   projectId: string;
+  chartLoading: boolean;
   category: string[]; // 行业信息
   timeLimit: { gte: number; lte: number };
   platforms: Platform[];
@@ -44,6 +45,7 @@ export interface ReportInitialState {
 
 const initialState: ReportInitialState = {
   projectId: '',
+  chartLoading: false,
   category: [],
   timeLimit: { gte: 0, lte: 0 },
   platforms: ['redbook'],

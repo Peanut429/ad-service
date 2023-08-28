@@ -5,14 +5,15 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { EChartsOption } from 'echarts/types/dist/shared';
 import ReportContext from '../Report.context';
+import { Spin } from 'antd';
 
 echarts.use([TooltipComponent, SankeyChart, CanvasRenderer]);
 
-const platformLabel = {
-  weibo: '微博',
-  redbook: '小红书',
-  tiktok: '抖音',
-};
+// const platformLabel = {
+//   weibo: '微博',
+//   redbook: '小红书',
+//   tiktok: '抖音',
+// };
 
 type AgeAndGenderChartProps = {
   dataSource: 'tweet' | 'comment';
@@ -22,7 +23,7 @@ const AgeAndGenderChart: React.FC<AgeAndGenderChartProps> = ({ dataSource }) => 
   const divRef = useRef<HTMLDivElement | null>(null);
 
   const {
-    state: { userPortraitData },
+    state: { userPortraitData, chartLoading },
   } = useContext(ReportContext);
 
   // const ageData = useMemo(() => {}, [userPortraitData])
@@ -72,7 +73,11 @@ const AgeAndGenderChart: React.FC<AgeAndGenderChartProps> = ({ dataSource }) => 
     return () => chart.dispose();
   }, [userPortraitData, dataSource]);
 
-  return <div ref={divRef} style={{ height: 300 }} />;
+  return (
+    <Spin spinning={chartLoading}>
+      <div ref={divRef} style={{ height: 300 }} />
+    </Spin>
+  );
 };
 
 export default AgeAndGenderChart;

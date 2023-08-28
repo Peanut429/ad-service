@@ -28,7 +28,12 @@ function getNodeSize(value: number, max: number, min: number) {
 
 const AppearTogetherChart = () => {
   const {
-    state: { tweetAppearTogetherData, appearTogetherHiddenWord, appearTogetherDeleteWord },
+    state: {
+      tweetAppearTogetherData,
+      appearTogetherHiddenWord,
+      appearTogetherDeleteWord,
+      chartLoading,
+    },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
@@ -226,7 +231,7 @@ const AppearTogetherChart = () => {
 
   return (
     <div>
-      <Spin size="large" spinning={!tweetAppearTogetherData}>
+      <Spin size="large" spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
           trigger={['contextMenu']}

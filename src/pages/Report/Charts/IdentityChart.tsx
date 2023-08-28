@@ -5,6 +5,7 @@ import * as echarts from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { EChartsOption } from 'echarts/types/dist/shared';
 import ReportContext from '../Report.context';
+import { Spin } from 'antd';
 
 type IdentityChartProps = {
   dataSource: 'tweet' | 'comment';
@@ -15,7 +16,7 @@ echarts.use([SunburstChart, CanvasRenderer, TooltipComponent]);
 const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { userPortraitData },
+    state: { userPortraitData, chartLoading },
   } = useContext(ReportContext);
 
   const chartData = useMemo(() => {
@@ -119,7 +120,11 @@ const IdentityChart: React.FC<IdentityChartProps> = ({ dataSource }) => {
     return () => chart.dispose();
   }, [chartData]);
 
-  return <div ref={divRef} style={{ height: 300 }} />;
+  return (
+    <Spin spinning={chartLoading}>
+      <div ref={divRef} style={{ height: 300 }} />
+    </Spin>
+  );
 };
 
 export default IdentityChart;

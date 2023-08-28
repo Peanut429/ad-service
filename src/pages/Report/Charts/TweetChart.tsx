@@ -1,11 +1,11 @@
-import { Segmented } from 'antd';
+import { Segmented, Spin } from 'antd';
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Area } from '@antv/g2plot';
 
 const TweetChart = () => {
   const {
-    state: { tweetTrendData },
+    state: { tweetTrendData, chartLoading },
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('heat');
@@ -45,7 +45,9 @@ const TweetChart = () => {
         ]}
         onChange={(value) => setDataType(value as 'frequency' | 'heat')}
       />
-      <div ref={divRef} style={{ marginTop: 20 }} />
+      <Spin spinning={chartLoading}>
+        <div ref={divRef} style={{ marginTop: 20 }} />
+      </Spin>
     </div>
   );
 };

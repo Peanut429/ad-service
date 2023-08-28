@@ -1,11 +1,12 @@
 import { useContext, useEffect, useRef } from 'react';
 import ReportContext from '../Report.context';
 import { Column } from '@antv/g2plot';
+import { Spin } from 'antd';
 
 const FanLevelChart: React.FC<{ dataSource: 'tweet' | 'comment' }> = ({ dataSource }) => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { userPortraitData },
+    state: { userPortraitData, chartLoading },
   } = useContext(ReportContext);
 
   useEffect(() => {
@@ -31,7 +32,11 @@ const FanLevelChart: React.FC<{ dataSource: 'tweet' | 'comment' }> = ({ dataSour
     return () => chart.destroy();
   }, [userPortraitData, dataSource]);
 
-  return <div ref={divRef} style={{ height: 300 }} />;
+  return (
+    <Spin spinning={chartLoading}>
+      <div ref={divRef} style={{ height: 300 }} />
+    </Spin>
+  );
 };
 
 export default FanLevelChart;

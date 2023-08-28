@@ -7,8 +7,9 @@ import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
 const BrandBarChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { brandBarData, brandBarHiddenWord, brandBarDeleteWord },
+    state: { brandBarData, brandBarHiddenWord, brandBarDeleteWord, chartLoading },
     dispatch,
+    addListKeyword,
   } = useContext(ReportContext);
   const { source: dataSource, ComponentNode: SourceNode } = useSegmented(
     [
@@ -29,7 +30,9 @@ const BrandBarChart: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
-    if (key === 'hide') {
+    if (key === 'add') {
+      addListKeyword([currentWord]);
+    } else if (key === 'hide') {
       if (!brandBarHiddenWord.includes(currentWord)) {
         dispatch({ field: 'brandBarHiddenWord', value: [...brandBarHiddenWord, currentWord] });
       }
@@ -96,12 +99,13 @@ const BrandBarChart: React.FC = () => {
         <SourceNode key="dataSource" />
         <DataTypeNode key="dataType" />
       </Space>
-      <Spin spinning={!brandBarData}>
+      <Spin spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
           trigger={['contextMenu']}
           menu={{
             items: [
+              { label: '添加关键词', key: 'add' },
               { label: '隐藏关键词', key: 'hide' },
               { label: '删除关键词', key: 'delete' },
             ],

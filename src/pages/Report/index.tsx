@@ -7,19 +7,18 @@ import useCreateReducer from '@/hooks/useCreateReducer';
 import ReportContext from './Report.context';
 import initialState, { ReportInitialState } from './Report.state';
 import Keywords from './Keywords';
-import { chartData } from '@/services/report';
 import TweetList from './TweetList';
 import CommentList from './CommentList';
 import Popularity from './Popularity';
 import PortraitAnalysis from './PortraitAnalysis';
 import TopicAnalysis from './TopicAnalysis';
-import styles from './index.module.scss';
 import FilterForm from './FilterForm';
+import { chartData } from '@/services/report';
 import { keywordsInfo, taskList } from '@/services/brands';
+import styles from './index.module.scss';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
-  // const tasksIdInQuery = searchParams.get('ids')!.split(',');
   const contextValue = useCreateReducer<ReportInitialState>({
     initialState: {
       ...initialState,
@@ -131,34 +130,40 @@ const Report = () => {
   });
 
   const fetchChatData = async () => {
-    const res = await chartData({
-      timeLimit,
-      platforms,
-      tasksId,
-      includeWords,
-      excludeWords,
-      userType,
-      sentiment,
-      hiddenWord: {
-        wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
-        brandBar: brandBarHiddenWord,
-        appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
-        wordClass: wordClassHiddenWord,
-        wordTrend: wordTrendHiddenWord,
-      },
-      mappingWord: wordMap,
-      category,
-    });
+    dispatch({ field: 'chartLoading', value: true });
+    try {
+      const res = await chartData({
+        timeLimit,
+        platforms,
+        tasksId,
+        includeWords,
+        excludeWords,
+        userType,
+        sentiment,
+        hiddenWord: {
+          wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
+          brandBar: brandBarHiddenWord,
+          appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
+          wordClass: wordClassHiddenWord,
+          wordTrend: wordTrendHiddenWord,
+        },
+        mappingWord: wordMap,
+        category,
+      });
 
-    dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
-    dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
-    dispatch({ field: 'adNode', value: res.data.adNode });
-    dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
-    dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
-    dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
-    dispatch({ field: 'topicData', value: res.data.topic });
-    dispatch({ field: 'brandBarData', value: res.data.brandBar });
-    dispatch({ field: 'wordClassData', value: res.data.wordClass });
+      dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
+      dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
+      dispatch({ field: 'adNode', value: res.data.adNode });
+      dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
+      dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
+      dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
+      dispatch({ field: 'topicData', value: res.data.topic });
+      dispatch({ field: 'brandBarData', value: res.data.brandBar });
+      dispatch({ field: 'wordClassData', value: res.data.wordClass });
+    } catch (e) {
+      console.log(e);
+    }
+    dispatch({ field: 'chartLoading', value: false });
   };
 
   const handleDateRangeChange: RangePickerDateProps<Dayjs>['onChange'] = (value) => {
@@ -177,7 +182,7 @@ const Report = () => {
       const existIncludeWord = listIncludeWords.findIndex((item) => {
         return item.sort().toString() === keywords.sort().toString();
       });
-      // const existExcludeWord = listExcludeWords.includes(keywords);
+
       if (existIncludeWord === -1) {
         dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [...keywords]] });
       }

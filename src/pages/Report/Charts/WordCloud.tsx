@@ -10,7 +10,6 @@ const WordCloudChart = () => {
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
   const [currentWord, setCurrentWord] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
-  // const [hiddenWords, setHiddenWords] = useState<string[]>([]);
   const [menuItems] = useState<MenuProps['items']>([
     { label: '添加关键词', key: 'add' },
     { label: '隐藏关键词', key: 'hide' },
@@ -19,7 +18,7 @@ const WordCloudChart = () => {
   const [chart, setChart] = useState<WordCloud>();
 
   const {
-    state: { wordcloudData, wordCloudHiddenWord, wordCloudDeleteWord },
+    state: { wordcloudData, wordCloudHiddenWord, wordCloudDeleteWord, chartLoading },
     dispatch,
     addListKeyword,
     addListExcludeWords,
@@ -104,7 +103,7 @@ const WordCloudChart = () => {
         />
       </Space>
 
-      <Spin size="large" spinning={!wordcloudData}>
+      <Spin size="large" spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
           menu={{ items: menuItems, onClick: handleMenuItemClick }}

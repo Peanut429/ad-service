@@ -20,8 +20,9 @@ const WordClass = () => {
     'frequency',
   );
   const {
-    state: { wordClassData, wordClassHiddenWord, wordClassDeleteWord },
+    state: { wordClassData, wordClassHiddenWord, wordClassDeleteWord, chartLoading },
     dispatch,
+    addListKeyword,
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
   const [chart, setChart] = useState<Treemap>();
@@ -29,7 +30,6 @@ const WordClass = () => {
   const [currentWord, setCurrentWord] = useState('');
 
   const handleContextmenu = (ev: any) => {
-    console.log(ev.target.get('origin'));
     const origin = ev.target.get('origin');
     if (origin.data.childNodeCount === 0) {
       setCurrentWord(origin.data.data.name);
@@ -42,6 +42,9 @@ const WordClass = () => {
   };
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'add') {
+      addListKeyword([currentWord]);
+    }
     if (key === 'hide') {
       if (!wordClassHiddenWord.includes(currentWord)) {
         dispatch({ field: 'wordClassHiddenWord', value: [...wordClassHiddenWord, currentWord] });
@@ -106,12 +109,13 @@ const WordClass = () => {
         <SourceSegmented />
         <DataTypeSegmented />
       </Space>
-      <Spin spinning={!wordClassData}>
+      <Spin spinning={chartLoading}>
         <Dropdown
           trigger={['contextMenu']}
           open={menuVisible}
           menu={{
             items: [
+              { label: '添加关键词', key: 'add' },
               { label: '隐藏关键词', key: 'hide' },
               { label: '删除关键词', key: 'delete' },
             ],

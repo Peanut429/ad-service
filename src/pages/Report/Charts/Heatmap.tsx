@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { tweetWordTrendData, wordTrendHiddenWord, wordTrendDeleteWord },
+    state: { tweetWordTrendData, wordTrendHiddenWord, wordTrendDeleteWord, chartLoading },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
@@ -16,21 +16,16 @@ const HeatmapChart = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
 
-  const handleElementClick = (ev: any) => {
-    setMenuVisible(false);
-    const element = ev.target.get('element');
-    if (element) {
-      const data = element.getModel().data;
-
-      addListKeyword([data.word as string]);
-      dispatch({
-        field: 'listTimeLimit',
-        value: {
-          gte: dayjs(data.date).startOf('month').valueOf(),
-          lte: dayjs(data.date).endOf('month').valueOf(),
-        },
-      });
-    }
+  const handleAxisClick = (ev: any) => {
+    if (ev.gEvent.delegateObject.axis.cfg.position !== 'bottom') return;
+    const dateStr = ev.target.attrs.text;
+    dispatch({
+      field: 'listTimeLimit',
+      value: {
+        gte: dayjs(dateStr).startOf('month').valueOf(),
+        lte: dayjs(dateStr).endOf('month').valueOf(),
+      },
+    });
   };
 
   const handleContextmenu = (ev: any) => {
@@ -45,6 +40,9 @@ const HeatmapChart = () => {
   };
 
   const handleContextmenuClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'add') {
+      addListKeyword([currentWord]);
+    }
     if (key === 'delete') {
       dispatch({ field: 'wordTrendHiddenWord', value: [...wordTrendDeleteWord, currentWord] });
     } else if (key === 'hide') {
@@ -103,12 +101,14 @@ const HeatmapChart = () => {
   useEffect(() => {
     if (!chart) return;
 
-    chart.on('element:click', handleElementClick);
+    // chart.on('element:click', handleElementClick);
+    chart.on('axis-label:click', handleAxisClick);
     chart.on('axis-label:contextmenu', handleContextmenu);
     document.addEventListener('click', handleCloseContextmenu);
 
     return () => {
-      chart.off('element:click', handleElementClick);
+      // chart.off('element:click', handleElementClick);
+      chart.off('axis-label:click', handleAxisClick);
       chart.off('axis-label:contentmenu', handleContextmenu);
       document.removeEventListener('click', handleCloseContextmenu);
     };
@@ -126,12 +126,13 @@ const HeatmapChart = () => {
           onChange={(value) => setDataType(value as 'frequency' | 'heat')}
         />
       </div>
-      <Spin size="large" spinning={!tweetWordTrendData}>
+      <Spin size="large" spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
           trigger={['contextMenu']}
           menu={{
             items: [
+              { label: '添加关键词', key: 'add' },
               { label: '隐藏关键词', key: 'hide' },
               { label: '删除关键词', key: 'delete' },
             ],
