@@ -38,7 +38,7 @@ export async function updateTaskInfo(data: {
 }
 
 export async function industryList(data?: { category: string }) {
-  return request<BrandsApi.IndustryListRes>('/api/functional/category', {
+  return request<BrandsApi.IndustryListRes>('/api/functional/classification', {
     method: 'GET',
     params: data,
   });

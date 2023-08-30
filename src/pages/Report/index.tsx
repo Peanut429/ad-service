@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRequest, useSearchParams } from '@umijs/max';
-import { Affix, Card, DatePicker, Form, Tabs, Tag } from 'antd';
+import { Affix, Card, DatePicker, Form, Tabs, Tag, message } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { RangePickerDateProps } from 'antd/es/date-picker/generatePicker';
 import useCreateReducer from '@/hooks/useCreateReducer';
@@ -52,11 +52,16 @@ const Report = () => {
       appearTogetherDeleteWord,
       wordCloudHiddenWord,
       wordCloudDeleteWord,
+      categoryBarHiddenWord,
+      categoryBarDeleteWord,
       wordMap,
+      excludeNotes,
+      excludeUsers,
     },
     dispatch,
   } = contextValue;
 
+  // 获取项目信息
   useRequest(() => taskList({ projectsId: [projectId] }), {
     onSuccess: (res) => {
       if (res.length) {
@@ -119,6 +124,12 @@ const Report = () => {
         if (condition.wordClassDeleteWord) {
           dispatch({ field: 'wordClassDeleteWord', value: condition.wordClassDeleteWord });
         }
+        if (condition.categoryBarHiddenWord) {
+          dispatch({ field: 'categoryBarHiddenWord', value: condition.categoryBarHiddenWord });
+        }
+        if (condition.categoryBarDeleteWord) {
+          dispatch({ field: 'categoryBarDeleteWord', value: condition.categoryBarDeleteWord });
+        }
         if (condition.category) {
           dispatch({ field: 'category', value: condition.category });
         }
@@ -129,6 +140,7 @@ const Report = () => {
     },
   });
 
+  // 获取图表数据
   const fetchChatData = async () => {
     dispatch({ field: 'chartLoading', value: true });
     try {
@@ -142,30 +154,35 @@ const Report = () => {
         sentiment,
         hiddenWord: {
           wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
-          brandBar: brandBarHiddenWord,
+          brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
           appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
-          wordClass: wordClassHiddenWord,
-          wordTrend: wordTrendHiddenWord,
+          wordClass: [...wordClassHiddenWord, ...wordClassDeleteWord],
+          wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
+          categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
         },
         mappingWord: wordMap,
-        category,
+        classification: category,
+        excludeNotes,
+        excludeUsers,
       });
 
       dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
       dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
       dispatch({ field: 'adNode', value: res.data.adNode });
-      dispatch({ field: 'tweetWordTrendData', value: res.data.tweetWordTrend });
-      dispatch({ field: 'tweetAppearTogetherData', value: res.data.tweetAppearTogether });
+      dispatch({ field: 'tweetWordTrendData', value: res.data.wordTrend });
+      dispatch({ field: 'tweetAppearTogetherData', value: res.data.appearTogether });
       dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
       dispatch({ field: 'topicData', value: res.data.topic });
       dispatch({ field: 'brandBarData', value: res.data.brandBar });
       dispatch({ field: 'wordClassData', value: res.data.wordClass });
+      dispatch({ field: 'categoryBarData', value: res.data.categoryBar });
     } catch (e) {
       console.log(e);
     }
     dispatch({ field: 'chartLoading', value: false });
   };
 
+  // 时间范围修改
   const handleDateRangeChange: RangePickerDateProps<Dayjs>['onChange'] = (value) => {
     if (!value) return;
     dispatch({
@@ -177,39 +194,71 @@ const Report = () => {
     });
   };
 
+  // 图表操作： 新增关键词
   const addListKeyword = useCallback(
     (keywords: string[]) => {
-      const existIncludeWord = listIncludeWords.findIndex((item) => {
-        return item.sort().toString() === keywords.sort().toString();
+      const result = keywords.filter((item) => {
+        const existInExclude = excludeWords.includes(item);
+        const existInHidden = [
+          ...wordCloudHiddenWord,
+          ...wordCloudDeleteWord,
+          ...appearTogetherHiddenWord,
+          ...appearTogetherDeleteWord,
+          ...wordClassHiddenWord,
+          ...wordClassDeleteWord,
+          ...wordTrendHiddenWord,
+          ...wordTrendDeleteWord,
+          ...brandBarHiddenWord,
+          ...brandBarDeleteWord,
+        ].includes(item);
+        return !existInExclude && !existInHidden;
       });
 
-      if (existIncludeWord === -1) {
-        dispatch({ field: 'listIncludeWords', value: [...listIncludeWords, [...keywords]] });
+      if (!keywords.length) {
+        // 数据如果正常应该是不会出现能进入这个条件的情况
+        message.error('添加的关键词已经存在于排除，隐藏，删除的关键词中');
+        return;
       }
+
       dispatch({
-        field: 'listExcludeWords',
-        value: listExcludeWords.filter((item) => !keywords.includes(item)),
+        field: 'listIncludeWords',
+        value: [...listIncludeWords, result],
       });
     },
-    [listIncludeWords, listExcludeWords],
+    [
+      listIncludeWords,
+      listExcludeWords,
+      excludeWords,
+      wordCloudHiddenWord,
+      wordCloudDeleteWord,
+      wordClassHiddenWord,
+      wordClassDeleteWord,
+      wordTrendHiddenWord,
+      wordTrendDeleteWord,
+      appearTogetherHiddenWord,
+      appearTogetherDeleteWord,
+      brandBarHiddenWord,
+      brandBarDeleteWord,
+    ],
   );
 
-  const addListExcludeWords = useCallback(
-    (keyword: string) => {
-      const existIncludeWord = listIncludeWords.findIndex((item) => {
-        return item.length === 1 && item[0] === keyword;
-      });
-      const existExcludeWord = listExcludeWords.includes(keyword);
-      if (existIncludeWord > -1) {
-        listIncludeWords.splice(existIncludeWord, 1);
-        dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
-      }
-      if (!existExcludeWord) {
-        dispatch({ field: 'listExcludeWords', value: [...listExcludeWords, keyword] });
-      }
-    },
-    [listIncludeWords, listExcludeWords],
-  );
+  // 筛选表单： 排除关键词
+  // const addListExcludeWords = useCallback(
+  //   (keyword: string) => {
+  //     const existIncludeWord = listIncludeWords.findIndex((item) => {
+  //       return item.length === 1 && item[0] === keyword;
+  //     });
+  //     const existExcludeWord = listExcludeWords.includes(keyword);
+  //     if (existIncludeWord > -1) {
+  //       listIncludeWords.splice(existIncludeWord, 1);
+  //       dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+  //     }
+  //     if (!existExcludeWord) {
+  //       dispatch({ field: 'listExcludeWords', value: [...listExcludeWords, keyword] });
+  //     }
+  //   },
+  //   [listIncludeWords, listExcludeWords],
+  // );
 
   useEffect(() => {
     if (!tasksId.length) return;
@@ -234,6 +283,8 @@ const Report = () => {
     appearTogetherHiddenWord,
     appearTogetherDeleteWord,
     wordMap,
+    excludeNotes,
+    excludeUsers,
   ]);
 
   useEffect(() => {
@@ -246,7 +297,7 @@ const Report = () => {
   }, [tasksId]);
 
   return (
-    <ReportContext.Provider value={{ ...contextValue, addListKeyword, addListExcludeWords }}>
+    <ReportContext.Provider value={{ ...contextValue, addListKeyword }}>
       <div>
         <Affix offsetTop={0}>
           <Card>

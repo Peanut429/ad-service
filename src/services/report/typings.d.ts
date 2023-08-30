@@ -22,9 +22,12 @@ declare namespace ReportApi {
       appearTogether: string[];
       wordClass: string[];
       wordTrend: string[];
+      categoryBar: string[];
     }>;
     mappingWord?: Record<string, string>;
-    category?: string[];
+    classification?: string[];
+    excludeNotes?: string[];
+    excludeUsers?: string[];
   };
 
   type WordcloudData = {
@@ -141,12 +144,17 @@ declare namespace ReportApi {
     }[];
   };
 
+  type CategoryBarData = {
+    comment: { heat: number; frequency: number; word: string }[];
+    tweet: { heat: number; frequency: number; word: string }[];
+  };
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
     adNode: AdNodeItem[];
-    tweetWordTrend: TweetWordTrendData;
-    tweetAppearTogether: TweetAppearTogetherData;
+    wordTrend: TweetWordTrendData;
+    appearTogether: TweetAppearTogetherData;
     userPortrait: {
       comment: PortraitData;
       tweet: PortraitData;
@@ -154,6 +162,7 @@ declare namespace ReportApi {
     topic: TopicData[];
     brandBar: BrandBarData;
     wordClass: WordClassData;
+    categoryBar: CategoryBarData;
   }>;
 
   type TweetListReq = {
@@ -171,6 +180,8 @@ declare namespace ReportApi {
     excludeWords?: string[];
     userType?: string[];
     sentiment?: number[];
+    excludeNotes?: string[];
+    excludeUsers?: string[];
   };
 
   type TweetListItem = {
@@ -186,6 +197,7 @@ declare namespace ReportApi {
     likeNum: number;
     repostNum: number;
     platform: 'redbook' | 'tiktok';
+    gender: '男' | '女' | '未知';
   };
 
   type TweetListRes = Response<{
@@ -225,5 +237,7 @@ declare namespace ReportApi {
     content: string;
     likeNum: number;
     platform: 'redbook' | 'tiktok';
+    gender: '男' | '女' | '未知';
+    noteContent: string;
   };
 }

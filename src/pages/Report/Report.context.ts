@@ -6,7 +6,7 @@ export interface ReportContextProps {
   state: ReportInitialState;
   dispatch: Dispatch<ActionType<ReportInitialState>>;
   addListKeyword: (keyword: string[]) => void;
-  addListExcludeWords: (keyword: string) => void;
+  // addListExcludeWords: (keyword: string) => void;
 }
 
 const ReportContext = createContext<ReportContextProps>(undefined!);

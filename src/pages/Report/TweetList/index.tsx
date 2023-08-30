@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import ReportContext from '../Report.context';
-import { Dropdown, Tag, Space, Button, message, Spin } from 'antd';
+import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal } from 'antd';
 import {
   CommentOutlined,
   DownloadOutlined,
@@ -9,6 +9,7 @@ import {
   RetweetOutlined,
 } from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
+import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { tweetList } from '@/services/report';
 import { Platform } from '../Report.state';
 import usePageInfo from '../usePageInfo';
@@ -80,6 +81,12 @@ const formatDate = (date: number) => {
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 };
 
+const genderColor = {
+  男: '#108ee9',
+  女: '#cd201f',
+  未知: 'default',
+};
+
 const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
   // const [visible, setVisible] = useState(false);
   async function changeTweetSentiment() {
@@ -104,6 +111,12 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
           }
         }}
       >
+        <Checkbox
+          value={tweet.id}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        />
         <div className={styles.tweet__left}>
           {
             <img
@@ -140,6 +153,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
                 {tweet.nickname}
               </span>
               {/* <Tag onClick={() => setUserTypeModalVisible(true)}>{tweet.userType}</Tag> */}
+              <Tag color={genderColor[tweet.gender]}>{tweet.gender}</Tag>
               <Tag>{tweet.userType}</Tag>
               <span className={styles.tweet__time}>{formatDate(tweet.createdAtTimestamp)}</span>
               {tweet.type && TweetTypeEnum[tweet.type] ? (
@@ -226,7 +240,10 @@ const TweetList = () => {
       includeWords,
       listIncludeWords,
       listSentiment,
+      excludeNotes,
+      excludeUsers,
     },
+    dispatch,
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.TweetListItem[]>([]);
   const [sortKey] = useState('heat');
@@ -234,11 +251,23 @@ const TweetList = () => {
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<CheckboxValueType[]>([]);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
 
+  const reqIncludeWordsData = useMemo(() => {
+    if (!includeWords.length && !listIncludeWords.length) {
+      return [];
+    }
+    const allListIncludeWords = listIncludeWords.flat();
+    return includeWords.length
+      ? includeWords.map((item) => [...item, ...allListIncludeWords])
+      : [allListIncludeWords];
+  }, [listIncludeWords, includeWords]);
+
   const fetchData = async () => {
     setLoading(true);
+    setSelectedRowKeys([]);
     try {
       const res = await tweetList({
         timeLimit: listTimeLimit,
@@ -246,8 +275,10 @@ const TweetList = () => {
         platforms: listPlatforms,
         tasksId,
         excludeWords: [...excludeWords, ...listExcludeWords],
-        includeWords: [...includeWords, ...listIncludeWords],
+        includeWords: reqIncludeWordsData,
         sentiment: listSentiment,
+        excludeNotes,
+        excludeUsers,
         page: currentPage,
         limit: pageSize,
         sortKey: sortKey,
@@ -314,6 +345,25 @@ const TweetList = () => {
     setDownloadLoading(false);
   };
 
+  const deleteTweet = () => {
+    Modal.confirm({
+      title: '确认删除所选推文?',
+      // content: '删除后将无法恢复,请谨慎操作',
+      okText: '确认',
+      cancelText: '取消',
+      centered: true,
+      onOk: async () => {
+        // await deleteTweetList(selectedRowKeys);
+        // fetchData();
+        dispatch({
+          field: 'excludeNotes',
+          value: [...excludeNotes, ...(selectedRowKeys as string[])],
+        });
+        setSelectedRowKeys([]);
+      },
+    });
+  };
+
   useEffect(() => {
     if (!tasksId.length) return;
     fetchData();
@@ -331,19 +381,40 @@ const TweetList = () => {
     listExcludeWords,
     listIncludeWords,
     listSentiment,
+    excludeNotes,
+    excludeUsers,
   ]);
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+    <div style={{ position: 'relative' }}>
+      {/* <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+      </div> */}
+      {/* <Button
+        className={styles.download}
+        loading={downloadLoading}
+        icon={<DownloadOutlined />}
+        onClick={downloadExcel}
+      >
+        下载为Excel
+      </Button> */}
+      <Space style={{ marginBottom: 20 }}>
+        <Button type="primary" danger disabled={selectedRowKeys.length === 0} onClick={deleteTweet}>
+          批量删除
+        </Button>
         <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
           下载为Excel
         </Button>
-      </div>
+      </Space>
       <Spin spinning={loading}>
-        {dataList.map((item) => {
-          return <TweetListItem key={item.id} data={item} />;
-        })}
+        <Checkbox.Group
+          value={selectedRowKeys}
+          style={{ display: 'block', width: '100%' }}
+          onChange={(e) => setSelectedRowKeys(e)}
+        >
+          {dataList.map((item) => {
+            return <TweetListItem key={item.id} data={item} />;
+          })}
+        </Checkbox.Group>
       </Spin>
       <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>

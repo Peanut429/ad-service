@@ -21,7 +21,6 @@ const WordCloudChart = () => {
     state: { wordcloudData, wordCloudHiddenWord, wordCloudDeleteWord, chartLoading },
     dispatch,
     addListKeyword,
-    addListExcludeWords,
   } = useContext(ReportContext);
 
   const handleOpenChange = (open: boolean) => {
@@ -79,7 +78,7 @@ const WordCloudChart = () => {
     return () => {
       chart.off('contextmenu', handleContextmenu);
     };
-  }, [chart, addListKeyword, addListExcludeWords]);
+  }, [chart, addListKeyword]);
 
   return (
     <div>

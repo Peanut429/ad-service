@@ -36,12 +36,17 @@ const FilterForm = () => {
       wordCloudHiddenWord,
       wordCloudDeleteWord,
       brandBarHiddenWord,
+      brandBarDeleteWord,
       wordTrendHiddenWord,
       wordTrendDeleteWord,
       appearTogetherHiddenWord,
       appearTogetherDeleteWord,
       wordClassHiddenWord,
+      wordClassDeleteWord,
+      categoryBarHiddenWord,
+      categoryBarDeleteWord,
       wordMap,
+      listIncludeWords,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -69,6 +74,13 @@ const FilterForm = () => {
   };
 
   const handleUpdateExcludeWords = () => {
+    const isInIncludeWords = [...includeWords.flat(), ...listIncludeWords.flat()].includes(
+      excludeWordValue,
+    );
+    if (isInIncludeWords) {
+      message.error('该词已存在于组合关键词或筛选关键词中');
+      return;
+    }
     dispatch({ field: 'excludeWords', value: [...excludeWords, excludeWordValue] });
     setShowExcludeWordsInput(false);
   };
@@ -241,34 +253,66 @@ const FilterForm = () => {
           </Form.Item>
           <Access accessible={access.canEdit}>
             <Form.Item>
-              <Button
-                type="primary"
-                onClick={() =>
-                  updateApi({
-                    projectId,
-                    wordTasksId: tasksId,
-                    condition: JSON.stringify({
-                      includeWords,
-                      excludeWords,
-                      timeLimit,
-                      platforms,
-                      sentiment,
-                      category,
-                      wordCloudHiddenWord,
-                      wordCloudDeleteWord,
-                      wordClassHiddenWord,
-                      wordTrendHiddenWord,
-                      wordTrendDeleteWord,
-                      appearTogetherHiddenWord,
-                      appearTogetherDeleteWord,
-                      brandBarHiddenWord,
-                      wordMap,
-                    }),
-                  })
-                }
-              >
-                保存当前条件
-              </Button>
+              <Space>
+                <Button
+                  type="primary"
+                  onClick={() =>
+                    updateApi({
+                      projectId,
+                      wordTasksId: tasksId,
+                      condition: JSON.stringify({
+                        includeWords,
+                        excludeWords,
+                        timeLimit,
+                        platforms,
+                        sentiment,
+                        category,
+                        wordCloudHiddenWord,
+                        wordCloudDeleteWord,
+                        wordClassHiddenWord,
+                        wordClassDeleteWord,
+                        wordTrendHiddenWord,
+                        wordTrendDeleteWord,
+                        appearTogetherHiddenWord,
+                        appearTogetherDeleteWord,
+                        brandBarHiddenWord,
+                        brandBarDeleteWord,
+                        categoryBarHiddenWord,
+                        categoryBarDeleteWord,
+                        wordMap,
+                      }),
+                    })
+                  }
+                >
+                  保存当前条件
+                </Button>
+                <Button
+                  onClick={() => {
+                    dispatch({ field: 'includeWords', value: [] });
+                    dispatch({ field: 'excludeWords', value: [] });
+                    // dispatch({ field: 'timeLimit', value: {} });
+                    // dispatch({ field: 'listTimeLimit', value: {} });
+                    dispatch({ field: 'sentiment', value: [] });
+                    dispatch({ field: 'platforms', value: [] });
+                    dispatch({ field: 'category', value: [] });
+                    dispatch({ field: 'wordCloudHiddenWord', value: [] });
+                    dispatch({ field: 'wordCloudDeleteWord', value: [] });
+                    dispatch({ field: 'wordClassHiddenWord', value: [] });
+                    dispatch({ field: 'wordClassDeleteWord', value: [] });
+                    dispatch({ field: 'wordTrendHiddenWord', value: [] });
+                    dispatch({ field: 'wordTrendDeleteWord', value: [] });
+                    dispatch({ field: 'appearTogetherHiddenWord', value: [] });
+                    dispatch({ field: 'appearTogetherDeleteWord', value: [] });
+                    dispatch({ field: 'brandBarHiddenWord', value: [] });
+                    dispatch({ field: 'brandBarDeleteWord', value: [] });
+                    dispatch({ field: 'categoryBarHiddenWord', value: [] });
+                    dispatch({ field: 'categoryBarDeleteWord', value: [] });
+                    dispatch({ field: 'wordMap', value: {} });
+                  }}
+                >
+                  重置
+                </Button>
+              </Space>
             </Form.Item>
           </Access>
         </Form>

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Dropdown, Space, Spin, message } from 'antd';
+import { Button, Dropdown, Space, Spin, Tag, message } from 'antd';
 import { DownloadOutlined, LikeOutlined } from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
@@ -47,6 +47,12 @@ const sentimentText = {
   '3': '正面',
 };
 
+const genderColor = {
+  男: '#108ee9',
+  女: '#cd201f',
+  未知: 'default',
+};
+
 const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
   return (
     <Dropdown
@@ -85,14 +91,12 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
         <div className="works__center">
           <Space size={8} className="content__header">
             <div className="nickname">{data.nickname}</div>
+            <Tag color={genderColor[data.gender]}>{data.gender}</Tag>
             <div className="time">{formatDate(data.createdAtTimestamp)}</div>
           </Space>
           <div className="content">
             <div className="comment-content">{data.content}</div>
-            <div className="works-content">
-              不知道姐妹们发现没有，现在一瓶洗发水沐浴露护发素这些好贵一瓶，类似一些老牌子现在随便一瓶都要最低五十起步甚至随便都要八九十的！有时候看到这个价格我真不舍得买[暗中观察R]现在一百块人民币能买些啥啊[哭惹R][哭惹R]#洗护推荐#
-              #消费观# #洗发水# #沐浴露# #护发素#
-            </div>
+            <div className="works-content">{data.noteContent}</div>
           </div>
           <Space size={20}>
             <span>
@@ -134,6 +138,8 @@ const CommentList = () => {
       includeWords,
       listIncludeWords,
       listSentiment,
+      excludeNotes,
+      excludeUsers,
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
@@ -160,6 +166,8 @@ const CommentList = () => {
         excludeWords: [...excludeWords, ...listExcludeWords],
         includeWords: [...includeWords, ...listIncludeWords],
         sentiment: listSentiment,
+        excludeNotes,
+        excludeUsers,
         page: currentPage,
         limit: pageSize,
         sortKey: sortParams.order_key,
@@ -234,6 +242,8 @@ const CommentList = () => {
     listIncludeWords,
     listSentiment,
     sortParams,
+    excludeNotes,
+    excludeUsers,
   ]);
 
   return (
@@ -243,11 +253,11 @@ const CommentList = () => {
           setSortParams(value);
         }}
       /> */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+      <Space style={{ marginBottom: 20 }}>
         <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
           下载为Excel
         </Button>
-      </div>
+      </Space>
       <div>
         <Spin spinning={loading}>
           {dataList.map((item) => {

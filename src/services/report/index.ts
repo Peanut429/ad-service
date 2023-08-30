@@ -13,6 +13,7 @@ export async function tweetList(data: ReportApi.TweetListReq) {
     data,
   });
 }
+
 export async function commentList(data: ReportApi.TweetListReq) {
   return request<ReportApi.CommentListRes>('/api/core/list/comment', {
     method: 'POST',

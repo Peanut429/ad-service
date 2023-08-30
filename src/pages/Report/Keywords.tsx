@@ -6,6 +6,7 @@ import AppearTogetherChart from './Charts/AppearTogetherChart';
 import BrandBarChart from './Charts/BrandBar';
 import WordClass from './Charts/WordClass';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import CategoryChart from './Charts/CategoryBar';
 // import KeywordCategoryChart from './Charts/KeywordCategoryChart';
 
 const Keywords = () => {
@@ -67,6 +68,18 @@ const Keywords = () => {
         }
       >
         <BrandBarChart />
+      </ChartCard>
+      <ChartCard
+        title={
+          <Space>
+            <span>品类</span>
+            <Tooltip placement="right" title="右键 X轴 的品类名称可以进行相关操作">
+              <QuestionCircleOutlined style={{ fontSize: 14 }} />
+            </Tooltip>
+          </Space>
+        }
+      >
+        <CategoryChart />
       </ChartCard>
     </Space>
   );

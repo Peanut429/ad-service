@@ -30,6 +30,7 @@ export interface ReportInitialState {
   topicData?: ReportApi.TopicData[];
   brandBarData?: ReportApi.BrandBarData;
   wordClassData?: ReportApi.WordClassData;
+  categoryBarData?: ReportApi.CategoryBarData;
   wordCloudHiddenWord: string[]; // 词云中隐藏的关键词
   wordCloudDeleteWord: string[]; // 词云中删除的关键词
   brandBarHiddenWord: string[]; // 品牌类别中隐藏的品牌
@@ -40,7 +41,11 @@ export interface ReportInitialState {
   appearTogetherDeleteWord: string[]; // 共现关系图中删除的关键词
   wordTrendHiddenWord: string[]; // 高频词热力图中隐藏的关键词
   wordTrendDeleteWord: string[]; // 高频词热力图中删除的关键词
+  categoryBarHiddenWord: string[]; // 品类柱状图中隐藏的关键词
+  categoryBarDeleteWord: string[]; // 品类柱状图中删除的关键词
   wordMap: Record<string, string>; // 关键词映射
+  excludeNotes: string[]; // 排除的推文
+  excludeUsers: string[]; // 排除的用户
 }
 
 const initialState: ReportInitialState = {
@@ -61,16 +66,20 @@ const initialState: ReportInitialState = {
   listUserType: [],
   listSentiment: [],
   wordCloudHiddenWord: [],
+  wordCloudDeleteWord: [],
   brandBarHiddenWord: [],
   brandBarDeleteWord: [],
   wordClassHiddenWord: [],
   wordClassDeleteWord: [],
   appearTogetherHiddenWord: [],
+  appearTogetherDeleteWord: [],
   wordTrendHiddenWord: [],
   wordTrendDeleteWord: [],
-  wordCloudDeleteWord: [],
-  appearTogetherDeleteWord: [],
+  categoryBarHiddenWord: [],
+  categoryBarDeleteWord: [],
   wordMap: {},
+  excludeNotes: [],
+  excludeUsers: [],
 };
 
 export default initialState;
