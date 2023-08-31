@@ -1,10 +1,11 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Dropdown, MenuProps, Spin, Tag } from 'antd';
 import { Edge, Graph, Tooltip } from '@antv/g6';
 import ReportContext from '../Report.context';
 import bad from './bad.png';
 import normal from './normal.png';
 import smile from './smile.png';
+import useSegmented from './useSegmented';
 
 const SentimentEnum = {
   1: '负面',
@@ -30,6 +31,7 @@ const AppearTogetherChart = () => {
   const {
     state: {
       tweetAppearTogetherData,
+      commentAppearTogetherData,
       appearTogetherHiddenWord,
       appearTogetherDeleteWord,
       chartLoading,
@@ -42,6 +44,18 @@ const AppearTogetherChart = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   // const [hiddenWords, setHiddenWords] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState('');
+
+  const { source: dataSource, ComponentNode: SourceSegmented } = useSegmented(
+    [
+      { label: '推文', value: 'tweet' },
+      { label: '评论', value: 'comment' },
+    ],
+    'tweet',
+  );
+
+  const chartData = useMemo(() => {
+    return dataSource === 'tweet' ? tweetAppearTogetherData : commentAppearTogetherData;
+  }, [tweetAppearTogetherData, commentAppearTogetherData, dataSource]);
 
   const handleMouseenter = (ev: any) => {
     const edge = ev.item! as Edge;
@@ -93,12 +107,10 @@ const AppearTogetherChart = () => {
   };
 
   useEffect(() => {
-    if (!divRef.current || !tweetAppearTogetherData) return;
+    if (!divRef.current || !chartData) return;
 
-    const nodes = tweetAppearTogetherData.nodes.filter(
-      (item) => !appearTogetherHiddenWord.includes(item.id),
-    );
-    const edges = tweetAppearTogetherData.edges
+    const nodes = chartData.nodes.filter((item) => !appearTogetherHiddenWord.includes(item.id));
+    const edges = chartData.edges
       .filter(
         (item) =>
           !appearTogetherHiddenWord.includes(item.source) &&
@@ -209,7 +221,7 @@ const AppearTogetherChart = () => {
     return () => {
       chart?.destroy();
     };
-  }, [tweetAppearTogetherData]);
+  }, [chartData, dataSource]);
 
   useEffect(() => {
     if (!chart) return;
@@ -231,6 +243,9 @@ const AppearTogetherChart = () => {
 
   return (
     <div>
+      <div style={{ marginBottom: 20 }}>
+        <SourceSegmented />
+      </div>
       <Spin size="large" spinning={chartLoading}>
         <Dropdown
           open={menuVisible}

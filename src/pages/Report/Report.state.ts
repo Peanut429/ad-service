@@ -12,7 +12,7 @@ export interface ReportInitialState {
   excludeWords: string[];
   userType: UserType[];
   sentiment: number[];
-  listTimeLimit: { gte: number; lte: number };
+  // listTimeLimit: { gte: number; lte: number };
   listPlatforms: Platform[];
   listIncludeWords: string[][];
   listExcludeWords: string[];
@@ -23,6 +23,7 @@ export interface ReportInitialState {
   adNode?: ReportApi.AdNodeItem[];
   tweetWordTrendData?: ReportApi.TweetWordTrendData;
   tweetAppearTogetherData?: ReportApi.TweetAppearTogetherData;
+  commentAppearTogetherData?: ReportApi.TweetAppearTogetherData;
   userPortraitData?: {
     comment: ReportApi.PortraitData;
     tweet: ReportApi.PortraitData;
@@ -59,7 +60,7 @@ const initialState: ReportInitialState = {
   excludeWords: [],
   userType: [],
   sentiment: [],
-  listTimeLimit: { gte: 0, lte: 0 },
+  // listTimeLimit: { gte: 0, lte: 0 },
   listPlatforms: ['redbook', 'tiktok'],
   listIncludeWords: [],
   listExcludeWords: [],

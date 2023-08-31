@@ -2,14 +2,14 @@ import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.scss';
 
-type SortInfo = { order_key: string; order_direction: number };
+export type SortInfo = { order_key: string; order_direction: number };
 type SortComponentProps = {
   onChange?: (sortInfo: SortInfo) => void;
 };
 
 const SortComponent: React.FC<SortComponentProps> = ({ onChange }) => {
   const [params, setParams] = useState<SortInfo>({
-    order_key: 'created_at_timestamp',
+    order_key: 'time',
     order_direction: 1, // 1降序，0正序
   });
 
@@ -23,9 +23,8 @@ const SortComponent: React.FC<SortComponentProps> = ({ onChange }) => {
         className={styles.sort__item}
         onClick={() => {
           setParams((prev) => ({
-            order_key: 'created_at_timestamp',
-            order_direction:
-              prev.order_key === 'created_at_timestamp' ? 1 - prev.order_direction : 1,
+            order_key: 'time',
+            order_direction: prev.order_key === 'time' ? 1 - prev.order_direction : 1,
           }));
         }}
       >
@@ -33,14 +32,12 @@ const SortComponent: React.FC<SortComponentProps> = ({ onChange }) => {
         <span className={styles['sort-icon-wrapper']}>
           <span
             className={classNames(styles['sort-icon__up'], {
-              [styles.active]:
-                params.order_key === 'created_at_timestamp' && !params.order_direction,
+              [styles.active]: params.order_key === 'time' && !params.order_direction,
             })}
           />
           <span
             className={classNames(styles['sort-icon__down'], {
-              [styles.active]:
-                params.order_key === 'created_at_timestamp' && params.order_direction,
+              [styles.active]: params.order_key === 'time' && params.order_direction,
             })}
           />
         </span>

@@ -13,6 +13,7 @@ import sentimentNeutral from '../TweetList/sentiment_neutral.png';
 import sentimentUnknow from '../TweetList/question.png';
 
 import './index.less';
+import SortComponent from '../SortComponent';
 // import SortComponent from '../SortComponent';
 
 type CommentListItemProps = {
@@ -129,7 +130,7 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
 const CommentList = () => {
   const {
     state: {
-      listTimeLimit,
+      timeLimit,
       listUserType,
       listPlatforms,
       tasksId,
@@ -150,7 +151,7 @@ const CommentList = () => {
   const [loading, setLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
-  const [sortParams] = useState({
+  const [sortParams, setSortParams] = useState({
     order_key: 'heat',
     order_direction: 1, // 1降序，0正序
   });
@@ -159,7 +160,7 @@ const CommentList = () => {
     setLoading(true);
     try {
       const res = await commentList({
-        timeLimit: listTimeLimit,
+        timeLimit,
         userType: listUserType,
         platforms: listPlatforms,
         tasksId,
@@ -185,7 +186,7 @@ const CommentList = () => {
 
   const downloadExcel = async () => {
     const params = {
-      timeLimit: listTimeLimit,
+      timeLimit,
       userType: listUserType,
       platforms: listPlatforms,
       tasksId,
@@ -205,6 +206,8 @@ const CommentList = () => {
         content: item.content,
         likeNum: item.likeNum,
         sentiment: sentimentText[item.sentiment] || '未知',
+        gender: item.gender,
+        noteContent: item.noteContent,
         createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
       }));
       const headers = {
@@ -212,6 +215,8 @@ const CommentList = () => {
         content: '评论内容',
         likeNum: '点赞数',
         sentiment: '情感',
+        gender: '性别',
+        noteContent: '原文内容',
         createdAtTimestamp: '发布时间',
       };
       const workbook = utils.book_new();
@@ -235,7 +240,7 @@ const CommentList = () => {
     excludeWords,
     includeWords,
     tasksId,
-    listTimeLimit,
+    timeLimit,
     listUserType,
     listPlatforms,
     listExcludeWords,
@@ -248,16 +253,18 @@ const CommentList = () => {
 
   return (
     <div>
-      {/* <SortComponent
-        onChange={(value) => {
-          setSortParams(value);
-        }}
-      /> */}
       <Space style={{ marginBottom: 20 }}>
         <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
           下载为Excel
         </Button>
       </Space>
+      <div style={{ marginBottom: 20 }}>
+        <SortComponent
+          onChange={(value) => {
+            setSortParams(value);
+          }}
+        />
+      </div>
       <div>
         <Spin spinning={loading}>
           {dataList.map((item) => {

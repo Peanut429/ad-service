@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import ReportContext from '../Report.context';
-import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal } from 'antd';
+import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal, Input } from 'antd';
 import {
   CommentOutlined,
   DownloadOutlined,
@@ -21,6 +21,8 @@ import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
 import styles from './index.module.scss';
+import SortComponent, { SortInfo } from '../SortComponent';
+import { useRequest } from '@umijs/max';
 
 type TweetListItemProps = {
   data: ReportApi.TweetListItem & {
@@ -231,7 +233,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
 const TweetList = () => {
   const {
     state: {
-      listTimeLimit,
+      timeLimit,
       listUserType,
       listPlatforms,
       tasksId,
@@ -246,12 +248,13 @@ const TweetList = () => {
     dispatch,
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.TweetListItem[]>([]);
-  const [sortKey] = useState('heat');
-  const [sortOrder] = useState('desc');
+  const [sortKey, setSortKey] = useState('heat');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<CheckboxValueType[]>([]);
+  const [searchValue, setSearchValue] = useState('');
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
 
@@ -261,16 +264,18 @@ const TweetList = () => {
     }
     const allListIncludeWords = listIncludeWords.flat();
     return includeWords.length
-      ? includeWords.map((item) => [...item, ...allListIncludeWords])
+      ? includeWords.map((item) => {
+          return searchValue
+            ? [...item, ...allListIncludeWords, searchValue]
+            : [...item, ...allListIncludeWords];
+        })
       : [allListIncludeWords];
-  }, [listIncludeWords, includeWords]);
+  }, [listIncludeWords, includeWords, searchValue]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    setSelectedRowKeys([]);
-    try {
-      const res = await tweetList({
-        timeLimit: listTimeLimit,
+  const { loading, run: fetchData } = useRequest(
+    () =>
+      tweetList({
+        timeLimit,
         userType: listUserType,
         platforms: listPlatforms,
         tasksId,
@@ -283,25 +288,59 @@ const TweetList = () => {
         limit: pageSize,
         sortKey: sortKey,
         sortOrder: sortOrder,
-      });
+      }),
+    {
+      debounceInterval: 500,
+      manual: true,
+      onSuccess: (res) => {
+        setDataList(res.data);
+        setTotal(res.count);
+        // setLoading(false);
+      },
+      onError: (err) => {
+        console.error(err);
+        // setLoading(false);
+      },
+    },
+  );
 
-      setDataList(res.data.data);
-      setTotal(res.data.count);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   setSelectedRowKeys([]);
+  //   try {
+  //     const res = await tweetList({
+  //       timeLimit,
+  //       userType: listUserType,
+  //       platforms: listPlatforms,
+  //       tasksId,
+  //       excludeWords: [...excludeWords, ...listExcludeWords],
+  //       includeWords: reqIncludeWordsData,
+  //       sentiment: listSentiment,
+  //       excludeNotes,
+  //       excludeUsers,
+  //       page: currentPage,
+  //       limit: pageSize,
+  //       sortKey: sortKey,
+  //       sortOrder: sortOrder,
+  //     });
+
+  //     setDataList(res.data.data);
+  //     setTotal(res.data.count);
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const downloadExcel = async () => {
     const params = {
-      timeLimit: listTimeLimit,
+      timeLimit,
       userType: listUserType,
       platforms: listPlatforms,
       tasksId,
       excludeWords: [...excludeWords, ...listExcludeWords],
-      includeWords: [...includeWords, ...listIncludeWords],
+      includeWords: reqIncludeWordsData,
       sentiment: listSentiment,
       page: 1,
       limit: 10000,
@@ -320,6 +359,7 @@ const TweetList = () => {
         commentNum: item.commentNum,
         content: item.content,
         userType: item.userType,
+        gender: item.gender,
         sentiment: sentimentText[item.sentiment] || '未知',
         createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
       }));
@@ -332,6 +372,7 @@ const TweetList = () => {
         commentNum: '评论数',
         content: '笔记内容',
         userType: '用户类型',
+        gender: '性别',
         sentiment: '情感',
         createdAtTimestamp: '发布时间',
       };
@@ -345,16 +386,18 @@ const TweetList = () => {
     setDownloadLoading(false);
   };
 
+  const handleSortChange = (data: SortInfo) => {
+    setSortKey(data.order_key);
+    setSortOrder(data.order_direction === 0 ? 'asc' : 'desc');
+  };
+
   const deleteTweet = () => {
     Modal.confirm({
       title: '确认删除所选推文?',
-      // content: '删除后将无法恢复,请谨慎操作',
       okText: '确认',
       cancelText: '取消',
       centered: true,
       onOk: async () => {
-        // await deleteTweetList(selectedRowKeys);
-        // fetchData();
         dispatch({
           field: 'excludeNotes',
           value: [...excludeNotes, ...(selectedRowKeys as string[])],
@@ -373,13 +416,12 @@ const TweetList = () => {
     sortKey,
     sortOrder,
     excludeWords,
-    includeWords,
-    listTimeLimit,
+    reqIncludeWordsData,
+    timeLimit,
     tasksId,
     listUserType,
     listPlatforms,
     listExcludeWords,
-    listIncludeWords,
     listSentiment,
     excludeNotes,
     excludeUsers,
@@ -387,24 +429,23 @@ const TweetList = () => {
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
-      </div> */}
-      {/* <Button
-        className={styles.download}
-        loading={downloadLoading}
-        icon={<DownloadOutlined />}
-        onClick={downloadExcel}
-      >
-        下载为Excel
-      </Button> */}
-      <Space style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', marginBottom: 20, gap: 10 }}>
+        <Input
+          placeholder="输入关键词搜索"
+          style={{ flex: 1 }}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
         <Button type="primary" danger disabled={selectedRowKeys.length === 0} onClick={deleteTweet}>
           批量删除
         </Button>
         <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
           下载为Excel
         </Button>
-      </Space>
+      </div>
+      <div style={{ marginBottom: 20 }}>
+        <SortComponent onChange={handleSortChange} />
+      </div>
       <Spin spinning={loading}>
         <Checkbox.Group
           value={selectedRowKeys}

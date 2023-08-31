@@ -20,3 +20,10 @@ export async function commentList(data: ReportApi.TweetListReq) {
     data,
   });
 }
+
+// tweetTrend, appearTogether图表的评论数据
+export async function commentChartData(
+  data: ReportApi.ChartDataReq & { commentWordCloud: ReportApi.WordcloudData['comment'] },
+) {
+  return request<ReportApi.ChartDataRes>('/api/core/chart/comment', { method: 'POST', data });
+}

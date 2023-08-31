@@ -33,17 +33,17 @@ const FilterForm = () => {
       timeLimit,
       sentiment,
       platforms,
-      wordCloudHiddenWord,
+      // wordCloudHiddenWord,
       wordCloudDeleteWord,
-      brandBarHiddenWord,
+      // brandBarHiddenWord,
       brandBarDeleteWord,
-      wordTrendHiddenWord,
+      // wordTrendHiddenWord,
       wordTrendDeleteWord,
-      appearTogetherHiddenWord,
+      // appearTogetherHiddenWord,
       appearTogetherDeleteWord,
-      wordClassHiddenWord,
+      // wordClassHiddenWord,
       wordClassDeleteWord,
-      categoryBarHiddenWord,
+      // categoryBarHiddenWord,
       categoryBarDeleteWord,
       wordMap,
       listIncludeWords,
@@ -113,7 +113,7 @@ const FilterForm = () => {
           <Form.Item label="组合关键词">
             {includeWords.map((item, index) => (
               <Tag
-                key={index}
+                key={item.join(' + ')}
                 closable
                 onClose={() => handleRemoveIncludeWords(index)}
                 style={{ fontSize: 14 }}
@@ -203,7 +203,6 @@ const FilterForm = () => {
                   lte: value![1]!.endOf('day').valueOf(),
                 };
                 dispatch({ field: 'timeLimit', value: range });
-                dispatch({ field: 'listTimeLimit', value: range });
               }}
             />
           </Form.Item>
@@ -267,17 +266,17 @@ const FilterForm = () => {
                         platforms,
                         sentiment,
                         category,
-                        wordCloudHiddenWord,
+                        // wordCloudHiddenWord,
                         wordCloudDeleteWord,
-                        wordClassHiddenWord,
+                        // wordClassHiddenWord,
                         wordClassDeleteWord,
-                        wordTrendHiddenWord,
+                        // wordTrendHiddenWord,
                         wordTrendDeleteWord,
-                        appearTogetherHiddenWord,
+                        // appearTogetherHiddenWord,
                         appearTogetherDeleteWord,
-                        brandBarHiddenWord,
+                        // brandBarHiddenWord,
                         brandBarDeleteWord,
-                        categoryBarHiddenWord,
+                        // categoryBarHiddenWord,
                         categoryBarDeleteWord,
                         wordMap,
                       }),

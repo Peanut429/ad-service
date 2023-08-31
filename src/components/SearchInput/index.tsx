@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Input, InputRef, Modal, Select, Space, Table } from 'antd';
+import { Alert, Button, Input, InputRef, Modal, Select, Space, Table, message } from 'antd';
 import { keywordsInfo } from '@/services/brands';
 import { useRequest } from '@umijs/max';
 import { ColumnsType } from 'antd/es/table';
@@ -30,6 +30,31 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
   const columns: ColumnsType<WordInfo> = [
     { title: '关键词', dataIndex: 'word', width: 150, ellipsis: true },
     { title: '分词', dataIndex: 'pattern', render: (_, record) => record.pattern?.join(', ') },
+    {
+      title: '平台',
+      width: 170,
+      dataIndex: 'platforms',
+      render: (_, record) => {
+        return (
+          <Select
+            value={record.platforms}
+            size="small"
+            mode="multiple"
+            options={[
+              { label: '小红书', value: 'redbook' },
+              { label: '抖音', value: 'tiktok' },
+            ]}
+            onChange={(value) => {
+              if (!value.length) {
+                message.error('至少选择一个平台');
+                return;
+              }
+              setValue((prev) => prev.map((item) => ({ ...item, platforms: value })));
+            }}
+          />
+        );
+      },
+    },
     {
       title: '操作',
       width: 200,
@@ -89,7 +114,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
           taskId: target.taskId,
           word: target.word,
           pattern: [],
-          platforms: ['redbook'],
+          platforms: ['redbook', 'tiktok'],
         },
       ]);
       setSelectedValue(undefined);
@@ -133,6 +158,10 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
     setVisible(false);
   };
 
+  // const handleChangePlatforms = (value: string[]) => {
+  //   setValue((prev) => prev.map((item) => ({ ...item, platforms: value })));
+  // };
+
   useEffect(() => {
     onChange?.(value);
   }, [value]);
@@ -164,7 +193,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
                 {
                   word,
                   pattern: [],
-                  platforms: ['redbook'],
+                  platforms: ['redbook', 'tiktok'],
                 },
               ]);
             }
