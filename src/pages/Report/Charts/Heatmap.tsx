@@ -1,26 +1,52 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import ReportContext from '../Report.context';
-import { Heatmap } from '@antv/g2plot';
-import { Dropdown, MenuProps, Segmented, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { Heatmap } from '@antv/g2plot';
+import ReportContext from '../Report.context';
+import useSegmented from './useSegmented';
 
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { tweetWordTrendData, wordTrendHiddenWord, wordTrendDeleteWord, chartLoading },
+    state: {
+      tweetWordTrendData,
+      wordTrendHiddenWord,
+      wordTrendDeleteWord,
+      chartLoading,
+      commentWordTrendData,
+    },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
-  const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
+  // const [dataType, setDataType] = useState<'frequency' | 'heat'>('frequency');
   const [chart, setChart] = useState<Heatmap>();
   const [menuVisible, setMenuVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
+
+  const { source: dataSource, ComponentNode: SourceSegmented } = useSegmented(
+    [
+      { label: '推文', value: 'tweet' },
+      { label: '评论', value: 'comment' },
+    ],
+    'tweet',
+  );
+  const { source: dataType, ComponentNode: DataTypeSegmented } = useSegmented(
+    [
+      { label: '词频', value: 'frequency' },
+      { label: '热度', value: 'heat' },
+    ],
+    'frequency',
+  );
+
+  const chartData = useMemo(() => {
+    return dataSource === 'tweet' ? tweetWordTrendData : commentWordTrendData;
+  }, [tweetWordTrendData, commentWordTrendData, dataSource]);
 
   const handleAxisClick = (ev: any) => {
     if (ev.gEvent.delegateObject.axis.cfg.position !== 'bottom') return;
     const dateStr = ev.target.attrs.text;
     dispatch({
-      field: 'listTimeLimit',
+      field: 'timeLimit',
       value: {
         gte: dayjs(dateStr).startOf('month').valueOf(),
         lte: dayjs(dateStr).endOf('month').valueOf(),
@@ -54,10 +80,10 @@ const HeatmapChart = () => {
   };
 
   useEffect(() => {
-    if (!divRef.current || !tweetWordTrendData) return;
+    if (!divRef.current || !chartData) return;
 
     const chart = new Heatmap(divRef.current, {
-      data: tweetWordTrendData[dataType],
+      data: chartData[dataType as 'frequency' | 'heat'],
       height: 400,
       xField: 'date',
       yField: 'word',
@@ -96,7 +122,7 @@ const HeatmapChart = () => {
     chart.render();
 
     return () => chart?.destroy();
-  }, [tweetWordTrendData, dataType, addListKeyword]);
+  }, [chartData, dataType, addListKeyword]);
 
   useEffect(() => {
     if (!chart) return;
@@ -117,14 +143,18 @@ const HeatmapChart = () => {
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <Segmented
-          value={dataType}
-          options={[
-            { label: '词频', value: 'frequency' },
-            { label: '热度', value: 'heat' },
-          ]}
-          onChange={(value) => setDataType(value as 'frequency' | 'heat')}
-        />
+        <Space>
+          <SourceSegmented />
+          <DataTypeSegmented />
+          {/* <Segmented
+            value={dataType}
+            options={[
+              { label: '词频', value: 'frequency' },
+              { label: '热度', value: 'heat' },
+            ]}
+            onChange={(value) => setDataType(value as 'frequency' | 'heat')}
+          /> */}
+        </Space>
       </div>
       <Spin size="large" spinning={chartLoading}>
         <Dropdown

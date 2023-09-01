@@ -27,3 +27,7 @@ export async function commentChartData(
 ) {
   return request<ReportApi.ChartDataRes>('/api/core/chart/comment', { method: 'POST', data });
 }
+
+export async function wordClassList() {
+  return request<ReportApi.WordClassListRes>('/api/functional/wordClassType', { method: 'POST' });
+}

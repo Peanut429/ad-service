@@ -12,6 +12,7 @@ import ReportContext from '../Report.context';
 import styles from './index.module.scss';
 import { Access, useAccess, useRequest } from '@umijs/max';
 import { industryList, updateTaskInfo } from '@/services/brands';
+import { wordClassList } from '@/services/report';
 
 const FilterForm = () => {
   const [open, setOpen] = useState(false);
@@ -47,6 +48,7 @@ const FilterForm = () => {
       categoryBarDeleteWord,
       wordMap,
       listIncludeWords,
+      wordClassType,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -61,11 +63,14 @@ const FilterForm = () => {
 
   const { data: industryListData } = useRequest(industryList);
 
+  const { data: wordClass } = useRequest(wordClassList);
+
   const handleUpdateIncludeWords = () => {
     dispatch({
       field: 'includeWords',
       value: [...includeWords, selectedWords.map((item) => item.word)],
     });
+    setIncludeWordsOpen(false);
   };
 
   const handleRemoveIncludeWords = (index: number) => {
@@ -250,6 +255,18 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
+          <Form.Item label="词类">
+            <Select
+              allowClear
+              mode="multiple"
+              value={wordClassType}
+              options={wordClass?.map((item) => ({ label: item, value: item }))}
+              placeholder="选择词类"
+              onChange={(value) => {
+                dispatch({ field: 'wordClassType', value });
+              }}
+            />
+          </Form.Item>
           <Access accessible={access.canEdit}>
             <Form.Item>
               <Space>
@@ -279,6 +296,7 @@ const FilterForm = () => {
                         // categoryBarHiddenWord,
                         categoryBarDeleteWord,
                         wordMap,
+                        wordClassType,
                       }),
                     })
                   }
@@ -290,23 +308,23 @@ const FilterForm = () => {
                     dispatch({ field: 'includeWords', value: [] });
                     dispatch({ field: 'excludeWords', value: [] });
                     // dispatch({ field: 'timeLimit', value: {} });
-                    // dispatch({ field: 'listTimeLimit', value: {} });
                     dispatch({ field: 'sentiment', value: [] });
                     dispatch({ field: 'platforms', value: [] });
                     dispatch({ field: 'category', value: [] });
                     dispatch({ field: 'wordCloudHiddenWord', value: [] });
-                    dispatch({ field: 'wordCloudDeleteWord', value: [] });
+                    // dispatch({ field: 'wordCloudDeleteWord', value: [] });
                     dispatch({ field: 'wordClassHiddenWord', value: [] });
-                    dispatch({ field: 'wordClassDeleteWord', value: [] });
+                    // dispatch({ field: 'wordClassDeleteWord', value: [] });
                     dispatch({ field: 'wordTrendHiddenWord', value: [] });
-                    dispatch({ field: 'wordTrendDeleteWord', value: [] });
+                    // dispatch({ field: 'wordTrendDeleteWord', value: [] });
                     dispatch({ field: 'appearTogetherHiddenWord', value: [] });
-                    dispatch({ field: 'appearTogetherDeleteWord', value: [] });
+                    // dispatch({ field: 'appearTogetherDeleteWord', value: [] });
                     dispatch({ field: 'brandBarHiddenWord', value: [] });
-                    dispatch({ field: 'brandBarDeleteWord', value: [] });
+                    // dispatch({ field: 'brandBarDeleteWord', value: [] });
                     dispatch({ field: 'categoryBarHiddenWord', value: [] });
-                    dispatch({ field: 'categoryBarDeleteWord', value: [] });
+                    // dispatch({ field: 'categoryBarDeleteWord', value: [] });
                     dispatch({ field: 'wordMap', value: {} });
+                    dispatch({ field: 'wordClassType', value: [] });
                   }}
                 >
                   重置
@@ -319,6 +337,7 @@ const FilterForm = () => {
 
       <Modal
         title="组合关键词"
+        width={500}
         destroyOnClose
         open={includeWordsOpen}
         onCancel={() => setIncludeWordsOpen(false)}

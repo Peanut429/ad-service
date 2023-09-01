@@ -19,11 +19,12 @@ export interface ReportInitialState {
   listUserType: UserType[];
   listSentiment: number[];
   wordcloudData?: ReportApi.WordcloudData;
-  tweetTrendData?: ReportApi.TweetTrendData;
-  adNode?: ReportApi.AdNodeItem[];
-  tweetWordTrendData?: ReportApi.TweetWordTrendData;
-  tweetAppearTogetherData?: ReportApi.TweetAppearTogetherData;
-  commentAppearTogetherData?: ReportApi.TweetAppearTogetherData;
+  tweetTrendData?: ReportApi.TweetTrendData; // 推文数量/热度趋势图
+  adNode?: ReportApi.AdNodeItem[]; // 营销事件节点
+  tweetWordTrendData?: ReportApi.TweetWordTrendData; // 高频词热力图推文数据
+  commentWordTrendData?: ReportApi.TweetWordTrendData; // 高频词热力图评论数据
+  tweetAppearTogetherData?: ReportApi.TweetAppearTogetherData; // 共现图推文数据
+  commentAppearTogetherData?: ReportApi.TweetAppearTogetherData; // 共现图评论数据
   userPortraitData?: {
     comment: ReportApi.PortraitData;
     tweet: ReportApi.PortraitData;
@@ -47,6 +48,7 @@ export interface ReportInitialState {
   wordMap: Record<string, string>; // 关键词映射
   excludeNotes: string[]; // 排除的推文
   excludeUsers: string[]; // 排除的用户
+  wordClassType: string[]; // 词类筛选
 }
 
 const initialState: ReportInitialState = {
@@ -81,6 +83,7 @@ const initialState: ReportInitialState = {
   wordMap: {},
   excludeNotes: [],
   excludeUsers: [],
+  wordClassType: [],
 };
 
 export default initialState;

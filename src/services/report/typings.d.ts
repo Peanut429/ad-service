@@ -28,6 +28,7 @@ declare namespace ReportApi {
     classification?: string[];
     excludeNotes?: string[];
     excludeUsers?: string[];
+    wordClassType: string[];
   };
 
   type WordcloudData = {
@@ -240,4 +241,6 @@ declare namespace ReportApi {
     gender: '男' | '女' | '未知';
     noteContent: string;
   };
+
+  type WordClassListRes = Response<string[]>;
 }

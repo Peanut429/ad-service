@@ -25,12 +25,16 @@ const Report = () => {
   });
 
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [projectTimeRange, setProjectTimeRange] = useState<{ gte: number; lte: number }>({
+    gte: 0,
+    lte: 0,
+  });
+  const [brandId, setBrandId] = useState<string>('');
 
   const {
     state: {
       category,
       projectId,
-      timeLimit,
       platforms,
       tasksId,
       includeWords,
@@ -54,6 +58,7 @@ const Report = () => {
       wordMap,
       excludeNotes,
       excludeUsers,
+      wordClassType,
     },
     dispatch,
   } = contextValue;
@@ -65,6 +70,8 @@ const Report = () => {
         const data = res[0];
         const condition = JSON.parse(data.condition || '{}');
         dispatch({ field: 'tasksId', value: data.wordTasksId });
+        setProjectTimeRange(data.dataRetrieverTime);
+        setBrandId(data.brandId);
         // 加载保存的筛选条件
         if (condition.includeWords) {
           dispatch({ field: 'includeWords', value: condition.includeWords });
@@ -74,8 +81,6 @@ const Report = () => {
         }
         if (condition.timeLimit) {
           dispatch({ field: 'timeLimit', value: condition.timeLimit });
-        } else {
-          dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
         }
         if (condition.sentiment) {
           dispatch({ field: 'sentiment', value: condition.sentiment });
@@ -83,29 +88,14 @@ const Report = () => {
         if (condition.platforms) {
           dispatch({ field: 'platforms', value: condition.platforms });
         }
-        if (condition.wordCloudHiddenWord) {
-          dispatch({ field: 'wordCloudHiddenWord', value: condition.wordCloudHiddenWord });
-        }
         if (condition.wordCloudDeleteWord) {
           dispatch({ field: 'wordCloudDeleteWord', value: condition.wordCloudDeleteWord });
-        }
-        if (condition.brandBarHiddenWord) {
-          dispatch({ field: 'brandBarHiddenWord', value: condition.brandBarHiddenWord });
         }
         if (condition.brandBarDeleteWord) {
           dispatch({ field: 'brandBarDeleteWord', value: condition.brandBarDeleteWord });
         }
-        if (condition.wordTrendHiddenWord) {
-          dispatch({ field: 'wordTrendHiddenWord', value: condition.wordTrendHiddenWord });
-        }
         if (condition.wordTrendDeleteWord) {
           dispatch({ field: 'wordTrendDeleteWord', value: condition.wordTrendDeleteWord });
-        }
-        if (condition.appearTogetherHiddenWord) {
-          dispatch({
-            field: 'appearTogetherHiddenWord',
-            value: condition.appearTogetherHiddenWord,
-          });
         }
         if (condition.appearTogetherDeleteWord) {
           dispatch({
@@ -113,14 +103,8 @@ const Report = () => {
             value: condition.appearTogetherDeleteWord,
           });
         }
-        if (condition.wordClassHiddenWord) {
-          dispatch({ field: 'wordClassHiddenWord', value: condition.wordClassHiddenWord });
-        }
         if (condition.wordClassDeleteWord) {
           dispatch({ field: 'wordClassDeleteWord', value: condition.wordClassDeleteWord });
-        }
-        if (condition.categoryBarHiddenWord) {
-          dispatch({ field: 'categoryBarHiddenWord', value: condition.categoryBarHiddenWord });
         }
         if (condition.categoryBarDeleteWord) {
           dispatch({ field: 'categoryBarDeleteWord', value: condition.categoryBarDeleteWord });
@@ -140,7 +124,7 @@ const Report = () => {
     dispatch({ field: 'chartLoading', value: true });
     try {
       const res = await chartData({
-        timeLimit,
+        timeLimit: projectTimeRange,
         platforms,
         tasksId,
         includeWords,
@@ -159,9 +143,10 @@ const Report = () => {
         classification: category,
         excludeNotes,
         excludeUsers,
+        wordClassType,
       });
       const commentData = await commentChartData({
-        timeLimit,
+        timeLimit: projectTimeRange,
         platforms,
         tasksId,
         includeWords,
@@ -181,12 +166,14 @@ const Report = () => {
         excludeNotes,
         excludeUsers,
         commentWordCloud: res.data.wordCloud.comment,
+        wordClassType,
       });
 
       dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
       dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
       dispatch({ field: 'adNode', value: res.data.adNode });
       dispatch({ field: 'tweetWordTrendData', value: res.data.wordTrend });
+      dispatch({ field: 'commentWordTrendData', value: commentData.data.wordTrend });
       dispatch({ field: 'tweetAppearTogetherData', value: res.data.appearTogether });
       dispatch({ field: 'commentAppearTogetherData', value: commentData.data.appearTogether });
       dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
@@ -252,7 +239,7 @@ const Report = () => {
     if (!tasksId.length) return;
     fetchChatData();
   }, [
-    timeLimit,
+    projectTimeRange,
     platforms,
     tasksId,
     includeWords,
@@ -273,6 +260,7 @@ const Report = () => {
     wordMap,
     excludeNotes,
     excludeUsers,
+    wordClassType,
   ]);
 
   useEffect(() => {
@@ -322,7 +310,7 @@ const Report = () => {
           <div className={styles['left-container']}>
             <Tabs
               items={[
-                { label: '相关词分析', children: <Keywords />, key: 'keyword' },
+                { label: '相关词分析', children: <Keywords brandId={brandId} />, key: 'keyword' },
                 { label: '声量分析', children: <Popularity />, key: 'popularity' },
                 { label: '画像分析', children: <PortraitAnalysis />, key: 'portrait' },
                 { label: '话题分析', children: <TopicAnalysis />, key: 'topic' },

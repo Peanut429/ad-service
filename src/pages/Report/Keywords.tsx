@@ -7,9 +7,14 @@ import BrandBarChart from './Charts/BrandBar';
 import WordClass from './Charts/WordClass';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import CategoryChart from './Charts/CategoryBar';
+import ScentBarChart from './Charts/ScentBar';
 // import KeywordCategoryChart from './Charts/KeywordCategoryChart';
 
-const Keywords = () => {
+type Props = {
+  brandId: string;
+};
+
+const Keywords: React.FC<Props> = ({ brandId }) => {
   return (
     <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
       <ChartCard title="关键词词云">
@@ -81,6 +86,11 @@ const Keywords = () => {
       >
         <CategoryChart />
       </ChartCard>
+      {brandId === 'brand-4243733387' && (
+        <ChartCard title="香味">
+          <ScentBarChart />
+        </ChartCard>
+      )}
     </Space>
   );
 };

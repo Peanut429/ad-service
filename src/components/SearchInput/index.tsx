@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Input, InputRef, Modal, Select, Space, Table, message } from 'antd';
 import { keywordsInfo } from '@/services/brands';
 import { useRequest } from '@umijs/max';
@@ -27,67 +27,73 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
   const [visible, setVisible] = useState(false);
   const [editValue, setEditValue] = useState<WordInfo>();
 
-  const columns: ColumnsType<WordInfo> = [
-    { title: '关键词', dataIndex: 'word', width: 150, ellipsis: true },
-    { title: '分词', dataIndex: 'pattern', render: (_, record) => record.pattern?.join(', ') },
-    {
-      title: '平台',
-      width: 170,
-      dataIndex: 'platforms',
-      render: (_, record) => {
-        return (
-          <Select
-            value={record.platforms}
-            size="small"
-            mode="multiple"
-            options={[
-              { label: '小红书', value: 'redbook' },
-              { label: '抖音', value: 'tiktok' },
-            ]}
-            onChange={(value) => {
-              if (!value.length) {
-                message.error('至少选择一个平台');
-                return;
-              }
-              setValue((prev) => prev.map((item) => ({ ...item, platforms: value })));
-            }}
-          />
-        );
+  const columns = useMemo(() => {
+    const columnsConfig: ColumnsType<WordInfo> = [
+      { title: '关键词', dataIndex: 'word', width: 150, ellipsis: true },
+      { title: '分词', dataIndex: 'pattern', render: (_, record) => record.pattern?.join(', ') },
+      {
+        title: '平台',
+        width: 170,
+        dataIndex: 'platforms',
+        render: (_, record) => {
+          return (
+            <Select
+              value={record.platforms}
+              size="small"
+              mode="multiple"
+              options={[
+                { label: '小红书', value: 'redbook' },
+                { label: '抖音', value: 'tiktok' },
+              ]}
+              onChange={(value) => {
+                if (!value.length) {
+                  message.error('至少选择一个平台');
+                  return;
+                }
+                setValue((prev) => prev.map((item) => ({ ...item, platforms: value })));
+              }}
+            />
+          );
+        },
       },
-    },
-    {
-      title: '操作',
-      width: 200,
-      align: 'center',
-      render: (_, record) => [
-        editAble ? (
+      {
+        title: '操作',
+        width: editAble ? 200 : 80,
+        align: 'center',
+        render: (_, record) => [
+          editAble ? (
+            <Button
+              type="text"
+              key="edit"
+              size="small"
+              disabled={!!record.taskId}
+              onClick={() => {
+                setVisible(true);
+                setEditValue(record);
+              }}
+            >
+              拆分设置
+            </Button>
+          ) : null,
           <Button
             type="text"
-            key="edit"
+            danger
             size="small"
-            disabled={!!record.taskId}
+            key="delete"
             onClick={() => {
-              setVisible(true);
-              setEditValue(record);
+              setValue((prev) => prev.filter((item) => item.word !== record.word));
             }}
           >
-            拆分设置
-          </Button>
-        ) : null,
-        <Button
-          type="text"
-          danger
-          size="small"
-          key="delete"
-          onClick={() => {
-            setValue((prev) => prev.filter((item) => item.word !== record.word));
-          }}
-        >
-          删除
-        </Button>,
-      ],
-    },
-  ];
+            删除
+          </Button>,
+        ],
+      },
+    ];
+    if (!editAble) {
+      columnsConfig.splice(1, 2);
+    }
+    return columnsConfig;
+  }, [editAble]);
 
   const { run, cancel } = useRequest(keywordsInfo, {
     manual: true,
