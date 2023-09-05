@@ -7,12 +7,7 @@ import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
 const CategoryChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: {
-      categoryBarData,
-      chartLoading,
-      categoryBarHiddenWord: cateogryBarHiddenWord,
-      cateogryBarDeleteWord,
-    },
+    state: { categoryBarData, chartLoading, categoryBarHiddenWord, categoryBarDeleteWord },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
@@ -38,17 +33,17 @@ const CategoryChart: React.FC = () => {
     if (key === 'add') {
       addListKeyword([currentWord]);
     } else if (key === 'hide') {
-      if (!cateogryBarHiddenWord.includes(currentWord)) {
+      if (!categoryBarHiddenWord.includes(currentWord)) {
         dispatch({
           field: 'categoryBarDeleteWord',
-          value: [...cateogryBarHiddenWord, currentWord],
+          value: [...categoryBarHiddenWord, currentWord],
         });
       }
     } else if (key === 'delete') {
-      if (!cateogryBarDeleteWord.includes(currentWord)) {
+      if (!categoryBarDeleteWord.includes(currentWord)) {
         dispatch({
           field: 'categoryBarDeleteWord',
-          value: [...cateogryBarDeleteWord, currentWord],
+          value: [...categoryBarDeleteWord, currentWord],
         });
       }
     }
@@ -75,6 +70,12 @@ const CategoryChart: React.FC = () => {
       height: 300,
       xField: 'word',
       yField: dataType,
+      xAxis: {
+        label: {
+          rotate: 0.4,
+          offset: 10,
+        },
+      },
       label: {
         position: 'top',
       },
@@ -102,7 +103,7 @@ const CategoryChart: React.FC = () => {
       chart.off('axis-label:contextmenu', handleContextmenu);
       document.removeEventListener('click', handleCloseContextmenu);
     };
-  }, [chart, cateogryBarHiddenWord, cateogryBarDeleteWord]);
+  }, [chart, categoryBarHiddenWord, categoryBarDeleteWord]);
 
   return (
     <div>
@@ -126,16 +127,16 @@ const CategoryChart: React.FC = () => {
           <div ref={divRef} style={{ height: 300 }} />
         </Dropdown>
       </Spin>
-      {cateogryBarHiddenWord.length > 0 && (
+      {categoryBarHiddenWord.length > 0 && (
         <div>
           <span>隐藏的关键词：</span>
-          {cateogryBarHiddenWord.map((item) => (
+          {categoryBarHiddenWord.map((item) => (
             <Tag
               key={item}
               closable
               onClose={() => {
-                cateogryBarHiddenWord.splice(cateogryBarHiddenWord.indexOf(item), 1);
-                dispatch({ field: 'cateogryBarHiddenWord', value: [...cateogryBarHiddenWord] });
+                categoryBarHiddenWord.splice(categoryBarHiddenWord.indexOf(item), 1);
+                dispatch({ field: 'categoryBarHiddenWord', value: [...categoryBarHiddenWord] });
               }}
             >
               {item}

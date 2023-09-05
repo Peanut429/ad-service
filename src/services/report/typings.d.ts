@@ -150,6 +150,11 @@ declare namespace ReportApi {
     tweet: { heat: number; frequency: number; word: string }[];
   };
 
+  type TweetSentimentData = {
+    key: 0 | 1 | 2 | 3;
+    value: number;
+  }[];
+
   type ChartDataRes = Response<{
     wordCloud: WordcloudData;
     tweetTrend: TweetTrendData;
@@ -164,6 +169,7 @@ declare namespace ReportApi {
     brandBar: BrandBarData;
     wordClass: WordClassData;
     categoryBar: CategoryBarData;
+    tweetSentiment: TweetSentimentData;
   }>;
 
   type TweetListReq = {
@@ -240,7 +246,19 @@ declare namespace ReportApi {
     platform: 'redbook' | 'tiktok';
     gender: '男' | '女' | '未知';
     noteContent: string;
+    noteId: string;
   };
 
   type WordClassListRes = Response<string[]>;
+
+  type FixTweetSentimentReq = {
+    data: {
+      id: string;
+      sentiment: 1 | 2 | 3;
+    }[];
+    platform: 'redbook' | 'tiktok';
+    type: 'tweet' | 'comment';
+  };
+
+  type CommentSentimentRes = Response<TweetSentimentData>;
 }

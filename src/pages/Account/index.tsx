@@ -1,22 +1,26 @@
-import { createAccount, searchUser } from '@/services/account';
+import { useEffect, useRef, useState } from 'react';
+import { useRequest, useModel } from '@umijs/max';
+import { Button, message } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {
   ModalForm,
-  ProFormDependency,
   ProFormInstance,
   ProFormSelect,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { useRequest } from '@umijs/max';
-import { Button, message } from 'antd';
-import { useRef, useState } from 'react';
+import { createAccount, searchUser } from '@/services/account';
 
 const AccountList = () => {
   const formRef = useRef<ProFormInstance>();
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
+  const { initialState } = useModel('@@initialState');
 
-  const { run: searchUserApi, cancel } = useRequest(searchUser, {
+  const {
+    run: searchUserApi,
+    cancel,
+    loading,
+  } = useRequest(searchUser, {
     manual: true,
     onSuccess: (data) => {
       setUsers(
@@ -24,6 +28,12 @@ const AccountList = () => {
       );
     },
   });
+
+  useEffect(() => {
+    if (initialState?.currentUser?.access === 'admin') {
+      searchUserApi({ username: '' });
+    }
+  }, [initialState?.currentUser?.access]);
 
   return (
     <>
@@ -85,7 +95,24 @@ const AccountList = () => {
                 { label: '仅查看', value: 'viewer' },
               ]}
             ></ProFormSelect>
-            <ProFormDependency name={['role']}>
+            {initialState?.currentUser?.access === 'admin' ? (
+              <ProFormSelect
+                label="所属账户"
+                name="belongToUserId"
+                rules={[{ required: true, message: '请选择所属账户' }]}
+                placeholder="选择所属账户"
+                options={users}
+                fieldProps={{
+                  loading,
+                  showSearch: true,
+                  onSearch: (value) => {
+                    cancel();
+                    searchUserApi({ username: value });
+                  },
+                }}
+              />
+            ) : null}
+            {/* <ProFormDependency name={['role']}>
               {({ role }) => {
                 return role === 'viewer' ? (
                   <ProFormSelect
@@ -104,7 +131,7 @@ const AccountList = () => {
                   />
                 ) : null;
               }}
-            </ProFormDependency>
+            </ProFormDependency> */}
           </ModalForm>,
         ]}
       />

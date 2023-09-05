@@ -46,19 +46,19 @@ const Task = () => {
       title: '操作',
       width: 200,
       render: (_, record) => [
-        <Access accessible={canEdit} key="stop">
-          <Button
-            danger
-            type="text"
-            onClick={() => stopTaskApi({ tasksId: [record.projectId], stop: true })}
-          >
-            停止任务
-          </Button>
-        </Access>,
         // <Link key="detail" to={`/report?ids=${record.wordTasksId.join(',')}`}>
         <Link key="detail" to={`/report?projectId=${record.projectId}`}>
           查看详情
         </Link>,
+        <Access accessible={canEdit} key="stop">
+          <Button
+            danger
+            type="text"
+            onClick={() => stopTaskApi({ tasksId: record.wordTasksId, stop: true })}
+          >
+            停止任务
+          </Button>
+        </Access>,
       ],
     },
   ];

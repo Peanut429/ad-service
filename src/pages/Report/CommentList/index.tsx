@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, Dropdown, Space, Spin, Tag, message } from 'antd';
-import { DownloadOutlined, LikeOutlined } from '@ant-design/icons';
+import { DownloadOutlined, LikeOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
 import { Platform } from '../Report.state';
@@ -14,14 +14,9 @@ import sentimentUnknow from '../TweetList/question.png';
 
 import './index.less';
 import SortComponent from '../SortComponent';
+import SentimentForm from '../SentimentForm';
+import getTweetLink from '@/utils/getTweetLink';
 // import SortComponent from '../SortComponent';
-
-type CommentListItemProps = {
-  data: ReportApi.CommentListItem & {
-    platform?: Platform;
-    tweet_content?: string;
-  };
-};
 
 const formatDate = (date: number) => {
   const dateObj = new Date(date);
@@ -54,7 +49,24 @@ const genderColor = {
   未知: 'default',
 };
 
-const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
+export const GenderElement: React.FC<{ gender: keyof typeof genderColor }> = ({ gender }) => {
+  if (gender === '男') {
+    return <ManOutlined style={{ color: '#5B92E1' }} />;
+  } else if (gender === '女') {
+    return <WomanOutlined style={{ color: '#FF7084' }} />;
+  }
+  return <Tag>性别未知</Tag>;
+};
+
+type CommentListItemProps = {
+  data: ReportApi.CommentListItem & {
+    platform?: Platform;
+    tweet_content?: string;
+  };
+  modifySentiment?: (id: string, sentiment: 1 | 2 | 3) => void;
+};
+
+const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySentiment }) => {
   return (
     <Dropdown
       // overlay={<Menu items={[
@@ -84,15 +96,25 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data }) => {
             <img src={data.avatar} alt="头像" />
           </div>
           {/* <div className="works__sentiment" onClick={() => setVisible(true) */}
-          <div className="works__sentiment">
-            <img src={sentimentIcon[data.sentiment || 0]} alt="情感" />
-            <div>{sentimentText[data.sentiment || 0]}</div>
-          </div>
+          <SentimentForm
+            id={data.id}
+            platform={data.platform}
+            type="comment"
+            trigger={
+              <div className="works__sentiment">
+                <img src={sentimentIcon[data.sentiment || 0]} alt="情感" />
+                <div>{sentimentText[data.sentiment || 0]}</div>
+              </div>
+            }
+            onChange={(value) => modifySentiment?.(data.id, value)}
+          />
         </div>
         <div className="works__center">
           <Space size={8} className="content__header">
             <div className="nickname">{data.nickname}</div>
-            <Tag color={genderColor[data.gender]}>{data.gender}</Tag>
+            <GenderElement gender={data.gender} />
+            {/* <Tag color={genderColor[data.gender]}>
+            </Tag> */}
             <div className="time">{formatDate(data.createdAtTimestamp)}</div>
           </Space>
           <div className="content">
@@ -144,15 +166,13 @@ const CommentList = () => {
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
-  const [sortKey] = useState('heat');
-  const [sortOrder] = useState('desc');
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
   const [sortParams, setSortParams] = useState({
-    order_key: 'heat',
+    order_key: 'time',
     order_direction: 1, // 1降序，0正序
   });
 
@@ -161,9 +181,9 @@ const CommentList = () => {
     try {
       const res = await commentList({
         timeLimit,
+        tasksId,
         userType: listUserType,
         platforms: listPlatforms,
-        tasksId,
         excludeWords: [...excludeWords, ...listExcludeWords],
         includeWords: [...includeWords, ...listIncludeWords],
         sentiment: listSentiment,
@@ -209,6 +229,7 @@ const CommentList = () => {
         gender: item.gender,
         noteContent: item.noteContent,
         createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
+        link: getTweetLink(item.noteId, item.platform),
       }));
       const headers = {
         nickname: '用户昵称',
@@ -218,6 +239,7 @@ const CommentList = () => {
         gender: '性别',
         noteContent: '原文内容',
         createdAtTimestamp: '发布时间',
+        link: '原文链接',
       };
       const workbook = utils.book_new();
       const worksheet = utils.json_to_sheet([headers, ...data], { skipHeader: true });
@@ -235,8 +257,6 @@ const CommentList = () => {
   }, [
     pageSize,
     currentPage,
-    sortKey,
-    sortOrder,
     excludeWords,
     includeWords,
     tasksId,
@@ -246,7 +266,8 @@ const CommentList = () => {
     listExcludeWords,
     listIncludeWords,
     listSentiment,
-    sortParams,
+    sortParams.order_direction,
+    sortParams.order_key,
     excludeNotes,
     excludeUsers,
   ]);
@@ -261,6 +282,7 @@ const CommentList = () => {
       <div style={{ marginBottom: 20 }}>
         <SortComponent
           onChange={(value) => {
+            console.log(value);
             setSortParams(value);
           }}
         />
@@ -268,7 +290,17 @@ const CommentList = () => {
       <div>
         <Spin spinning={loading}>
           {dataList.map((item) => {
-            return <CommentListItem key={item.id} data={item} />;
+            return (
+              <CommentListItem
+                key={item.id}
+                data={item}
+                modifySentiment={(id: string, sentiment: 1 | 2 | 3) => {
+                  setDataList(
+                    dataList.map((data) => (data.id === id ? { ...data, sentiment } : data)),
+                  );
+                }}
+              />
+            );
           })}
         </Spin>
       </div>

@@ -1,8 +1,8 @@
+import type { Dayjs } from 'dayjs';
 import SearchInput, { WordInfo } from '@/components/SearchInput';
 import { brandsList, createTask } from '@/services/brands';
 import { useRequest } from '@umijs/max';
 import { DatePicker, Form, Input, Modal, Select, message } from 'antd';
-import { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 type TaskCreatorProps = {

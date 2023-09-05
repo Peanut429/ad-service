@@ -82,8 +82,12 @@ const HeatmapChart = () => {
   useEffect(() => {
     if (!divRef.current || !chartData) return;
 
+    const renderData = chartData[dataType as 'frequency' | 'heat'].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    );
+
     const chart = new Heatmap(divRef.current, {
-      data: chartData[dataType as 'frequency' | 'heat'],
+      data: renderData,
       height: 400,
       xField: 'date',
       yField: 'word',

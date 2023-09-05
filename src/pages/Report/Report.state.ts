@@ -12,6 +12,7 @@ export interface ReportInitialState {
   excludeWords: string[];
   userType: UserType[];
   sentiment: number[];
+  gender: string[];
   // listTimeLimit: { gte: number; lte: number };
   listPlatforms: Platform[];
   listIncludeWords: string[][];
@@ -33,6 +34,8 @@ export interface ReportInitialState {
   brandBarData?: ReportApi.BrandBarData;
   wordClassData?: ReportApi.WordClassData;
   categoryBarData?: ReportApi.CategoryBarData;
+  tweetSentimentData?: ReportApi.TweetSentimentData;
+  commentSentimentData?: ReportApi.TweetSentimentData;
   wordCloudHiddenWord: string[]; // 词云中隐藏的关键词
   wordCloudDeleteWord: string[]; // 词云中删除的关键词
   brandBarHiddenWord: string[]; // 品牌类别中隐藏的品牌
@@ -56,12 +59,13 @@ const initialState: ReportInitialState = {
   chartLoading: false,
   category: [],
   timeLimit: { gte: 0, lte: 0 },
-  platforms: ['redbook'],
+  platforms: ['redbook', 'tiktok'],
   tasksId: [],
   includeWords: [],
   excludeWords: [],
   userType: [],
   sentiment: [],
+  gender: [],
   // listTimeLimit: { gte: 0, lte: 0 },
   listPlatforms: ['redbook', 'tiktok'],
   listIncludeWords: [],

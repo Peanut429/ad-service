@@ -5,6 +5,7 @@ import ChartCard from '@/components/ChartCard';
 import TweetChart from './Charts/TweetChart';
 import ReportContext from './Report.context';
 import EventsTimeline from './EventsTimeline';
+import SentimentChart from './Charts/SentimentChart';
 
 const Popularity = () => {
   const {
@@ -46,6 +47,9 @@ const Popularity = () => {
         >
           <EventsTimeline />
         </div>
+      </ChartCard>
+      <ChartCard title="情感分布">
+        <SentimentChart />
       </ChartCard>
     </Space>
   );

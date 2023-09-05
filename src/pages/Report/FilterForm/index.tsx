@@ -267,6 +267,14 @@ const FilterForm = () => {
               }}
             />
           </Form.Item>
+          <Form.Item label="性别">
+            <Select
+              options={[
+                { label: '男', value: '男' },
+                { label: '女', value: '女' },
+              ]}
+            />
+          </Form.Item>
           <Access accessible={access.canEdit}>
             <Form.Item>
               <Space>

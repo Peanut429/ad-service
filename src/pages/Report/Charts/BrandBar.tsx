@@ -64,6 +64,12 @@ const BrandBarChart: React.FC = () => {
       height: 300,
       xField: 'word',
       yField: dataType,
+      xAxis: {
+        label: {
+          rotate: 0.4,
+          offset: 10,
+        },
+      },
       label: {
         position: 'top',
       },

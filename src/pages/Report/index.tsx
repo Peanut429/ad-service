@@ -11,9 +11,15 @@ import Popularity from './Popularity';
 import PortraitAnalysis from './PortraitAnalysis';
 import TopicAnalysis from './TopicAnalysis';
 import FilterForm from './FilterForm';
-import { chartData, commentChartData } from '@/services/report';
+import { chartData, commentChartData, commentSentiment } from '@/services/report';
 import { keywordsInfo, taskList } from '@/services/brands';
 import styles from './index.module.scss';
+
+// const platform = {
+//   weibo: '微博',
+//   redbook: '小红书',
+//   tiktok: '抖音',
+// };
 
 const Report = () => {
   const [searchParams] = useSearchParams();
@@ -81,6 +87,8 @@ const Report = () => {
         }
         if (condition.timeLimit) {
           dispatch({ field: 'timeLimit', value: condition.timeLimit });
+        } else {
+          dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
         }
         if (condition.sentiment) {
           dispatch({ field: 'sentiment', value: condition.sentiment });
@@ -119,10 +127,77 @@ const Report = () => {
     },
   });
 
+  const { run: commentSentimentApi } = useRequest(
+    () =>
+      commentSentiment({
+        timeLimit: projectTimeRange,
+        platforms,
+        tasksId,
+        includeWords,
+        excludeWords,
+        userType,
+        sentiment,
+        hiddenWord: {
+          wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
+          brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
+          appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
+          wordClass: [...wordClassHiddenWord, ...wordClassDeleteWord],
+          wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
+          categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
+        },
+        mappingWord: wordMap,
+        classification: category,
+        excludeNotes,
+        excludeUsers,
+        wordClassType,
+      }),
+    {
+      manual: true,
+      onSuccess: (res) => {
+        dispatch({ field: 'commentSentimentData', value: res });
+      },
+    },
+  );
+
+  const { run: commentChartDataApi } = useRequest(
+    (commentData: ReportApi.WordcloudData['comment']) =>
+      commentChartData({
+        timeLimit: projectTimeRange,
+        platforms,
+        tasksId,
+        includeWords,
+        excludeWords,
+        userType,
+        sentiment,
+        hiddenWord: {
+          wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
+          brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
+          appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
+          wordClass: [...wordClassHiddenWord, ...wordClassDeleteWord],
+          wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
+          categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
+        },
+        mappingWord: wordMap,
+        classification: category,
+        excludeNotes,
+        excludeUsers,
+        commentWordCloud: commentData,
+        wordClassType,
+      }),
+    {
+      manual: true,
+      onSuccess: (res) => {
+        dispatch({ field: 'commentWordTrendData', value: res.wordTrend });
+        dispatch({ field: 'commentAppearTogetherData', value: res.appearTogether });
+      },
+    },
+  );
+
   // 获取图表数据
   const fetchChatData = async () => {
     dispatch({ field: 'chartLoading', value: true });
     try {
+      commentSentimentApi();
       const res = await chartData({
         timeLimit: projectTimeRange,
         platforms,
@@ -145,42 +220,20 @@ const Report = () => {
         excludeUsers,
         wordClassType,
       });
-      const commentData = await commentChartData({
-        timeLimit: projectTimeRange,
-        platforms,
-        tasksId,
-        includeWords,
-        excludeWords,
-        userType,
-        sentiment,
-        hiddenWord: {
-          wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
-          brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
-          appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
-          wordClass: [...wordClassHiddenWord, ...wordClassDeleteWord],
-          wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
-          categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
-        },
-        mappingWord: wordMap,
-        classification: category,
-        excludeNotes,
-        excludeUsers,
-        commentWordCloud: res.data.wordCloud.comment,
-        wordClassType,
-      });
+
+      commentChartDataApi(res.data.wordCloud.comment);
 
       dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
       dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
       dispatch({ field: 'adNode', value: res.data.adNode });
       dispatch({ field: 'tweetWordTrendData', value: res.data.wordTrend });
-      dispatch({ field: 'commentWordTrendData', value: commentData.data.wordTrend });
       dispatch({ field: 'tweetAppearTogetherData', value: res.data.appearTogether });
-      dispatch({ field: 'commentAppearTogetherData', value: commentData.data.appearTogether });
       dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
       dispatch({ field: 'topicData', value: res.data.topic });
       dispatch({ field: 'brandBarData', value: res.data.brandBar });
       dispatch({ field: 'wordClassData', value: res.data.wordClass });
       dispatch({ field: 'categoryBarData', value: res.data.categoryBar });
+      dispatch({ field: 'tweetSentimentData', value: res.data.tweetSentiment });
     } catch (e) {
       console.log(e);
     }
@@ -286,7 +339,7 @@ const Report = () => {
               ))}
             </h4>
             <h4>列表筛选条件：</h4>
-            <Form size="small" layout="inline">
+            <Form size="small">
               <Form.Item label="筛选关键词">
                 {listIncludeWords.map((item, index) => (
                   <Tag
@@ -303,6 +356,41 @@ const Report = () => {
                   </Tag>
                 ))}
               </Form.Item>
+              {/* <Form.Item label="平台">
+                {listPlatforms.map((item) => (
+                  <Tag
+                    key={item}
+                    style={{ fontSize: 14 }}
+                    closable
+                    onClose={() => {
+                      listPlatforms.splice(listPlatforms.indexOf(item), 1);
+                      console.log(listPlatforms.toString());
+                      if (listPlatforms.length === 0) {
+                        listPlatforms.push(...platforms);
+                      }
+                      console.log(listPlatforms.toString());
+                      dispatch({ field: 'listPlatforms', value: [...listPlatforms] });
+                    }}
+                  >
+                    {platform[item]}
+                  </Tag>
+                ))}
+              </Form.Item>
+              <Form.Item label="情感">
+                {listSentiment.map((item) => (
+                  <Tag
+                    key={item}
+                    style={{ fontSize: 14 }}
+                    closable
+                    onClose={() => {
+                      listSentiment.splice(listSentiment.indexOf(item), 1);
+                      dispatch({ field: 'listSentiment', value: [...listSentiment] });
+                    }}
+                  >
+                    {item}
+                  </Tag>
+                ))}
+              </Form.Item> */}
             </Form>
           </Card>
         </Affix>

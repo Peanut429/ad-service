@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import ReportContext from '../Report.context';
+import { useRequest } from '@umijs/max';
+import { utils, writeFile } from 'xlsx';
+import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal, Input } from 'antd';
 import {
   CommentOutlined,
@@ -8,11 +10,11 @@ import {
   LikeOutlined,
   RetweetOutlined,
 } from '@ant-design/icons';
-import { utils, writeFile } from 'xlsx';
-import { CheckboxValueType } from 'antd/es/checkbox/Group';
+import SortComponent, { SortInfo } from '../SortComponent';
 import { tweetList } from '@/services/report';
 import { Platform } from '../Report.state';
 import usePageInfo from '../usePageInfo';
+import ReportContext from '../Report.context';
 import sentimentBad from './sentiment_bad.png';
 import sentimentGood from './sentiment_good.png';
 import sentimentNeutral from './sentiment_neutral.png';
@@ -21,16 +23,9 @@ import redbookIcon from './redbook.jpg';
 import tiktokIcon from './tiktok.png';
 import weiboIcon from './weibo.png';
 import styles from './index.module.scss';
-import SortComponent, { SortInfo } from '../SortComponent';
-import { useRequest } from '@umijs/max';
-
-type TweetListItemProps = {
-  data: ReportApi.TweetListItem & {
-    platform?: Platform;
-    type?: keyof typeof TweetTypeEnum;
-    image?: string;
-  };
-};
+import SentimentForm from '../SentimentForm';
+import getTweetLink from '@/utils/getTweetLink';
+import { GenderElement } from '../CommentList';
 
 export enum TweetTypeEnum {
   star = '明星帖',
@@ -89,7 +84,16 @@ const genderColor = {
   未知: 'default',
 };
 
-const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
+type TweetListItemProps = {
+  data: ReportApi.TweetListItem & {
+    platform?: Platform;
+    type?: keyof typeof TweetTypeEnum;
+    image?: string;
+  };
+  modifySentiment?: (id: string, sentiment: 1 | 2 | 3) => void;
+};
+
+const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentiment }) => {
   // const [visible, setVisible] = useState(false);
   async function changeTweetSentiment() {
     // setVisible(true);
@@ -103,16 +107,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
       }}
       trigger={['contextMenu']}
     >
-      <div
-        className={styles.tweet}
-        onClick={() => {
-          if (tweet.platform === 'redbook') {
-            window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
-          } else if (tweet.platform === 'tiktok') {
-            window.open(`https://www.douyin.com/video/${tweet.id}`);
-          }
-        }}
-      >
+      <div className={styles.tweet}>
         <Checkbox
           value={tweet.id}
           onClick={(e) => {
@@ -131,12 +126,33 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
               alt="头像"
             />
           }
-          <div className={styles.tweet__sentiment} onClick={() => changeTweetSentiment()}>
-            <img src={sentimentIcon[tweet.sentiment]} width={24} height={24} />
-          </div>
-          <span>{sentimentText[tweet.sentiment]}</span>
+          <SentimentForm
+            id={tweet.id}
+            type="tweet"
+            platform={tweet.platform}
+            trigger={
+              <div onClick={(e) => e.stopPropagation()}>
+                <div className={styles.tweet__sentiment} onClick={() => changeTweetSentiment()}>
+                  <img src={sentimentIcon[tweet.sentiment]} width={24} height={24} />
+                </div>
+                <span>{sentimentText[tweet.sentiment]}</span>
+              </div>
+            }
+            onChange={(value) => {
+              modifySentiment?.(tweet.id, value);
+            }}
+          />
         </div>
-        <div className={styles.tweet__right}>
+        <div
+          className={styles.tweet__right}
+          onClick={() => {
+            if (tweet.platform === 'redbook') {
+              window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
+            } else if (tweet.platform === 'tiktok') {
+              window.open(`https://www.douyin.com/video/${tweet.id}`);
+            }
+          }}
+        >
           <div className={styles.tweet__head}>
             <div style={{ display: 'flex', alignItems: 'center', columnGap: 10, marginBottom: 8 }}>
               <span
@@ -155,7 +171,8 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet }) => {
                 {tweet.nickname}
               </span>
               {/* <Tag onClick={() => setUserTypeModalVisible(true)}>{tweet.userType}</Tag> */}
-              <Tag color={genderColor[tweet.gender]}>{tweet.gender}</Tag>
+              {/* <Tag color={genderColor[tweet.gender]}>{tweet.gender}</Tag> */}
+              <GenderElement gender={tweet.gender} />
               <Tag>{tweet.userType}</Tag>
               <span className={styles.tweet__time}>{formatDate(tweet.createdAtTimestamp)}</span>
               {tweet.type && TweetTypeEnum[tweet.type] ? (
@@ -272,7 +289,11 @@ const TweetList = () => {
       : [allListIncludeWords];
   }, [listIncludeWords, includeWords, searchValue]);
 
-  const { loading, run: fetchData } = useRequest(
+  const {
+    loading,
+    run: fetchData,
+    cancel,
+  } = useRequest(
     () =>
       tweetList({
         timeLimit,
@@ -295,43 +316,12 @@ const TweetList = () => {
       onSuccess: (res) => {
         setDataList(res.data);
         setTotal(res.count);
-        // setLoading(false);
       },
       onError: (err) => {
         console.error(err);
-        // setLoading(false);
       },
     },
   );
-
-  // const fetchData = async () => {
-  //   setLoading(true);
-  //   setSelectedRowKeys([]);
-  //   try {
-  //     const res = await tweetList({
-  //       timeLimit,
-  //       userType: listUserType,
-  //       platforms: listPlatforms,
-  //       tasksId,
-  //       excludeWords: [...excludeWords, ...listExcludeWords],
-  //       includeWords: reqIncludeWordsData,
-  //       sentiment: listSentiment,
-  //       excludeNotes,
-  //       excludeUsers,
-  //       page: currentPage,
-  //       limit: pageSize,
-  //       sortKey: sortKey,
-  //       sortOrder: sortOrder,
-  //     });
-
-  //     setDataList(res.data.data);
-  //     setTotal(res.data.count);
-  //   } catch (e) {
-  //     console.error(e);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const downloadExcel = async () => {
     const params = {
@@ -362,6 +352,7 @@ const TweetList = () => {
         gender: item.gender,
         sentiment: sentimentText[item.sentiment] || '未知',
         createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
+        link: getTweetLink(item.id, item.platform),
       }));
       const headers = {
         id: '笔记ID',
@@ -375,6 +366,7 @@ const TweetList = () => {
         gender: '性别',
         sentiment: '情感',
         createdAtTimestamp: '发布时间',
+        link: '原文链接',
       };
       const workbook = utils.book_new();
       const worksheet = utils.json_to_sheet([headers, ...data], { skipHeader: true });
@@ -407,8 +399,22 @@ const TweetList = () => {
     });
   };
 
+  const modifySentiment = (id: string, sentimentValue: 1 | 2 | 3) => {
+    setDataList(
+      dataList.map((item) => {
+        if (item.id === id) {
+          item.sentiment = sentimentValue;
+        }
+        return item;
+      }),
+    );
+  };
+
   useEffect(() => {
     if (!tasksId.length) return;
+    if (loading) {
+      cancel();
+    }
     fetchData();
   }, [
     pageSize,
@@ -453,7 +459,7 @@ const TweetList = () => {
           onChange={(e) => setSelectedRowKeys(e)}
         >
           {dataList.map((item) => {
-            return <TweetListItem key={item.id} data={item} />;
+            return <TweetListItem key={item.id} data={item} modifySentiment={modifySentiment} />;
           })}
         </Checkbox.Group>
       </Spin>

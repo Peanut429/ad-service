@@ -31,3 +31,14 @@ export async function commentChartData(
 export async function wordClassList() {
   return request<ReportApi.WordClassListRes>('/api/functional/wordClassType', { method: 'POST' });
 }
+
+export async function fixSentiment(data: ReportApi.FixTweetSentimentReq) {
+  return request('/api/functional/fix/sentiment', { method: 'POST', data });
+}
+
+export async function commentSentiment(data: ReportApi.ChartDataReq) {
+  return request<ReportApi.CommentSentimentRes>('/api/core/sentiment/comment', {
+    method: 'POST',
+    data,
+  });
+}

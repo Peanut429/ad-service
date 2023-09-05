@@ -1,9 +1,9 @@
 // 香味数据柱状图
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Column } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
-import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { Dropdown, Space, Spin } from 'antd';
 
 const ScentBarChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
@@ -68,10 +68,16 @@ const ScentBarChart: React.FC = () => {
     const chart = new Column(divRef.current, {
       data: chartData.subWords
         .sort((a, b) => b[dataType as 'frequency' | 'heat'] - a[dataType as 'frequency' | 'heat'])
-        .slice(0, 10),
+        .slice(0, 15),
       height: 300,
       xField: 'word',
       yField: dataType,
+      xAxis: {
+        label: {
+          rotate: 0.4,
+          offset: 10,
+        },
+      },
       label: {
         position: 'top',
       },
