@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { Button, Dropdown, Space, Spin, Tag, message } from 'antd';
+import { Button, Dropdown, MenuProps, Space, Spin, Tag, message } from 'antd';
 import { DownloadOutlined, LikeOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
@@ -67,85 +67,77 @@ type CommentListItemProps = {
 };
 
 const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySentiment }) => {
+  // const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
+  //   if (key === 'tweet') {
+  //     const link = getTweetLink(data.noteId, data.platform);
+  //     window.open(link);
+  //   }
+  // };
+
   return (
-    <Dropdown
-      // overlay={<Menu items={[
-      //   { label: '查看用户', key: 'user' },
-      //   { label: '查看原文', key: 'works' },
-      // ]}
-      // onClick={({ key }) => {
-      //   if (key === 'user') {
-      //     if (data.platform === 'weibo') {
-      //       window.open(`https://weibo.com/u/${data.id}`);
-      //     } else if (data.platform === 'redbook') {
-      //       window.open(`https://www.xiaohongshu.com/user/profile/${data.id}`);
-      //     }
-      //   } else if (key === 'works') {
-      //     if (data.platform === 'weibo') {
-      //       window.open(`https://weibo.com/${data.id}/${data.id}`);
-      //     } else if (data.platform === 'redbook') {
-      //       window.open(`https://www.xiaohongshu.com/discovery/item/${data.id}`);
-      //     }
-      //   }
-      // }} />}
-      trigger={['contextMenu']}
-    >
-      <div className="works">
-        <div className="works__left">
-          <div className="works__avatar">
-            <img src={data.avatar} alt="头像" />
-          </div>
-          {/* <div className="works__sentiment" onClick={() => setVisible(true) */}
-          <SentimentForm
-            id={data.id}
-            platform={data.platform}
-            type="comment"
-            trigger={
-              <div className="works__sentiment">
-                <img src={sentimentIcon[data.sentiment || 0]} alt="情感" />
-                <div>{sentimentText[data.sentiment || 0]}</div>
-              </div>
-            }
-            onChange={(value) => modifySentiment?.(data.id, value)}
-          />
+    // <Dropdown
+    //   menu={{
+    //     items: [{ label: '查看原文', key: 'tweet' }],
+    //     onClick: handleMenuItemClick,
+    //   }}
+    //   trigger={['contextMenu']}
+    // >
+    // </Dropdown>
+    <div className="works">
+      <div className="works__left">
+        <div className="works__avatar">
+          <img src={data.avatar} alt="头像" />
         </div>
-        <div className="works__center">
-          <Space size={8} className="content__header">
-            <div className="nickname">{data.nickname}</div>
-            <GenderElement gender={data.gender} />
-            {/* <Tag color={genderColor[data.gender]}>
-            </Tag> */}
-            <div className="time">{formatDate(data.createdAtTimestamp)}</div>
-          </Space>
-          <div className="content">
-            <div className="comment-content">{data.content}</div>
-            <div className="works-content">{data.noteContent}</div>
-          </div>
-          <Space size={20}>
-            <span>
-              <LikeOutlined />
-              {data.likeNum.toLocaleString()}
-            </span>
-            {/* <span style={{ color: '#ccc' }}>
-                <CommentOutlined style={{ color: '#ccc' }} />
-                {data.tweet_comment_num.toLocaleString()}
-              </span> */}
-            {/* {data.platform === 'weibo' ? (
-                <span style={{ color: '#ccc' }}>
-                  <ShareAltOutlined style={{ color: '#ccc' }} />
-                  {(data.tweet_repost_num || 0).toLocaleString()}
-                </span>
-              ) : null} */}
-            {/* {data.platform === 'redbook' ? (
-                <span style={{ color: '#ccc' }}>
-                  <StarOutlined style={{ color: '#ccc' }} />
-                  {(data.tweet_collect_num || 0).toLocaleString()}
-                </span>
-              ) : null} */}
-          </Space>
-        </div>
+        {/* <div className="works__sentiment" onClick={() => setVisible(true) */}
+        <SentimentForm
+          id={data.id}
+          platform={data.platform}
+          type="comment"
+          trigger={
+            <div className="works__sentiment">
+              <img src={sentimentIcon[data.sentiment || 0]} alt="情感" />
+              <div>{sentimentText[data.sentiment || 0]}</div>
+            </div>
+          }
+          onChange={(value) => modifySentiment?.(data.id, value)}
+        />
       </div>
-    </Dropdown>
+      <div className="works__center">
+        <Space size={8} className="content__header">
+          <div className="nickname">{data.nickname}</div>
+          <GenderElement gender={data.gender} />
+          {/* <Tag color={genderColor[data.gender]}>
+          </Tag> */}
+          <div className="time">{formatDate(data.createdAtTimestamp)}</div>
+        </Space>
+        <div className="content">
+          <div className="comment-content">{data.content}</div>
+          <div className="works-content">{data.noteContent}</div>
+        </div>
+        <Space size={20}>
+          <span>
+            <LikeOutlined />
+            {data.likeNum.toLocaleString()}
+          </span>
+          {/* <span style={{ color: '#ccc' }}>
+              <CommentOutlined style={{ color: '#ccc' }} />
+              {data.tweet_comment_num.toLocaleString()}
+            </span> */}
+          {/* {data.platform === 'weibo' ? (
+              <span style={{ color: '#ccc' }}>
+                <ShareAltOutlined style={{ color: '#ccc' }} />
+                {(data.tweet_repost_num || 0).toLocaleString()}
+              </span>
+            ) : null} */}
+          {/* {data.platform === 'redbook' ? (
+              <span style={{ color: '#ccc' }}>
+                <StarOutlined style={{ color: '#ccc' }} />
+                {(data.tweet_collect_num || 0).toLocaleString()}
+              </span>
+            ) : null} */}
+        </Space>
+      </div>
+    </div>
   );
 };
 
@@ -163,6 +155,7 @@ const CommentList = () => {
       listSentiment,
       excludeNotes,
       excludeUsers,
+      gender,
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
@@ -189,6 +182,7 @@ const CommentList = () => {
         sentiment: listSentiment,
         excludeNotes,
         excludeUsers,
+        userGender: gender,
         page: currentPage,
         limit: pageSize,
         sortKey: sortParams.order_key,
@@ -207,12 +201,15 @@ const CommentList = () => {
   const downloadExcel = async () => {
     const params = {
       timeLimit,
+      tasksId,
       userType: listUserType,
       platforms: listPlatforms,
-      tasksId,
       excludeWords: [...excludeWords, ...listExcludeWords],
       includeWords: [...includeWords, ...listIncludeWords],
       sentiment: listSentiment,
+      excludeNotes,
+      excludeUsers,
+      userGender: gender,
       page: 1,
       limit: 10000,
       sortKey: sortParams.order_key,
@@ -270,6 +267,7 @@ const CommentList = () => {
     sortParams.order_key,
     excludeNotes,
     excludeUsers,
+    gender,
   ]);
 
   return (

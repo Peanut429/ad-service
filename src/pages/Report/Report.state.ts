@@ -14,11 +14,17 @@ export interface ReportInitialState {
   sentiment: number[];
   gender: string[];
   // listTimeLimit: { gte: number; lte: number };
-  listPlatforms: Platform[];
-  listIncludeWords: string[][];
-  listExcludeWords: string[];
-  listUserType: UserType[];
-  listSentiment: number[];
+  listPlatforms: Platform[]; // 推文筛选的平台信息
+  listIncludeWords: string[][]; // 推文筛选的关键词信息
+  listExcludeWords: string[]; // 推文筛选的关键词信息
+  listUserType: UserType[]; // 推文筛选的用户类型
+  listSentiment: number[]; // 推文筛选的情感
+  commentIncludeWords: string[][]; // 评论筛选的关键词信息
+  // commentPlatforms: Platform[]; // 推文筛选的平台信息
+  // commentExcludeWords: string[]; // 推文筛选的关键词信息
+  // commentUserType: UserType[]; // 推文筛选的用户类型
+  // commentSentiment: number[]; // 推文筛选的情感
+
   wordcloudData?: ReportApi.WordcloudData;
   tweetTrendData?: ReportApi.TweetTrendData; // 推文数量/热度趋势图
   adNode?: ReportApi.AdNodeItem[]; // 营销事件节点
@@ -48,6 +54,8 @@ export interface ReportInitialState {
   wordTrendDeleteWord: string[]; // 高频词热力图中删除的关键词
   categoryBarHiddenWord: string[]; // 品类柱状图中隐藏的关键词
   categoryBarDeleteWord: string[]; // 品类柱状图中删除的关键词
+  specificChartHiddenWord: string[]; // 特殊图（客户特别需求）中隐藏的关键词
+  specificChartDeleteWord: string[]; // 特殊图（客户特别需求）中删除的关键词
   wordMap: Record<string, string>; // 关键词映射
   excludeNotes: string[]; // 排除的推文
   excludeUsers: string[]; // 排除的用户
@@ -66,12 +74,12 @@ const initialState: ReportInitialState = {
   userType: [],
   sentiment: [],
   gender: [],
-  // listTimeLimit: { gte: 0, lte: 0 },
   listPlatforms: ['redbook', 'tiktok'],
   listIncludeWords: [],
   listExcludeWords: [],
   listUserType: [],
   listSentiment: [],
+  commentIncludeWords: [],
   wordCloudHiddenWord: [],
   wordCloudDeleteWord: [],
   brandBarHiddenWord: [],
@@ -84,6 +92,8 @@ const initialState: ReportInitialState = {
   wordTrendDeleteWord: [],
   categoryBarHiddenWord: [],
   categoryBarDeleteWord: [],
+  specificChartHiddenWord: [],
+  specificChartDeleteWord: [],
   wordMap: {},
   excludeNotes: [],
   excludeUsers: [],

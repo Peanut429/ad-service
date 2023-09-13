@@ -15,12 +15,6 @@ import { chartData, commentChartData, commentSentiment } from '@/services/report
 import { keywordsInfo, taskList } from '@/services/brands';
 import styles from './index.module.scss';
 
-// const platform = {
-//   weibo: '微博',
-//   redbook: '小红书',
-//   tiktok: '抖音',
-// };
-
 const Report = () => {
   const [searchParams] = useSearchParams();
   const contextValue = useCreateReducer<ReportInitialState>({
@@ -47,6 +41,7 @@ const Report = () => {
       excludeWords,
       userType,
       sentiment,
+      gender,
       listIncludeWords,
       listExcludeWords,
       wordClassHiddenWord,
@@ -61,6 +56,8 @@ const Report = () => {
       wordCloudDeleteWord,
       categoryBarHiddenWord,
       categoryBarDeleteWord,
+      specificChartHiddenWord,
+      specificChartDeleteWord,
       wordMap,
       excludeNotes,
       excludeUsers,
@@ -117,11 +114,20 @@ const Report = () => {
         if (condition.categoryBarDeleteWord) {
           dispatch({ field: 'categoryBarDeleteWord', value: condition.categoryBarDeleteWord });
         }
+        if (condition.specificChartDeleteWord) {
+          dispatch({ field: 'specificChartDeleteWord', value: condition.specificChartDeleteWord });
+        }
         if (condition.category) {
           dispatch({ field: 'category', value: condition.category });
         }
         if (condition.wordMap) {
           dispatch({ field: 'wordMap', value: condition.wordMap });
+        }
+        if (condition.gender) {
+          dispatch({ field: 'gender', value: condition.gender });
+        }
+        if (condition.wordClassType) {
+          dispatch({ field: 'wordClassType', value: condition.wordClassType });
         }
       }
     },
@@ -165,6 +171,7 @@ const Report = () => {
         timeLimit: projectTimeRange,
         platforms,
         tasksId,
+        userGender: gender,
         includeWords,
         excludeWords,
         userType,
@@ -202,6 +209,7 @@ const Report = () => {
         timeLimit: projectTimeRange,
         platforms,
         tasksId,
+        userGender: gender,
         includeWords,
         excludeWords,
         userType,
@@ -210,7 +218,12 @@ const Report = () => {
           wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
           brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
           appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
-          wordClass: [...wordClassHiddenWord, ...wordClassDeleteWord],
+          wordClass: [
+            ...wordClassHiddenWord,
+            ...wordClassDeleteWord,
+            ...specificChartHiddenWord,
+            ...specificChartDeleteWord,
+          ],
           wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
           categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
         },
@@ -310,10 +323,15 @@ const Report = () => {
     wordTrendDeleteWord,
     appearTogetherHiddenWord,
     appearTogetherDeleteWord,
+    categoryBarHiddenWord,
+    categoryBarDeleteWord,
+    specificChartHiddenWord,
+    specificChartDeleteWord,
     wordMap,
     excludeNotes,
     excludeUsers,
     wordClassType,
+    gender,
   ]);
 
   useEffect(() => {

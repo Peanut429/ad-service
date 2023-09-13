@@ -102,7 +102,10 @@ const Login: React.FC = () => {
           subTitle="SMI System 数据中心"
           initialValues={{ autoLogin: true }}
           onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
+            await handleSubmit({
+              username: values.username.trim(),
+              password: values.password.trim(),
+            });
           }}
         >
           {/* {status === 'error' && (

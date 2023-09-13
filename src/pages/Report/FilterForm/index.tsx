@@ -34,18 +34,14 @@ const FilterForm = () => {
       timeLimit,
       sentiment,
       platforms,
-      // wordCloudHiddenWord,
+      gender,
       wordCloudDeleteWord,
-      // brandBarHiddenWord,
       brandBarDeleteWord,
-      // wordTrendHiddenWord,
       wordTrendDeleteWord,
-      // appearTogetherHiddenWord,
       appearTogetherDeleteWord,
-      // wordClassHiddenWord,
       wordClassDeleteWord,
-      // categoryBarHiddenWord,
       categoryBarDeleteWord,
+      specificChartDeleteWord,
       wordMap,
       listIncludeWords,
       wordClassType,
@@ -75,7 +71,7 @@ const FilterForm = () => {
 
   const handleRemoveIncludeWords = (index: number) => {
     includeWords.splice(index, 1);
-    dispatch({ field: 'includeWords', value: [...includeWords] });
+    dispatch({ field: 'includeWords', value: [...includeWords].filter((item) => item.length) });
   };
 
   const handleUpdateExcludeWords = () => {
@@ -104,8 +100,14 @@ const FilterForm = () => {
   };
 
   const handleRemoveWordMap = (key: string) => {
-    delete wordMap[key];
-    dispatch({ field: 'wordMap', value: { ...wordMap } });
+    dispatch({
+      field: 'wordMap',
+      value: {
+        ...Object.keys(wordMap)
+          .filter((item) => item !== key)
+          .reduce((pre, cur) => ({ ...pre, [cur]: wordMap[cur] }), {}),
+      },
+    });
   };
 
   return (
@@ -168,7 +170,7 @@ const FilterForm = () => {
           </Form.Item>
           <Form.Item label="关键词映射">
             {Object.entries(wordMap).map(([key, value]) => (
-              <Tag key={key} closable onClick={() => handleRemoveWordMap(key)}>
+              <Tag key={key} closable onClose={() => handleRemoveWordMap(key)}>
                 {key} → {value}
               </Tag>
             ))}
@@ -246,8 +248,8 @@ const FilterForm = () => {
               value={category}
               mode="multiple"
               options={(industryListData || []).map((item) => ({
-                label: item.category,
-                value: item.category,
+                label: item.classification,
+                value: item.classification,
               }))}
               placeholder="选择行业"
               onChange={(value) => {
@@ -269,10 +271,16 @@ const FilterForm = () => {
           </Form.Item>
           <Form.Item label="性别">
             <Select
+              mode="multiple"
               options={[
                 { label: '男', value: '男' },
                 { label: '女', value: '女' },
+                { label: '未知', value: '未知' },
               ]}
+              value={gender}
+              onChange={(value) => {
+                dispatch({ field: 'gender', value });
+              }}
             />
           </Form.Item>
           <Access accessible={access.canEdit}>
@@ -291,18 +299,14 @@ const FilterForm = () => {
                         platforms,
                         sentiment,
                         category,
-                        // wordCloudHiddenWord,
+                        gender,
                         wordCloudDeleteWord,
-                        // wordClassHiddenWord,
                         wordClassDeleteWord,
-                        // wordTrendHiddenWord,
                         wordTrendDeleteWord,
-                        // appearTogetherHiddenWord,
                         appearTogetherDeleteWord,
-                        // brandBarHiddenWord,
                         brandBarDeleteWord,
-                        // categoryBarHiddenWord,
                         categoryBarDeleteWord,
+                        specificChartDeleteWord,
                         wordMap,
                         wordClassType,
                       }),
@@ -315,24 +319,18 @@ const FilterForm = () => {
                   onClick={() => {
                     dispatch({ field: 'includeWords', value: [] });
                     dispatch({ field: 'excludeWords', value: [] });
-                    // dispatch({ field: 'timeLimit', value: {} });
                     dispatch({ field: 'sentiment', value: [] });
-                    dispatch({ field: 'platforms', value: [] });
+                    dispatch({ field: 'platforms', value: ['redbook', 'tiktok'] });
                     dispatch({ field: 'category', value: [] });
                     dispatch({ field: 'wordCloudHiddenWord', value: [] });
-                    // dispatch({ field: 'wordCloudDeleteWord', value: [] });
                     dispatch({ field: 'wordClassHiddenWord', value: [] });
-                    // dispatch({ field: 'wordClassDeleteWord', value: [] });
                     dispatch({ field: 'wordTrendHiddenWord', value: [] });
-                    // dispatch({ field: 'wordTrendDeleteWord', value: [] });
                     dispatch({ field: 'appearTogetherHiddenWord', value: [] });
-                    // dispatch({ field: 'appearTogetherDeleteWord', value: [] });
                     dispatch({ field: 'brandBarHiddenWord', value: [] });
-                    // dispatch({ field: 'brandBarDeleteWord', value: [] });
                     dispatch({ field: 'categoryBarHiddenWord', value: [] });
-                    // dispatch({ field: 'categoryBarDeleteWord', value: [] });
-                    dispatch({ field: 'wordMap', value: {} });
+                    dispatch({ field: 'specificChartHiddenWord', value: [] });
                     dispatch({ field: 'wordClassType', value: [] });
+                    dispatch({ field: 'gender', value: [] });
                   }}
                 >
                   重置

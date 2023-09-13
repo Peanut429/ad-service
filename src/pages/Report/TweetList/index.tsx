@@ -66,24 +66,6 @@ const sentimentText = {
   '3': '正面',
 };
 
-//时间格式化
-const formatDate = (date: number) => {
-  const dateObj = new Date(date);
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth() + 1;
-  const day = dateObj.getDate();
-  const hour = dateObj.getHours();
-  const minute = dateObj.getMinutes();
-  const second = dateObj.getSeconds();
-  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-};
-
-const genderColor = {
-  男: '#108ee9',
-  女: '#cd201f',
-  未知: 'default',
-};
-
 type TweetListItemProps = {
   data: ReportApi.TweetListItem & {
     platform?: Platform;
@@ -174,7 +156,9 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
               {/* <Tag color={genderColor[tweet.gender]}>{tweet.gender}</Tag> */}
               <GenderElement gender={tweet.gender} />
               <Tag>{tweet.userType}</Tag>
-              <span className={styles.tweet__time}>{formatDate(tweet.createdAtTimestamp)}</span>
+              <span className={styles.tweet__time}>
+                {dayjs(tweet.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss')}
+              </span>
               {tweet.type && TweetTypeEnum[tweet.type] ? (
                 <Tag color="cyan">{TweetTypeEnum[tweet.type]}</Tag>
               ) : null}
@@ -261,6 +245,7 @@ const TweetList = () => {
       listSentiment,
       excludeNotes,
       excludeUsers,
+      gender,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -276,9 +261,6 @@ const TweetList = () => {
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
 
   const reqIncludeWordsData = useMemo(() => {
-    if (!includeWords.length && !listIncludeWords.length) {
-      return [];
-    }
     const allListIncludeWords = listIncludeWords.flat();
     return includeWords.length
       ? includeWords.map((item) => {
@@ -286,7 +268,9 @@ const TweetList = () => {
             ? [...item, ...allListIncludeWords, searchValue]
             : [...item, ...allListIncludeWords];
         })
-      : [allListIncludeWords];
+      : searchValue
+      ? [[...allListIncludeWords, searchValue]]
+      : [allListIncludeWords].filter((item) => item.length);
   }, [listIncludeWords, includeWords, searchValue]);
 
   const {
@@ -305,6 +289,7 @@ const TweetList = () => {
         sentiment: listSentiment,
         excludeNotes,
         excludeUsers,
+        userGender: gender,
         page: currentPage,
         limit: pageSize,
         sortKey: sortKey,
@@ -332,6 +317,9 @@ const TweetList = () => {
       excludeWords: [...excludeWords, ...listExcludeWords],
       includeWords: reqIncludeWordsData,
       sentiment: listSentiment,
+      excludeNotes,
+      excludeUsers,
+      userGender: gender,
       page: 1,
       limit: 10000,
       sortKey: sortKey,
@@ -431,6 +419,7 @@ const TweetList = () => {
     listSentiment,
     excludeNotes,
     excludeUsers,
+    gender,
   ]);
 
   return (

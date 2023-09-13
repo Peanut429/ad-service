@@ -61,7 +61,7 @@ declare namespace BrandsApi {
 
   type IndustryListRes = Api.Response<
     {
-      category: string;
+      classification: string;
     }[]
   >;
 }

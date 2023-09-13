@@ -35,7 +35,7 @@ const CategoryChart: React.FC = () => {
     } else if (key === 'hide') {
       if (!categoryBarHiddenWord.includes(currentWord)) {
         dispatch({
-          field: 'categoryBarDeleteWord',
+          field: 'categoryBarHiddenWord',
           value: [...categoryBarHiddenWord, currentWord],
         });
       }

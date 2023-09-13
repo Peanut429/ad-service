@@ -10,6 +10,7 @@ declare namespace ReportApi {
       gte: number;
       lte: number;
     };
+    userGender: string[];
     platforms: string[];
     tasksId: string[];
     includeWords?: string[][];
@@ -189,6 +190,7 @@ declare namespace ReportApi {
     sentiment?: number[];
     excludeNotes?: string[];
     excludeUsers?: string[];
+    userGender?: string[];
   };
 
   type TweetListItem = {

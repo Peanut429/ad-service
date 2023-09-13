@@ -2,13 +2,31 @@ import { Segmented, Spin } from 'antd';
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { Area } from '@antv/g2plot';
+import dayjs from 'dayjs';
 
 const TweetChart = () => {
   const {
     state: { tweetTrendData, chartLoading },
+    dispatch,
   } = useContext(ReportContext);
   const divRef = useRef<HTMLDivElement | null>(null);
   const [dataType, setDataType] = useState<'frequency' | 'heat'>('heat');
+  const [chart, setChart] = useState<Area>();
+  const [currentDate, setCurrentDate] = useState('');
+
+  const handleChartClick = () => {
+    dispatch({
+      field: 'timeLimit',
+      value: {
+        gte: dayjs(currentDate).startOf('day').valueOf(),
+        lte: dayjs(currentDate).endOf('day').valueOf(),
+      },
+    });
+  };
+
+  const handleTooltipChange = (ev: any) => {
+    setCurrentDate(ev.data.title);
+  };
 
   useEffect(() => {
     if (!tweetTrendData || !divRef.current) return;
@@ -29,11 +47,24 @@ const TweetChart = () => {
     });
 
     chart.render();
+    setChart(chart);
 
     return () => {
       chart.destroy();
     };
   }, [tweetTrendData, dataType]);
+
+  useEffect(() => {
+    if (!chart) return;
+
+    chart.on('plot:click', handleChartClick);
+    chart.on('tooltip:change', handleTooltipChange);
+
+    return () => {
+      chart.off('plot:click', handleChartClick);
+      chart.off('tooltip:change', handleTooltipChange);
+    };
+  }, [chart, currentDate]);
 
   return (
     <div>

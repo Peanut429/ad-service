@@ -1,16 +1,16 @@
 // 香味数据柱状图
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Column } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
-import { Dropdown, Space, Spin } from 'antd';
+import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
 
 const ScentBarChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const {
-    state: { wordClassData, chartLoading },
-    // dispatch,
-    // addListKeyword,
+    state: { wordClassData, chartLoading, specificChartHiddenWord, specificChartDeleteWord },
+    dispatch,
+    addListKeyword,
   } = useContext(ReportContext);
   const { source: dataSource, ComponentNode: SourceNode } = useSegmented(
     [
@@ -26,36 +26,42 @@ const ScentBarChart: React.FC = () => {
     ],
     'frequency',
   );
-  // const [chart, setChart] = useState<Column>();
-  // const [currentWord, setCurrentWord] = useState('');
-  // const [menuVisible, setMenuVisible] = useState(false);
+  const [chart, setChart] = useState<Column>();
+  const [currentWord, setCurrentWord] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
 
-  // const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
-  //   if (key === 'add') {
-  //     addListKeyword([currentWord]);
-  //   } else if (key === 'hide') {
-  //     if (!brandBarHiddenWord.includes(currentWord)) {
-  //       dispatch({ field: 'brandBarHiddenWord', value: [...brandBarHiddenWord, currentWord] });
-  //     }
-  //   } else if (key === 'delete') {
-  //     if (!brandBarDeleteWord.includes(currentWord)) {
-  //       dispatch({ field: 'brandBarDeleteWord', value: [...brandBarDeleteWord, currentWord] });
-  //     }
-  //   }
-  // };
+  const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
+    if (key === 'add') {
+      addListKeyword([currentWord]);
+    } else if (key === 'hide') {
+      if (!specificChartHiddenWord.includes(currentWord)) {
+        dispatch({
+          field: 'specificChartHiddenWord',
+          value: [...specificChartHiddenWord, currentWord],
+        });
+      }
+    } else if (key === 'delete') {
+      if (!specificChartDeleteWord.includes(currentWord)) {
+        dispatch({
+          field: 'specificChartDeleteWord',
+          value: [...specificChartDeleteWord, currentWord],
+        });
+      }
+    }
+  };
 
-  // const handleCloseContextmenu = () => {
-  //   setMenuVisible(false);
-  // };
+  const handleCloseContextmenu = () => {
+    setMenuVisible(false);
+  };
 
-  // const handleContextmenu = (ev: any) => {
-  //   const delegateObject = ev.target.get('delegateObject');
-  //   console.log(delegateObject.axis.cfg.position);
-  //   if (delegateObject.axis.cfg.position !== 'bottom') return;
-  //   const item = delegateObject.item;
-  //   setCurrentWord(item.name);
-  //   setMenuVisible(true);
-  // };
+  const handleContextmenu = (ev: any) => {
+    const delegateObject = ev.target.get('delegateObject');
+    console.log(delegateObject.axis.cfg.position);
+    if (delegateObject.axis.cfg.position !== 'bottom') return;
+    const item = delegateObject.item;
+    setCurrentWord(item.name);
+    setMenuVisible(true);
+  };
 
   useEffect(() => {
     if (!divRef.current || !wordClassData) return;
@@ -88,24 +94,24 @@ const ScentBarChart: React.FC = () => {
       // legend: { position: 'bottom' },
     });
 
-    // setChart(chart);
+    setChart(chart);
 
     chart.render();
 
     return () => chart.destroy();
   }, [wordClassData, dataSource, dataType]);
 
-  // useEffect(() => {
-  //   if (!chart) return;
+  useEffect(() => {
+    if (!chart) return;
 
-  //   chart.on('axis-label:contextmenu', handleContextmenu);
-  //   document.addEventListener('click', handleCloseContextmenu);
+    chart.on('axis-label:contextmenu', handleContextmenu);
+    document.addEventListener('click', handleCloseContextmenu);
 
-  //   return () => {
-  //     chart.off('axis-label:contextmenu', handleContextmenu);
-  //     document.removeEventListener('click', handleCloseContextmenu);
-  //   };
-  // }, [chart, brandBarHiddenWord, brandBarDeleteWord]);
+    return () => {
+      chart.off('axis-label:contextmenu', handleContextmenu);
+      document.removeEventListener('click', handleCloseContextmenu);
+    };
+  }, [chart, specificChartHiddenWord, specificChartDeleteWord]);
 
   return (
     <div>
@@ -115,6 +121,7 @@ const ScentBarChart: React.FC = () => {
       </Space>
       <Spin spinning={chartLoading}>
         <Dropdown
+          open={menuVisible}
           trigger={['contextMenu']}
           menu={{
             items: [
@@ -122,29 +129,29 @@ const ScentBarChart: React.FC = () => {
               { label: '隐藏关键词', key: 'hide' },
               { label: '删除关键词', key: 'delete' },
             ],
-            // onClick: handleMenuItemClick,
+            onClick: handleMenuItemClick,
           }}
         >
           <div ref={divRef} style={{ height: 300 }} />
         </Dropdown>
       </Spin>
-      {/* {brandBarHiddenWord.length > 0 && (
+      {specificChartHiddenWord.length > 0 && (
         <div>
           <span>隐藏的关键词：</span>
-          {brandBarHiddenWord.map((item) => (
+          {specificChartHiddenWord.map((item) => (
             <Tag
               key={item}
               closable
               onClose={() => {
-                brandBarHiddenWord.splice(brandBarHiddenWord.indexOf(item), 1);
-                dispatch({ field: 'brandBarHiddenWord', value: [...brandBarHiddenWord] });
+                specificChartHiddenWord.splice(specificChartHiddenWord.indexOf(item), 1);
+                dispatch({ field: 'specificChartHiddenWord', value: [...specificChartHiddenWord] });
               }}
             >
               {item}
             </Tag>
           ))}
         </div>
-      )} */}
+      )}
     </div>
   );
 };
