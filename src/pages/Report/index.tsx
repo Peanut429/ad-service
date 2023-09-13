@@ -156,6 +156,7 @@ const Report = () => {
         excludeNotes,
         excludeUsers,
         wordClassType,
+        userGender: gender,
       }),
     {
       manual: true,
