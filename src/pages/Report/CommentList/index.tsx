@@ -156,6 +156,7 @@ const CommentList = () => {
       excludeNotes,
       excludeUsers,
       gender,
+      commentIncludeWords,
     },
   } = useContext(ReportContext);
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
@@ -178,7 +179,8 @@ const CommentList = () => {
         userType: listUserType,
         platforms: listPlatforms,
         excludeWords: [...excludeWords, ...listExcludeWords],
-        includeWords: [...includeWords, ...listIncludeWords],
+        includeWords: includeWords,
+        commentIncludeWords: commentIncludeWords,
         sentiment: listSentiment,
         excludeNotes,
         excludeUsers,
@@ -261,13 +263,13 @@ const CommentList = () => {
     listUserType,
     listPlatforms,
     listExcludeWords,
-    listIncludeWords,
     listSentiment,
     sortParams.order_direction,
     sortParams.order_key,
     excludeNotes,
     excludeUsers,
     gender,
+    commentIncludeWords,
   ]);
 
   return (

@@ -191,6 +191,7 @@ declare namespace ReportApi {
     excludeNotes?: string[];
     excludeUsers?: string[];
     userGender?: string[];
+    commentIncludeWords?: string[][];
   };
 
   type TweetListItem = {

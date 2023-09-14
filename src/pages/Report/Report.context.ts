@@ -5,7 +5,7 @@ import { ActionType } from '@/hooks/useCreateReducer';
 export interface ReportContextProps {
   state: ReportInitialState;
   dispatch: Dispatch<ActionType<ReportInitialState>>;
-  addListKeyword: (keyword: string[]) => void;
+  addListKeyword: (keyword: string[], keywordType: 'tweet' | 'comment') => void;
   // addListExcludeWords: (keyword: string) => void;
 }
 

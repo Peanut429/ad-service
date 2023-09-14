@@ -62,6 +62,7 @@ const Report = () => {
       excludeNotes,
       excludeUsers,
       wordClassType,
+      commentIncludeWords,
     },
     dispatch,
   } = contextValue;
@@ -256,34 +257,48 @@ const Report = () => {
 
   // 图表操作： 新增关键词
   const addListKeyword = useCallback(
-    (keywords: string[]) => {
-      const result = keywords.filter((item) => {
-        const existInExclude = excludeWords.includes(item);
-        const existInHidden = [
-          ...wordCloudHiddenWord,
-          ...wordCloudDeleteWord,
-          ...appearTogetherHiddenWord,
-          ...appearTogetherDeleteWord,
-          ...wordClassHiddenWord,
-          ...wordClassDeleteWord,
-          ...wordTrendHiddenWord,
-          ...wordTrendDeleteWord,
-          ...brandBarHiddenWord,
-          ...brandBarDeleteWord,
-        ].includes(item);
-        return !existInExclude && !existInHidden;
-      });
+    (keywords: string[], keywordType: 'tweet' | 'comment' = 'tweet') => {
+      if (keywordType === 'tweet') {
+        const result = keywords.filter((item) => {
+          const existInExclude = excludeWords.includes(item);
+          const existInHidden = [
+            ...wordCloudHiddenWord,
+            ...wordCloudDeleteWord,
+            ...appearTogetherHiddenWord,
+            ...appearTogetherDeleteWord,
+            ...wordClassHiddenWord,
+            ...wordClassDeleteWord,
+            ...wordTrendHiddenWord,
+            ...wordTrendDeleteWord,
+            ...brandBarHiddenWord,
+            ...brandBarDeleteWord,
+          ].includes(item);
+          return !existInExclude && !existInHidden;
+        });
 
-      if (!keywords.length) {
-        // 数据如果正常应该是不会出现能进入这个条件的情况
-        message.error('添加的关键词已经存在于排除，隐藏，删除的关键词中');
-        return;
+        if (!keywords.length) {
+          // 数据如果正常应该是不会出现能进入这个条件的情况
+          message.error('添加的关键词已经存在于排除，隐藏，删除的关键词中');
+          return;
+        }
+
+        dispatch({
+          field: 'listIncludeWords',
+          value: [...listIncludeWords, result],
+        });
+      } else {
+        if (commentIncludeWords.length) {
+          dispatch({
+            field: 'commentIncludeWords',
+            value: [...commentIncludeWords.map((item) => [...item, ...keywords])],
+          });
+        } else {
+          dispatch({
+            field: 'commentIncludeWords',
+            value: [keywords],
+          });
+        }
       }
-
-      dispatch({
-        field: 'listIncludeWords',
-        value: [...listIncludeWords, result],
-      });
     },
     [
       listIncludeWords,
@@ -299,6 +314,7 @@ const Report = () => {
       appearTogetherDeleteWord,
       brandBarHiddenWord,
       brandBarDeleteWord,
+      commentIncludeWords,
     ],
   );
 
@@ -359,7 +375,7 @@ const Report = () => {
             </h4>
             <h4>列表筛选条件：</h4>
             <Form size="small">
-              <Form.Item label="筛选关键词">
+              <Form.Item label="推文关键词">
                 {listIncludeWords.map((item, index) => (
                   <Tag
                     key={item.join(',')}
@@ -368,6 +384,21 @@ const Report = () => {
                       listIncludeWords.splice(index, 1);
                       console.log(listIncludeWords);
                       dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+                    }}
+                    style={{ fontSize: 14 }}
+                  >
+                    {item.join(' + ')}
+                  </Tag>
+                ))}
+              </Form.Item>
+              <Form.Item label="评论关键词">
+                {commentIncludeWords.map((item, index) => (
+                  <Tag
+                    key={item.join(',')}
+                    closable
+                    onClose={() => {
+                      commentIncludeWords.splice(index, 1);
+                      dispatch({ field: 'commentIncludeWords', value: [...commentIncludeWords] });
                     }}
                     style={{ fontSize: 14 }}
                   >
