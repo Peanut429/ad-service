@@ -192,6 +192,8 @@ declare namespace ReportApi {
     excludeUsers?: string[];
     userGender?: string[];
     commentIncludeWords?: string[][];
+    mappingWord?: Record<string, string>;
+    classification?: string[];
   };
 
   type TweetListItem = {

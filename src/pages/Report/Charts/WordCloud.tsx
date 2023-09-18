@@ -1,7 +1,8 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import ReportContext from '../Report.context';
 import { WordCloud } from '@antv/g2plot';
-import { Dropdown, Segmented, Space, Spin, Tag } from 'antd';
+import { Button, Dropdown, Segmented, Space, Spin, Tag } from 'antd';
+import { utils, writeFile } from 'xlsx';
 import type { MenuProps } from 'antd/es/menu';
 
 const WordCloudChart = () => {
@@ -16,6 +17,7 @@ const WordCloudChart = () => {
     { label: '删除关键词', key: 'delete' },
   ]);
   const [chart, setChart] = useState<WordCloud>();
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const {
     state: { wordcloudData, wordCloudHiddenWord, wordCloudDeleteWord, chartLoading },
@@ -40,6 +42,31 @@ const WordCloudChart = () => {
       dispatch({ field: 'wordCloudDeleteWord', value: [...wordCloudDeleteWord, currentWord] });
     }
     setMenuVisible(false);
+  };
+
+  const downloadData = () => {
+    if (!wordcloudData) return;
+    setDownloadLoading(true);
+    const headers = {
+      word: '关键词',
+      frequency: '词频',
+      heat: '热度',
+    };
+    const tweetData = wordcloudData.tweet.filter(
+      (item) => !wordCloudHiddenWord.includes(item.word),
+    );
+    const workbook = utils.book_new();
+    const tweetWorksheet = utils.json_to_sheet([headers, ...tweetData], { skipHeader: true });
+    utils.book_append_sheet(workbook, tweetWorksheet, '关键词词云-推文');
+
+    const commentData = wordcloudData.comment.filter(
+      (item) => !wordCloudHiddenWord.includes(item.word),
+    );
+    const commentWorksheet = utils.json_to_sheet([headers, ...commentData], { skipHeader: true });
+    utils.book_append_sheet(workbook, commentWorksheet, '关键词词云-评论');
+
+    writeFile(workbook, '词云.xlsx');
+    setDownloadLoading(false);
   };
 
   useEffect(() => {
@@ -82,25 +109,32 @@ const WordCloudChart = () => {
 
   return (
     <div>
-      <Space>
-        <Segmented
-          value={dataSource}
-          options={[
-            // { label: '全部', value: 'total' },
-            { label: '推文', value: 'tweet' },
-            { label: '评论', value: 'comment' },
-          ]}
-          onChange={(value) => setDataSource(value as 'tweet' | 'comment')}
-        />
-        <Segmented
-          value={dataType}
-          options={[
-            { label: '词频', value: 'frequency' },
-            { label: '热度', value: 'heat' },
-          ]}
-          onChange={(value) => setDataType(value as 'frequency' | 'heat')}
-        />
-      </Space>
+      <div style={{ display: 'flex', width: '100%' }}>
+        <Space>
+          <Segmented
+            value={dataSource}
+            options={[
+              // { label: '全部', value: 'total' },
+              { label: '推文', value: 'tweet' },
+              { label: '评论', value: 'comment' },
+            ]}
+            onChange={(value) => setDataSource(value as 'tweet' | 'comment')}
+          />
+          <Segmented
+            value={dataType}
+            options={[
+              { label: '词频', value: 'frequency' },
+              { label: '热度', value: 'heat' },
+            ]}
+            onChange={(value) => setDataType(value as 'frequency' | 'heat')}
+          />
+        </Space>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>
+            数据下载
+          </Button>
+        </div>
+      </div>
 
       <Spin size="large" spinning={chartLoading}>
         <Dropdown

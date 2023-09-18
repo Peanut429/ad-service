@@ -246,6 +246,8 @@ const TweetList = () => {
       excludeNotes,
       excludeUsers,
       gender,
+      wordMap,
+      category,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -290,6 +292,8 @@ const TweetList = () => {
         excludeNotes,
         excludeUsers,
         userGender: gender,
+        mappingWord: wordMap,
+        classification: category,
         page: currentPage,
         limit: pageSize,
         sortKey: sortKey,
@@ -320,6 +324,8 @@ const TweetList = () => {
       excludeNotes,
       excludeUsers,
       userGender: gender,
+      mappingWord: wordMap,
+      classification: category,
       page: 1,
       limit: 10000,
       sortKey: sortKey,
@@ -420,6 +426,8 @@ const TweetList = () => {
     excludeNotes,
     excludeUsers,
     gender,
+    wordMap,
+    category,
   ]);
 
   return (
