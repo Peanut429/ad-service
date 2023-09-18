@@ -2,10 +2,12 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Column } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
-import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { Button, Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { utils, writeFile } from 'xlsx';
 
 const CategoryChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const {
     state: { categoryBarData, chartLoading, categoryBarHiddenWord, categoryBarDeleteWord },
     dispatch,
@@ -62,6 +64,21 @@ const CategoryChart: React.FC = () => {
     setMenuVisible(true);
   };
 
+  const downloadData = () => {
+    if (!categoryBarData) return;
+    setDownloadLoading(true);
+    const headers = { word: '关键词', frequency: '词频', heat: '热度' };
+    const tweetData = categoryBarData.tweet;
+    const workbook = utils.book_new();
+    const tweetWorksheet = utils.json_to_sheet([headers, ...tweetData], { skipHeader: true });
+    utils.book_append_sheet(workbook, tweetWorksheet, '品类词-推文');
+    const commentData = categoryBarData.comment;
+    const commentWorksheet = utils.json_to_sheet([headers, ...commentData], { skipHeader: true });
+    utils.book_append_sheet(workbook, commentWorksheet, '品类词-评论');
+    writeFile(workbook, '品类词.xlsx');
+    setDownloadLoading(false);
+  };
+
   useEffect(() => {
     if (!divRef.current || !categoryBarData) return;
 
@@ -106,10 +123,17 @@ const CategoryChart: React.FC = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 20 }}>
-        <SourceNode key="dataSource" />
-        <DataTypeNode key="dataType" />
-      </Space>
+      <div style={{ display: 'flex', marginBottom: 20 }}>
+        <Space style={{ marginBottom: 20 }}>
+          <SourceNode key="dataSource" />
+          <DataTypeNode key="dataType" />
+        </Space>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>
+            数据下载
+          </Button>
+        </div>
+      </div>
       <Spin spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
