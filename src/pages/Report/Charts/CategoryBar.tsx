@@ -31,7 +31,7 @@ const CategoryChart: React.FC = () => {
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
-      addListKeyword([currentWord]);
+      addListKeyword([currentWord], dataSource as 'tweet' | 'comment');
     } else if (key === 'hide') {
       if (!categoryBarHiddenWord.includes(currentWord)) {
         dispatch({
@@ -83,7 +83,6 @@ const CategoryChart: React.FC = () => {
         frequency: { alias: '词频' },
         heat: { alias: '热度' },
       },
-      // legend: { position: 'bottom' },
     });
 
     setChart(chart);

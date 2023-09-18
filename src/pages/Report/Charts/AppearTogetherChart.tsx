@@ -243,8 +243,11 @@ const AppearTogetherChart = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', marginBottom: 20 }}>
         <SourceSegmented />
+        {/* <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>数据下载</Button>
+        </div> */}
       </div>
       <Spin size="large" spinning={chartLoading}>
         <Dropdown

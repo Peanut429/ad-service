@@ -69,7 +69,7 @@ const HeatmapChart = () => {
 
   const handleContextmenuClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
-      addListKeyword([currentWord]);
+      addListKeyword([currentWord], dataSource as 'tweet' | 'comment');
     }
     if (key === 'delete') {
       dispatch({ field: 'wordTrendHiddenWord', value: [...wordTrendDeleteWord, currentWord] });
@@ -108,7 +108,7 @@ const HeatmapChart = () => {
       skipHeader: true,
     });
     utils.book_append_sheet(workbook, tweetFrequencyWorksheet, '热力图-推文-词频');
-    utils.book_append_sheet(workbook, tweetHeatWorksheet, '关键词词云-推文-热度');
+    utils.book_append_sheet(workbook, tweetHeatWorksheet, '热力图-推文-热度');
     const commentFrequencyData = commentWordTrendData.frequency
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((item) => ({ word: item.word, value: item.value, date: item.date }));
@@ -125,8 +125,8 @@ const HeatmapChart = () => {
       skipHeader: true,
     });
     utils.book_append_sheet(workbook, commentFrequencyWorksheet, '热力图-评论-词频');
-    utils.book_append_sheet(workbook, commentHeatWorksheet, '关键词词云-评论-热度');
-    writeFile(workbook, '词云.xlsx');
+    utils.book_append_sheet(workbook, commentHeatWorksheet, '热力图-评论-热度');
+    writeFile(workbook, '热力图.xlsx');
     setDownloadLoading(false);
   };
 
