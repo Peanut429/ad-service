@@ -3,10 +3,12 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Column } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
-import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { Button, Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { utils, writeFile } from 'xlsx';
 
 const ScentBarChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const {
     state: { wordClassData, chartLoading, specificChartHiddenWord, specificChartDeleteWord },
     dispatch,
@@ -32,7 +34,7 @@ const ScentBarChart: React.FC = () => {
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
-      addListKeyword([currentWord]);
+      addListKeyword([currentWord], dataSource as 'tweet' | 'comment');
     } else if (key === 'hide') {
       if (!specificChartHiddenWord.includes(currentWord)) {
         dispatch({
@@ -63,6 +65,28 @@ const ScentBarChart: React.FC = () => {
     setMenuVisible(true);
   };
 
+  const downloadData = () => {
+    if (!wordClassData) return;
+    const tweetChartData = wordClassData.tweet.find((item) => item.mainWord === '香味');
+    const commentChartData = wordClassData.comment.find((item) => item.mainWord === '香味');
+    if (!tweetChartData || !commentChartData) return;
+    setDownloadLoading(true);
+    const headers = {
+      word: '关键词',
+      frequency: '词频',
+      heat: '热度',
+    };
+    const tweetData = tweetChartData.subWords;
+    const workbook = utils.book_new();
+    const tweetWorksheet = utils.json_to_sheet([headers, ...tweetData], { skipHeader: true });
+    utils.book_append_sheet(workbook, tweetWorksheet, '香味-推文');
+    const commentData = commentChartData.subWords;
+    const commentWorksheet = utils.json_to_sheet([headers, ...commentData], { skipHeader: true });
+    utils.book_append_sheet(workbook, commentWorksheet, '香味-评论');
+    writeFile(workbook, '香味.xlsx');
+    setDownloadLoading(false);
+  };
+
   useEffect(() => {
     if (!divRef.current || !wordClassData) return;
 
@@ -91,7 +115,6 @@ const ScentBarChart: React.FC = () => {
         frequency: { alias: '词频' },
         heat: { alias: '热度' },
       },
-      // legend: { position: 'bottom' },
     });
 
     setChart(chart);
@@ -115,10 +138,17 @@ const ScentBarChart: React.FC = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 20 }}>
-        <SourceNode key="dataSource" />
-        <DataTypeNode key="dataType" />
-      </Space>
+      <div style={{ marginBottom: 20, display: 'flex' }}>
+        <Space>
+          <SourceNode key="dataSource" />
+          <DataTypeNode key="dataType" />
+        </Space>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>
+            数据下载
+          </Button>
+        </div>
+      </div>
       <Spin spinning={chartLoading}>
         <Dropdown
           open={menuVisible}
