@@ -1,9 +1,10 @@
 import dayjs from 'dayjs';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { Button, Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
 import { Heatmap } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
+import { utils, writeFile } from 'xlsx';
 
 const HeatmapChart = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
@@ -22,6 +23,7 @@ const HeatmapChart = () => {
   const [chart, setChart] = useState<Heatmap>();
   const [menuVisible, setMenuVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const { source: dataSource, ComponentNode: SourceSegmented } = useSegmented(
     [
@@ -77,6 +79,55 @@ const HeatmapChart = () => {
         value: [...wordTrendHiddenWord, currentWord],
       });
     }
+  };
+
+  const downloadData = () => {
+    if (!tweetWordTrendData || !commentWordTrendData) return;
+    setDownloadLoading(true);
+    const frequencyHeaders = {
+      word: '关键词',
+      value: '词频',
+      date: '日期',
+    };
+    const heatHeaders = {
+      word: '关键词',
+      value: '热度',
+      date: '日期',
+    };
+    const tweetFrequencyData = tweetWordTrendData.frequency
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item) => ({ word: item.word, value: item.value, date: item.date }));
+    const tweetHeatData = tweetWordTrendData.heat
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item) => ({ word: item.word, value: item.value, date: item.date }));
+    const workbook = utils.book_new();
+    const tweetFrequencyWorksheet = utils.json_to_sheet([frequencyHeaders, ...tweetFrequencyData], {
+      skipHeader: true,
+    });
+    const tweetHeatWorksheet = utils.json_to_sheet([heatHeaders, ...tweetHeatData], {
+      skipHeader: true,
+    });
+    utils.book_append_sheet(workbook, tweetFrequencyWorksheet, '热力图-推文-词频');
+    utils.book_append_sheet(workbook, tweetHeatWorksheet, '关键词词云-推文-热度');
+    const commentFrequencyData = commentWordTrendData.frequency
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item) => ({ word: item.word, value: item.value, date: item.date }));
+    const commentHeatData = commentWordTrendData.heat
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((item) => ({ word: item.word, value: item.value, date: item.date }));
+    const commentFrequencyWorksheet = utils.json_to_sheet(
+      [frequencyHeaders, ...commentFrequencyData],
+      {
+        skipHeader: true,
+      },
+    );
+    const commentHeatWorksheet = utils.json_to_sheet([heatHeaders, ...commentHeatData], {
+      skipHeader: true,
+    });
+    utils.book_append_sheet(workbook, commentFrequencyWorksheet, '热力图-评论-词频');
+    utils.book_append_sheet(workbook, commentHeatWorksheet, '关键词词云-评论-热度');
+    writeFile(workbook, '词云.xlsx');
+    setDownloadLoading(false);
   };
 
   useEffect(() => {
@@ -146,19 +197,16 @@ const HeatmapChart = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, display: 'flex' }}>
         <Space>
           <SourceSegmented />
           <DataTypeSegmented />
-          {/* <Segmented
-            value={dataType}
-            options={[
-              { label: '词频', value: 'frequency' },
-              { label: '热度', value: 'heat' },
-            ]}
-            onChange={(value) => setDataType(value as 'frequency' | 'heat')}
-          /> */}
         </Space>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>
+            数据下载
+          </Button>
+        </div>
       </div>
       <Spin size="large" spinning={chartLoading}>
         <Dropdown
