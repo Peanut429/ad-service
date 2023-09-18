@@ -1,9 +1,11 @@
 import { useContext, useEffect, useRef, useState } from 'react';
+import { Treemap } from '@antv/g2plot';
+import { Button, Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
+import { utils, writeFile } from 'xlsx';
 import useSegmented from './useSegmented';
 import ReportContext from '../Report.context';
-import { Treemap } from '@antv/g2plot';
-import { Dropdown, MenuProps, Space, Spin, Tag } from 'antd';
 
+// 关键词类别图
 const WordClass = () => {
   const { source: dataSource, ComponentNode: SourceSegmented } = useSegmented(
     [
@@ -28,6 +30,7 @@ const WordClass = () => {
   const [chart, setChart] = useState<Treemap>();
   const [menuVisible, setMenuVisible] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
   const handleContextmenu = (ev: any) => {
     const origin = ev.target.get('origin');
@@ -43,7 +46,7 @@ const WordClass = () => {
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
-      addListKeyword([currentWord]);
+      addListKeyword([currentWord], dataSource as 'tweet' | 'comment');
     }
     if (key === 'hide') {
       if (!wordClassHiddenWord.includes(currentWord)) {
@@ -55,6 +58,45 @@ const WordClass = () => {
       }
     }
     setMenuVisible(false);
+  };
+
+  const downloadData = () => {
+    if (!wordClassData) return;
+    setDownloadLoading(true);
+    const headers = {
+      word: '关键词',
+      type: '词类',
+      frequency: '词频',
+      heat: '热度',
+    };
+    const tweetData = wordClassData.tweet
+      .map((item) => {
+        return item.subWords.map((sub) => ({
+          word: sub.word,
+          type: item.mainWord,
+          frequency: sub.frequency,
+          heat: sub.heat,
+        }));
+      })
+      .flat();
+    const workbook = utils.book_new();
+    const tweetWorksheet = utils.json_to_sheet([headers, ...tweetData], { skipHeader: true });
+    utils.book_append_sheet(workbook, tweetWorksheet, '关键词类别-推文');
+
+    const commentData = wordClassData.comment
+      .map((item) => {
+        return item.subWords.map((sub) => ({
+          word: sub.word,
+          type: item.mainWord,
+          frequency: sub.frequency,
+          heat: sub.heat,
+        }));
+      })
+      .flat();
+    const commentWorksheet = utils.json_to_sheet([headers, ...commentData], { skipHeader: true });
+    utils.book_append_sheet(workbook, commentWorksheet, '关键词类别-评论');
+    writeFile(workbook, '词类.xlsx');
+    setDownloadLoading(false);
   };
 
   useEffect(() => {
@@ -105,10 +147,17 @@ const WordClass = () => {
 
   return (
     <>
-      <Space style={{ marginBottom: 20 }}>
-        <SourceSegmented />
-        <DataTypeSegmented />
-      </Space>
+      <div style={{ display: 'flex', marginBottom: 20 }}>
+        <Space>
+          <SourceSegmented />
+          <DataTypeSegmented />
+        </Space>
+        <div style={{ marginLeft: 'auto' }}>
+          <Button loading={downloadLoading} onClick={downloadData}>
+            数据下载
+          </Button>
+        </div>
+      </div>
       <Spin spinning={chartLoading}>
         <Dropdown
           trigger={['contextMenu']}
