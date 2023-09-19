@@ -58,7 +58,7 @@ const ScentBarChart: React.FC = () => {
 
   const handleContextmenu = (ev: any) => {
     const delegateObject = ev.target.get('delegateObject');
-    console.log(delegateObject.axis.cfg.position);
+
     if (delegateObject.axis.cfg.position !== 'bottom') return;
     const item = delegateObject.item;
     setCurrentWord(item.name);

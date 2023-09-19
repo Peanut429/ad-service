@@ -73,12 +73,12 @@ const AppearTogetherChart = () => {
 
   const handleNodeClick = (ev: any) => {
     const { id } = ev.item.getModel();
-    addListKeyword([id]);
+    addListKeyword([id], dataSource as 'tweet' | 'comment');
   };
 
   const handleEdgeClick = (ev: any) => {
     const { source, target } = ev.item.getModel();
-    addListKeyword([source, target]);
+    addListKeyword([source, target], dataSource as 'tweet' | 'comment');
   };
 
   const handleNodeRightClick = (ev: any) => {
