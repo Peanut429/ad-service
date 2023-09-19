@@ -74,7 +74,9 @@ const WordCloudChart = () => {
     if (!divRef.current || !wordcloudData) return;
 
     const chart = new WordCloud(divRef.current, {
-      data: wordcloudData[dataSource].filter((item) => !wordCloudHiddenWord.includes(item.word)),
+      data: wordcloudData[dataSource]
+        .filter((item) => !wordCloudHiddenWord.includes(item.word))
+        .slice(0, 70),
       height: 300,
       wordField: 'word',
       weightField: dataType,

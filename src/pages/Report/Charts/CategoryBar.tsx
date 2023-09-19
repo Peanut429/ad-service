@@ -83,7 +83,7 @@ const CategoryChart: React.FC = () => {
     if (!divRef.current || !categoryBarData) return;
 
     const chart = new Column(divRef.current, {
-      data: categoryBarData[dataSource as 'tweet' | 'comment'],
+      data: categoryBarData[dataSource as 'tweet' | 'comment'].slice(0, 10),
       height: 300,
       xField: 'word',
       yField: dataType,

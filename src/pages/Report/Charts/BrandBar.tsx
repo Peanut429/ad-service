@@ -81,7 +81,7 @@ const BrandBarChart: React.FC = () => {
     if (!divRef.current || !brandBarData) return;
 
     const chart = new Column(divRef.current, {
-      data: brandBarData[dataSource as 'tweet' | 'comment'],
+      data: brandBarData[dataSource as 'tweet' | 'comment'].slice(0, 10),
       height: 300,
       xField: 'word',
       yField: dataType,
