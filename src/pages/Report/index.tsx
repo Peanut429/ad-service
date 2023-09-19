@@ -168,7 +168,7 @@ const Report = () => {
   );
 
   const { run: commentChartDataApi } = useRequest(
-    (commentData: ReportApi.WordcloudData['comment']) =>
+    () =>
       commentChartData({
         timeLimit: projectTimeRange,
         platforms,
@@ -190,7 +190,7 @@ const Report = () => {
         classification: category,
         excludeNotes,
         excludeUsers,
-        commentWordCloud: commentData,
+        // commentWordCloud: commentData,
         wordClassType,
       }),
     {
@@ -236,7 +236,7 @@ const Report = () => {
         wordClassType,
       });
 
-      commentChartDataApi(res.data.wordCloud.comment);
+      commentChartDataApi();
 
       dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
       dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
