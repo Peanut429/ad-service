@@ -76,10 +76,20 @@ type TweetListItemProps = {
 };
 
 const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentiment }) => {
-  // const [visible, setVisible] = useState(false);
-  async function changeTweetSentiment() {
-    // setVisible(true);
-  }
+  const {
+    state: { listIncludeWords },
+  } = useContext(ReportContext);
+
+  const tweetContent = useMemo(() => {
+    const keywords = listIncludeWords.flat();
+    console.log(keywords);
+    if (!keywords.length) return tweet.content;
+    return tweet.content.replace(new RegExp(`(${keywords.join('|')})`, 'g'), (match) => {
+      return `<span class="${styles.highlight}">${match}</span>`;
+    });
+  }, [tweet.content, listIncludeWords]);
+
+  async function changeTweetSentiment() {}
 
   return (
     <Dropdown
@@ -187,7 +197,10 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
               {/* {tweet.platform !== 'weibo' ? (
                 <span className={styles.tweet__title}>{tweet.title}</span>
               ) : null} */}
-              <div className={styles.tweet__text}>{tweet.content}</div>
+              <div
+                className={styles.tweet__text}
+                dangerouslySetInnerHTML={{ __html: tweetContent }}
+              ></div>
               <Space className={styles.tweet__data} size={20}>
                 <span>
                   <RetweetOutlined />

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, Space, Spin, Tag, message } from 'antd';
 import { DownloadOutlined, LikeOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
@@ -12,11 +12,12 @@ import sentimentGood from '../TweetList/sentiment_good.png';
 import sentimentNeutral from '../TweetList/sentiment_neutral.png';
 import sentimentUnknow from '../TweetList/question.png';
 
-import './index.less';
 import SortComponent from '../SortComponent';
 import SentimentForm from '../SentimentForm';
 import getTweetLink from '@/utils/getTweetLink';
 // import SortComponent from '../SortComponent';
+import './index.less';
+import { useRequest } from '@umijs/max';
 
 const formatDate = (date: number) => {
   const dateObj = new Date(date);
@@ -67,28 +68,24 @@ type CommentListItemProps = {
 };
 
 const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySentiment }) => {
-  // const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
-  //   if (key === 'tweet') {
-  //     const link = getTweetLink(data.noteId, data.platform);
-  //     window.open(link);
-  //   }
-  // };
+  const {
+    state: { commentIncludeWords },
+  } = useContext(ReportContext);
+
+  const commentContent = useMemo(() => {
+    const keywords = commentIncludeWords.flat();
+    if (!keywords.length) return data.content;
+    return data.content.replace(new RegExp(`(${keywords.join('|')})`, 'g'), (match) => {
+      return `<span class="highlight">${match}</span>`;
+    });
+  }, [data.content, commentIncludeWords]);
 
   return (
-    // <Dropdown
-    //   menu={{
-    //     items: [{ label: '查看原文', key: 'tweet' }],
-    //     onClick: handleMenuItemClick,
-    //   }}
-    //   trigger={['contextMenu']}
-    // >
-    // </Dropdown>
     <div className="works">
       <div className="works__left">
         <div className="works__avatar">
           <img src={data.avatar} alt="头像" />
         </div>
-        {/* <div className="works__sentiment" onClick={() => setVisible(true) */}
         <SentimentForm
           id={data.id}
           platform={data.platform}
@@ -106,12 +103,13 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
         <Space size={8} className="content__header">
           <div className="nickname">{data.nickname}</div>
           <GenderElement gender={data.gender} />
-          {/* <Tag color={genderColor[data.gender]}>
-          </Tag> */}
           <div className="time">{formatDate(data.createdAtTimestamp)}</div>
         </Space>
         <div className="content">
-          <div className="comment-content">{data.content}</div>
+          <div
+            className="comment-content"
+            dangerouslySetInnerHTML={{ __html: commentContent }}
+          ></div>
           <div className="works-content">{data.noteContent}</div>
         </div>
         <Space size={20}>
@@ -119,22 +117,6 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
             <LikeOutlined />
             {data.likeNum.toLocaleString()}
           </span>
-          {/* <span style={{ color: '#ccc' }}>
-              <CommentOutlined style={{ color: '#ccc' }} />
-              {data.tweet_comment_num.toLocaleString()}
-            </span> */}
-          {/* {data.platform === 'weibo' ? (
-              <span style={{ color: '#ccc' }}>
-                <ShareAltOutlined style={{ color: '#ccc' }} />
-                {(data.tweet_repost_num || 0).toLocaleString()}
-              </span>
-            ) : null} */}
-          {/* {data.platform === 'redbook' ? (
-              <span style={{ color: '#ccc' }}>
-                <StarOutlined style={{ color: '#ccc' }} />
-                {(data.tweet_collect_num || 0).toLocaleString()}
-              </span>
-            ) : null} */}
         </Space>
       </div>
     </div>
@@ -151,7 +133,6 @@ const CommentList = () => {
       excludeWords,
       listExcludeWords,
       includeWords,
-      listIncludeWords,
       listSentiment,
       excludeNotes,
       excludeUsers,
@@ -164,7 +145,7 @@ const CommentList = () => {
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const { currentPage, pageSize, Pagination } = usePageInfo(total);
   const [sortParams, setSortParams] = useState({
@@ -172,10 +153,13 @@ const CommentList = () => {
     order_direction: 1, // 1降序，0正序
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await commentList({
+  const {
+    run: commentListApi,
+    loading,
+    cancel,
+  } = useRequest(
+    () =>
+      commentList({
         timeLimit,
         tasksId,
         userType: listUserType,
@@ -193,16 +177,47 @@ const CommentList = () => {
         limit: pageSize,
         sortKey: sortParams.order_key,
         sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
-      });
+      }),
+    {
+      manual: true,
+      onSuccess: (data) => {
+        setDataList(data.data);
+        setTotal(data.count);
+      },
+    },
+  );
 
-      setDataList(res.data.data);
-      setTotal(res.data.count);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await commentList({
+  //       timeLimit,
+  //       tasksId,
+  //       userType: listUserType,
+  //       platforms: listPlatforms,
+  //       excludeWords: [...excludeWords, ...listExcludeWords],
+  //       includeWords: includeWords,
+  //       commentIncludeWords: commentIncludeWords,
+  //       sentiment: listSentiment,
+  //       excludeNotes,
+  //       excludeUsers,
+  //       userGender: gender,
+  //       mappingWord: wordMap,
+  //       classification: category,
+  //       page: currentPage,
+  //       limit: pageSize,
+  //       sortKey: sortParams.order_key,
+  //       sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
+  //     });
+
+  //     setDataList(res.data.data);
+  //     setTotal(res.data.count);
+  //   } catch (e) {
+  //     console.error(e);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const downloadExcel = async () => {
     const params = {
@@ -259,7 +274,8 @@ const CommentList = () => {
 
   useEffect(() => {
     if (!tasksId.length) return;
-    fetchData();
+    if (loading) cancel();
+    commentListApi();
   }, [
     pageSize,
     currentPage,
