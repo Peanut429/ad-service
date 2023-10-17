@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRequest, useSearchParams } from '@umijs/max';
-import { Affix, Card, Form, Tabs, Tag, message } from 'antd';
+import { Affix, Button, Card, Form, Space, Tabs, Tag, message } from 'antd';
 import useCreateReducer from '@/hooks/useCreateReducer';
 import ReportContext from './Report.context';
 import initialState, { ReportInitialState } from './Report.state';
@@ -14,6 +14,7 @@ import FilterForm from './FilterForm';
 import { chartData, commentChartData, commentSentiment } from '@/services/report';
 import { keywordsInfo, taskList } from '@/services/brands';
 import styles from './index.module.scss';
+import dayjs from 'dayjs';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
@@ -37,11 +38,13 @@ const Report = () => {
       projectId,
       platforms,
       tasksId,
+      timeLimit,
       includeWords,
       excludeWords,
       userType,
       sentiment,
       gender,
+      listTimeLimit,
       listIncludeWords,
       listExcludeWords,
       wordClassHiddenWord,
@@ -85,14 +88,17 @@ const Report = () => {
         }
         if (condition.timeLimit) {
           dispatch({ field: 'timeLimit', value: condition.timeLimit });
+          dispatch({ field: 'listTimeLimit', value: condition.timeLimit });
         } else {
           dispatch({ field: 'timeLimit', value: data.dataRetrieverTime });
+          dispatch({ field: 'listTimeLimit', value: data.dataRetrieverTime });
         }
         if (condition.sentiment) {
           dispatch({ field: 'sentiment', value: condition.sentiment });
         }
         if (condition.platforms) {
           dispatch({ field: 'platforms', value: condition.platforms });
+          dispatch({ field: 'listPlatforms', value: condition.platforms });
         }
         if (condition.wordCloudDeleteWord) {
           dispatch({ field: 'wordCloudDeleteWord', value: condition.wordCloudDeleteWord });
@@ -208,7 +214,7 @@ const Report = () => {
     try {
       commentSentimentApi();
       const res = await chartData({
-        timeLimit: projectTimeRange,
+        timeLimit,
         platforms,
         tasksId,
         userGender: gender,
@@ -322,7 +328,7 @@ const Report = () => {
     if (!tasksId.length) return;
     fetchChatData();
   }, [
-    projectTimeRange,
+    timeLimit,
     platforms,
     tasksId,
     includeWords,
@@ -375,6 +381,23 @@ const Report = () => {
             </h4>
             <h4>列表筛选条件：</h4>
             <Form size="small">
+              <Form.Item label="时间范围">
+                {listTimeLimit?.gte ? (
+                  <Space>
+                    <Tag>
+                      {dayjs(listTimeLimit.gte).format('YYYY-MM-DD')} ~{' '}
+                      {dayjs(listTimeLimit.lte).format('YYYY-MM-DD')}
+                    </Tag>
+                    {listTimeLimit.gte !== timeLimit.gte || listTimeLimit.lte !== timeLimit.lte ? (
+                      <Button
+                        onClick={() => dispatch({ field: 'listTimeLimit', value: timeLimit })}
+                      >
+                        重置
+                      </Button>
+                    ) : null}
+                  </Space>
+                ) : null}
+              </Form.Item>
               <Form.Item label="推文关键词">
                 {listIncludeWords.map((item, index) => (
                   <Tag
@@ -382,7 +405,7 @@ const Report = () => {
                     closable
                     onClose={() => {
                       listIncludeWords.splice(index, 1);
-                      console.log(listIncludeWords);
+
                       dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
                     }}
                     style={{ fontSize: 14 }}

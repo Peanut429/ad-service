@@ -252,6 +252,7 @@ declare namespace ReportApi {
     gender: '男' | '女' | '未知';
     noteContent: string;
     noteId: string;
+    subCommentNum: number;
   };
 
   type WordClassListRes = Response<string[]>;

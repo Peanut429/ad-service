@@ -210,6 +210,7 @@ const FilterForm = () => {
                   lte: value![1]!.endOf('day').valueOf(),
                 };
                 dispatch({ field: 'timeLimit', value: range });
+                dispatch({ field: 'listTimeLimit', value: range });
               }}
             />
           </Form.Item>
@@ -219,6 +220,7 @@ const FilterForm = () => {
               value={platforms}
               mode="tags"
               options={[
+                { label: '微博', value: 'weibo' },
                 { label: '小红书', value: 'redbook' },
                 { label: '抖音', value: 'tiktok' },
               ]}

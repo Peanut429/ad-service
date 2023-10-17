@@ -16,7 +16,7 @@ const TweetChart = () => {
 
   const handleChartClick = () => {
     dispatch({
-      field: 'timeLimit',
+      field: 'listTimeLimit',
       value: {
         gte: dayjs(currentDate).startOf('day').valueOf(),
         lte: dayjs(currentDate).endOf('day').valueOf(),
@@ -31,8 +31,12 @@ const TweetChart = () => {
   useEffect(() => {
     if (!tweetTrendData || !divRef.current) return;
 
+    const data = tweetTrendData[dataType].sort(
+      (a, b) => new Date(a.key).valueOf() - new Date(b.key).valueOf(),
+    );
+
     const chart = new Area(divRef.current, {
-      data: tweetTrendData[dataType],
+      data,
       height: 300,
       xField: 'key',
       yField: 'value',

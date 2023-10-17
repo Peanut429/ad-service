@@ -22,9 +22,12 @@ const usePageInfo = (total: number) => {
     return {
       currentPage: pageInfo.page,
       pageSize: pageInfo.limit,
+      reset: () => {
+        setPageInfo({ page: 1, limit: 10 });
+      },
       Pagination: PaginationDOM,
     };
-  }, [pageInfo, total]);
+  }, [pageInfo.page, pageInfo.limit, total]);
 };
 
 export default usePageInfo;

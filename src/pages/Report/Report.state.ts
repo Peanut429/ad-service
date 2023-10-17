@@ -13,7 +13,7 @@ export interface ReportInitialState {
   userType: UserType[];
   sentiment: number[];
   gender: string[];
-  // listTimeLimit: { gte: number; lte: number };
+  listTimeLimit: { gte: number; lte: number };
   listPlatforms: Platform[]; // 推文筛选的平台信息
   listIncludeWords: string[][]; // 推文筛选的关键词信息
   listExcludeWords: string[]; // 推文筛选的关键词信息
@@ -67,14 +67,15 @@ const initialState: ReportInitialState = {
   chartLoading: false,
   category: [],
   timeLimit: { gte: 0, lte: 0 },
-  platforms: ['redbook', 'tiktok'],
+  platforms: ['weibo', 'redbook', 'tiktok'],
   tasksId: [],
   includeWords: [],
   excludeWords: [],
   userType: [],
   sentiment: [],
   gender: [],
-  listPlatforms: ['redbook', 'tiktok'],
+  listTimeLimit: { gte: 0, lte: 0 },
+  listPlatforms: ['weibo', 'redbook', 'tiktok'],
   listIncludeWords: [],
   listExcludeWords: [],
   listUserType: [],

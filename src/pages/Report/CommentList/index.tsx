@@ -1,7 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Button, Space, Spin, Tag, message } from 'antd';
-import { DownloadOutlined, LikeOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
+import {
+  CommentOutlined,
+  DownloadOutlined,
+  LikeOutlined,
+  ManOutlined,
+  WomanOutlined,
+} from '@ant-design/icons';
 import { utils, writeFile } from 'xlsx';
 import usePageInfo from '../usePageInfo';
 import { Platform } from '../Report.state';
@@ -83,9 +89,9 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
   return (
     <div className="works">
       <div className="works__left">
-        <div className="works__avatar">
+        {/* <div className="works__avatar">
           <img src={data.avatar} alt="头像" />
-        </div>
+        </div> */}
         <SentimentForm
           id={data.id}
           platform={data.platform}
@@ -101,7 +107,7 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
       </div>
       <div className="works__center">
         <Space size={8} className="content__header">
-          <div className="nickname">{data.nickname}</div>
+          <div className="nickname">{data.nickname || '匿名'}</div>
           <GenderElement gender={data.gender} />
           <div className="time">{formatDate(data.createdAtTimestamp)}</div>
         </Space>
@@ -117,6 +123,9 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
             <LikeOutlined />
             {data.likeNum.toLocaleString()}
           </span>
+          <span>
+            <CommentOutlined /> {data.subCommentNum.toLocaleString()}
+          </span>
         </Space>
       </div>
     </div>
@@ -126,7 +135,7 @@ const CommentListItem: React.FC<CommentListItemProps> = ({ data: data, modifySen
 const CommentList = () => {
   const {
     state: {
-      timeLimit,
+      listTimeLimit,
       listUserType,
       listPlatforms,
       tasksId,
@@ -142,12 +151,12 @@ const CommentList = () => {
       category,
     },
   } = useContext(ReportContext);
+
   const [dataList, setDataList] = useState<ReportApi.CommentListItem[]>([]);
   const [total, setTotal] = useState(100);
   const [downloadLoading, setDownloadLoading] = useState(false);
-  // const [loading, setLoading] = useState(false);
 
-  const { currentPage, pageSize, Pagination } = usePageInfo(total);
+  const { currentPage, pageSize, Pagination, reset } = usePageInfo(total);
   const [sortParams, setSortParams] = useState({
     order_key: 'time',
     order_direction: 1, // 1降序，0正序
@@ -160,7 +169,7 @@ const CommentList = () => {
   } = useRequest(
     () =>
       commentList({
-        timeLimit,
+        timeLimit: listTimeLimit,
         tasksId,
         userType: listUserType,
         platforms: listPlatforms,
@@ -184,44 +193,13 @@ const CommentList = () => {
         setDataList(data.data);
         setTotal(data.count);
       },
+      debounceInterval: 500,
     },
   );
 
-  // const fetchData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await commentList({
-  //       timeLimit,
-  //       tasksId,
-  //       userType: listUserType,
-  //       platforms: listPlatforms,
-  //       excludeWords: [...excludeWords, ...listExcludeWords],
-  //       includeWords: includeWords,
-  //       commentIncludeWords: commentIncludeWords,
-  //       sentiment: listSentiment,
-  //       excludeNotes,
-  //       excludeUsers,
-  //       userGender: gender,
-  //       mappingWord: wordMap,
-  //       classification: category,
-  //       page: currentPage,
-  //       limit: pageSize,
-  //       sortKey: sortParams.order_key,
-  //       sortOrder: sortParams.order_direction === 1 ? 'desc' : 'asc',
-  //     });
-
-  //     setDataList(res.data.data);
-  //     setTotal(res.data.count);
-  //   } catch (e) {
-  //     console.error(e);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const downloadExcel = async () => {
     const params = {
-      timeLimit,
+      timeLimit: listTimeLimit,
       tasksId,
       userType: listUserType,
       platforms: listPlatforms,
@@ -273,16 +251,40 @@ const CommentList = () => {
   };
 
   useEffect(() => {
+    reset();
+  }, [
+    excludeWords,
+    includeWords,
+    tasksId,
+    // timeLimit,
+    listTimeLimit,
+    listUserType,
+    listPlatforms,
+    listExcludeWords,
+    listSentiment,
+    sortParams.order_direction,
+    sortParams.order_key,
+    excludeNotes,
+    excludeUsers,
+    gender,
+    commentIncludeWords,
+    wordMap,
+    category,
+  ]);
+
+  useEffect(() => {
     if (!tasksId.length) return;
     if (loading) cancel();
     commentListApi();
   }, [
     pageSize,
     currentPage,
+    tasksId,
     excludeWords,
     includeWords,
     tasksId,
-    timeLimit,
+    // timeLimit,
+    listTimeLimit,
     listUserType,
     listPlatforms,
     listExcludeWords,

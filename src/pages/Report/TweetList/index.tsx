@@ -82,7 +82,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
 
   const tweetContent = useMemo(() => {
     const keywords = listIncludeWords.flat();
-    console.log(keywords);
+
     if (!keywords.length) return tweet.content;
     return tweet.content.replace(new RegExp(`(${keywords.join('|')})`, 'g'), (match) => {
       return `<span class="${styles.highlight}">${match}</span>`;
@@ -107,17 +107,15 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
           }}
         />
         <div className={styles.tweet__left}>
-          {
-            <img
-              className={styles.avatar}
-              src={
-                tweet.avatar && tweet.avatar !== 'None'
-                  ? decodeURIComponent(tweet.avatar)
-                  : 'https://tvax1.sinaimg.cn/default/images/default_avatar_female_180.gif?KID=imgbed,tva&Expires=1671366461&ssig=7lPflXwnyW'
-              }
-              alt="头像"
-            />
-          }
+          {/* <img
+            className={styles.avatar}
+            src={
+              tweet.avatar && tweet.avatar !== 'None'
+                ? decodeURIComponent(tweet.avatar)
+                : 'https://tvax1.sinaimg.cn/default/images/default_avatar_female_180.gif?KID=imgbed,tva&Expires=1671366461&ssig=7lPflXwnyW'
+            }
+            alt="头像"
+          /> */}
           <SentimentForm
             id={tweet.id}
             type="tweet"
@@ -142,6 +140,8 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
               window.open(`https://www.xiaohongshu.com/discovery/item/${tweet.id}`);
             } else if (tweet.platform === 'tiktok') {
               window.open(`https://www.douyin.com/video/${tweet.id}`);
+            } else if (tweet.platform === 'weibo') {
+              // window.open(`https://weibo.com//${tweet.id}`);
             }
           }}
         >
@@ -247,7 +247,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
 const TweetList = () => {
   const {
     state: {
-      timeLimit,
+      listTimeLimit,
       listUserType,
       listPlatforms,
       tasksId,
@@ -273,7 +273,7 @@ const TweetList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<CheckboxValueType[]>([]);
   const [searchValue, setSearchValue] = useState('');
 
-  const { currentPage, pageSize, Pagination } = usePageInfo(total);
+  const { currentPage, pageSize, Pagination, reset } = usePageInfo(total);
 
   const reqIncludeWordsData = useMemo(() => {
     const allListIncludeWords = listIncludeWords.flat();
@@ -295,7 +295,7 @@ const TweetList = () => {
   } = useRequest(
     () =>
       tweetList({
-        timeLimit,
+        timeLimit: listTimeLimit,
         userType: listUserType,
         platforms: listPlatforms,
         tasksId,
@@ -327,7 +327,7 @@ const TweetList = () => {
 
   const downloadExcel = async () => {
     const params = {
-      timeLimit,
+      timeLimit: listTimeLimit,
       userType: listUserType,
       platforms: listPlatforms,
       tasksId,
@@ -418,19 +418,41 @@ const TweetList = () => {
   };
 
   useEffect(() => {
+    reset();
+  }, [
+    sortKey,
+    sortOrder,
+    excludeWords,
+    reqIncludeWordsData,
+    listTimeLimit,
+    tasksId,
+    listUserType,
+    listPlatforms,
+    listExcludeWords,
+    listSentiment,
+    excludeNotes,
+    excludeUsers,
+    gender,
+    wordMap,
+    category,
+  ]);
+
+  useEffect(() => {
     if (!tasksId.length) return;
     if (loading) {
       cancel();
     }
     fetchData();
+    console.log(listPlatforms);
   }, [
     pageSize,
     currentPage,
+    tasksId,
     sortKey,
     sortOrder,
     excludeWords,
     reqIncludeWordsData,
-    timeLimit,
+    listTimeLimit,
     tasksId,
     listUserType,
     listPlatforms,
