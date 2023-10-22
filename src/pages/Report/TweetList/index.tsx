@@ -141,7 +141,7 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
             } else if (tweet.platform === 'tiktok') {
               window.open(`https://www.douyin.com/video/${tweet.id}`);
             } else if (tweet.platform === 'weibo') {
-              // window.open(`https://weibo.com//${tweet.id}`);
+              window.open(`https://weibo.com/detail/${tweet.id}`);
             }
           }}
         >

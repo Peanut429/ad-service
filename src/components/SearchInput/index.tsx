@@ -44,6 +44,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
               options={[
                 { label: '小红书', value: 'redbook' },
                 { label: '抖音', value: 'tiktok' },
+                { label: '微博', value: 'weibo' },
               ]}
               onChange={(value) => {
                 if (!value.length) {
@@ -120,7 +121,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
           taskId: target.taskId,
           word: target.word,
           pattern: [],
-          platforms: ['redbook', 'tiktok'],
+          platforms: ['redbook', 'tiktok', 'weibo'],
         },
       ]);
       setSelectedValue(undefined);
@@ -199,7 +200,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder, style, editAble,
                 {
                   word,
                   pattern: [],
-                  platforms: ['redbook', 'tiktok'],
+                  platforms: ['redbook', 'tiktok', 'weibo'],
                 },
               ]);
             }
