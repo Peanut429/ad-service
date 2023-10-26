@@ -6,6 +6,7 @@ import { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal, Input } from 'antd';
 import {
   CommentOutlined,
+  DownOutlined,
   DownloadOutlined,
   LikeOutlined,
   RetweetOutlined,
@@ -26,6 +27,7 @@ import styles from './index.module.scss';
 import SentimentForm from '../SentimentForm';
 import getTweetLink from '@/utils/getTweetLink';
 import { GenderElement } from '../CommentList';
+import { updateTaskInfo } from '@/services/brands';
 
 export enum TweetTypeEnum {
   star = '明星帖',
@@ -247,6 +249,17 @@ const TweetListItem: React.FC<TweetListItemProps> = ({ data: tweet, modifySentim
 const TweetList = () => {
   const {
     state: {
+      projectId,
+      timeLimit,
+      platforms,
+      sentiment,
+      wordCloudDeleteWord,
+      wordClassDeleteWord,
+      wordTrendDeleteWord,
+      appearTogetherDeleteWord,
+      brandBarDeleteWord,
+      categoryBarDeleteWord,
+      specificChartDeleteWord,
       listTimeLimit,
       listUserType,
       listPlatforms,
@@ -261,6 +274,7 @@ const TweetList = () => {
       gender,
       wordMap,
       category,
+      wordClassType,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -272,6 +286,7 @@ const TweetList = () => {
   // const [loading, setLoading] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<CheckboxValueType[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [deletedTweets, setDeletedTweets] = useState<string[]>([]);
 
   const { currentPage, pageSize, Pagination, reset } = usePageInfo(total);
 
@@ -288,6 +303,10 @@ const TweetList = () => {
       : [allListIncludeWords].filter((item) => item.length);
   }, [listIncludeWords, includeWords, searchValue]);
 
+  const { run: updateApi } = useRequest(updateTaskInfo, {
+    manual: true,
+  });
+
   const {
     loading,
     run: fetchData,
@@ -302,7 +321,7 @@ const TweetList = () => {
         excludeWords: [...excludeWords, ...listExcludeWords],
         includeWords: reqIncludeWordsData,
         sentiment: listSentiment,
-        excludeNotes,
+        excludeNotes: [...excludeNotes, ...deletedTweets],
         excludeUsers,
         userGender: gender,
         mappingWord: wordMap,
@@ -390,7 +409,8 @@ const TweetList = () => {
     setSortOrder(data.order_direction === 0 ? 'asc' : 'desc');
   };
 
-  const deleteTweet = () => {
+  // 永久删除推文
+  const deleteTweetFover = () => {
     Modal.confirm({
       title: '确认删除所选推文?',
       okText: '确认',
@@ -402,8 +422,34 @@ const TweetList = () => {
           value: [...excludeNotes, ...(selectedRowKeys as string[])],
         });
         setSelectedRowKeys([]);
+        updateApi({
+          projectId,
+          wordTasksId: tasksId,
+          condition: JSON.stringify({
+            includeWords,
+            excludeWords,
+            timeLimit,
+            platforms,
+            sentiment,
+            category,
+            gender,
+            wordCloudDeleteWord,
+            wordClassDeleteWord,
+            wordTrendDeleteWord,
+            appearTogetherDeleteWord,
+            brandBarDeleteWord,
+            categoryBarDeleteWord,
+            specificChartDeleteWord,
+            wordMap,
+            wordClassType,
+          }),
+        });
       },
     });
+  };
+
+  const deleteTweet = () => {
+    setDeletedTweets((prev) => [...prev, ...(selectedRowKeys as string[])]);
   };
 
   const modifySentiment = (id: string, sentimentValue: 1 | 2 | 3) => {
@@ -443,7 +489,6 @@ const TweetList = () => {
       cancel();
     }
     fetchData();
-    console.log(listPlatforms);
   }, [
     pageSize,
     currentPage,
@@ -463,6 +508,7 @@ const TweetList = () => {
     gender,
     wordMap,
     category,
+    deletedTweets,
   ]);
 
   return (
@@ -474,9 +520,26 @@ const TweetList = () => {
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
-        <Button type="primary" danger disabled={selectedRowKeys.length === 0} onClick={deleteTweet}>
-          批量删除
-        </Button>
+        <Dropdown
+          disabled={selectedRowKeys.length === 0}
+          menu={{
+            items: [
+              { key: 'delete', label: '临时删除' },
+              { key: 'deleteFover', label: '永久删除' },
+            ],
+            onClick: ({ key }) => {
+              if (key === 'delete') {
+                deleteTweet();
+              } else {
+                deleteTweetFover();
+              }
+            },
+          }}
+        >
+          <Button>
+            删除 <DownOutlined />
+          </Button>
+        </Dropdown>
         <Button loading={downloadLoading} icon={<DownloadOutlined />} onClick={downloadExcel}>
           下载为Excel
         </Button>
