@@ -28,6 +28,7 @@ import SentimentForm from '../SentimentForm';
 import getTweetLink from '@/utils/getTweetLink';
 import { GenderElement } from '../CommentList';
 import { updateTaskInfo } from '@/services/brands';
+import { CheckboxChangeEvent } from 'antd/es/checkbox';
 
 export enum TweetTypeEnum {
   star = '明星帖',
@@ -288,6 +289,9 @@ const TweetList = () => {
   const [searchValue, setSearchValue] = useState('');
   const [deletedTweets, setDeletedTweets] = useState<string[]>([]);
 
+  const checkAll = selectedRowKeys.length === dataList.length && dataList.length > 0;
+  const indeterminate = selectedRowKeys.length > 0 && selectedRowKeys.length < dataList.length;
+
   const { currentPage, pageSize, Pagination, reset } = usePageInfo(total);
 
   const reqIncludeWordsData = useMemo(() => {
@@ -442,6 +446,7 @@ const TweetList = () => {
             specificChartDeleteWord,
             wordMap,
             wordClassType,
+            excludeNotes: [...excludeNotes, ...(selectedRowKeys as string[])],
           }),
         });
       },
@@ -461,6 +466,10 @@ const TweetList = () => {
         return item;
       }),
     );
+  };
+
+  const onCheckAllChange = (e: CheckboxChangeEvent) => {
+    setSelectedRowKeys(e.target.checked ? dataList.map((item) => item.id) : []);
   };
 
   useEffect(() => {
@@ -544,7 +553,10 @@ const TweetList = () => {
           下载为Excel
         </Button>
       </div>
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', marginBottom: 20, gap: 10, alignItems: 'center' }}>
+        <Checkbox indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
+          全选
+        </Checkbox>
         <SortComponent onChange={handleSortChange} />
       </div>
       <Spin spinning={loading}>

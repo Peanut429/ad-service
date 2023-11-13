@@ -45,6 +45,7 @@ const FilterForm = () => {
       wordMap,
       listIncludeWords,
       wordClassType,
+      excludeNotes,
     },
     dispatch,
   } = useContext(ReportContext);
@@ -311,6 +312,7 @@ const FilterForm = () => {
                         specificChartDeleteWord,
                         wordMap,
                         wordClassType,
+                        excludeNotes: [...excludeNotes],
                       }),
                     })
                   }

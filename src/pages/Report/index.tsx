@@ -136,6 +136,9 @@ const Report = () => {
         if (condition.wordClassType) {
           dispatch({ field: 'wordClassType', value: condition.wordClassType });
         }
+        if (condition.excludeNotes) {
+          dispatch({ field: 'excludeNotes', value: condition.excludeNotes });
+        }
       }
     },
   });
