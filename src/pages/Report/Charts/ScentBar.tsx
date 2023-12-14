@@ -1,5 +1,5 @@
 // 香味数据柱状图
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Column } from '@antv/g2plot';
 import ReportContext from '../Report.context';
 import useSegmented from './useSegmented';
@@ -10,7 +10,13 @@ const ScentBarChart: React.FC = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const {
-    state: { wordClassData, chartLoading, specificChartHiddenWord, specificChartDeleteWord },
+    state: {
+      projectId,
+      wordClassData,
+      chartLoading,
+      specificChartHiddenWord,
+      specificChartDeleteWord,
+    },
     dispatch,
     addListKeyword,
   } = useContext(ReportContext);
@@ -31,6 +37,10 @@ const ScentBarChart: React.FC = () => {
   const [chart, setChart] = useState<Column>();
   const [currentWord, setCurrentWord] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
+
+  const keyword = useMemo(() => {
+    return projectId === 'project-149015156' ? '风味' : '香味';
+  }, [projectId]);
 
   const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => {
     if (key === 'add') {
@@ -67,8 +77,8 @@ const ScentBarChart: React.FC = () => {
 
   const downloadData = () => {
     if (!wordClassData) return;
-    const tweetChartData = wordClassData.tweet.find((item) => item.mainWord === '香味');
-    const commentChartData = wordClassData.comment.find((item) => item.mainWord === '香味');
+    const tweetChartData = wordClassData.tweet.find((item) => item.mainWord === keyword);
+    const commentChartData = wordClassData.comment.find((item) => item.mainWord === keyword);
     if (!tweetChartData || !commentChartData) return;
     setDownloadLoading(true);
     const headers = {
@@ -79,11 +89,11 @@ const ScentBarChart: React.FC = () => {
     const tweetData = tweetChartData.subWords;
     const workbook = utils.book_new();
     const tweetWorksheet = utils.json_to_sheet([headers, ...tweetData], { skipHeader: true });
-    utils.book_append_sheet(workbook, tweetWorksheet, '香味-推文');
+    utils.book_append_sheet(workbook, tweetWorksheet, keyword + '-推文');
     const commentData = commentChartData.subWords;
     const commentWorksheet = utils.json_to_sheet([headers, ...commentData], { skipHeader: true });
-    utils.book_append_sheet(workbook, commentWorksheet, '香味-评论');
-    writeFile(workbook, '香味.xlsx');
+    utils.book_append_sheet(workbook, commentWorksheet, keyword + '-评论');
+    writeFile(workbook, keyword + '.xlsx');
     setDownloadLoading(false);
   };
 
@@ -91,7 +101,7 @@ const ScentBarChart: React.FC = () => {
     if (!divRef.current || !wordClassData) return;
 
     const chartData = wordClassData[dataSource as 'tweet' | 'comment'].find(
-      (item) => item.mainWord === '香味',
+      (item) => item.mainWord === keyword,
     );
     if (!chartData) return;
 

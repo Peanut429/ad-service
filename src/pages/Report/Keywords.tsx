@@ -8,6 +8,8 @@ import WordClass from './Charts/WordClass';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import CategoryChart from './Charts/CategoryBar';
 import ScentBarChart from './Charts/ScentBar';
+import { useContext } from 'react';
+import ReportContext from './Report.context';
 // import KeywordCategoryChart from './Charts/KeywordCategoryChart';
 
 type Props = {
@@ -15,6 +17,10 @@ type Props = {
 };
 
 const Keywords: React.FC<Props> = ({ brandId }) => {
+  const {
+    state: { projectId },
+  } = useContext(ReportContext);
+
   return (
     <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
       <ChartCard title="关键词词云">
@@ -87,7 +93,7 @@ const Keywords: React.FC<Props> = ({ brandId }) => {
         <CategoryChart />
       </ChartCard>
       {brandId === 'brand-4243733387' && (
-        <ChartCard title="香味">
+        <ChartCard title={projectId === 'project-149015156' ? '风味' : '香味'}>
           <ScentBarChart />
         </ChartCard>
       )}

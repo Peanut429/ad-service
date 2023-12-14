@@ -3,7 +3,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRequest } from '@umijs/max';
 import { utils, writeFile } from 'xlsx';
 import { CheckboxValueType } from 'antd/es/checkbox/Group';
-import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal, Input } from 'antd';
+import { Dropdown, Tag, Space, Button, message, Spin, Checkbox, Modal, Input, Form } from 'antd';
 import {
   CommentOutlined,
   DownOutlined,
@@ -49,11 +49,11 @@ const platformIcon = {
 //   brand: '本品牌官方账号',
 // };
 
-// const platform = {
-//   weibo: '微博',
-//   redbook: '小红书',
-//   tiktok: '抖音',
-// };
+const platformString = {
+  weibo: '微博',
+  redbook: '小红书',
+  tiktok: '抖音',
+};
 
 const sentimentIcon = {
   '0': sentimentUnknow,
@@ -288,6 +288,7 @@ const TweetList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<CheckboxValueType[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [deletedTweets, setDeletedTweets] = useState<string[]>([]);
+  const [totalHeat, setTotalHeat] = useState(0);
 
   const checkAll = selectedRowKeys.length === dataList.length && dataList.length > 0;
   const indeterminate = selectedRowKeys.length > 0 && selectedRowKeys.length < dataList.length;
@@ -341,6 +342,7 @@ const TweetList = () => {
       onSuccess: (res) => {
         setDataList(res.data);
         setTotal(res.count);
+        setTotalHeat(res.heat);
       },
       onError: (err) => {
         console.error(err);
@@ -382,6 +384,7 @@ const TweetList = () => {
         gender: item.gender,
         sentiment: sentimentText[item.sentiment] || '未知',
         createdAtTimestamp: dayjs(item.createdAtTimestamp).format('YYYY-MM-DD HH:mm:ss'),
+        platform: platformString[item.platform],
         link: getTweetLink(item.id, item.platform),
       }));
       const headers = {
@@ -396,6 +399,7 @@ const TweetList = () => {
         gender: '性别',
         sentiment: '情感',
         createdAtTimestamp: '发布时间',
+        platform: '平台',
         link: '原文链接',
       };
       const workbook = utils.book_new();
@@ -523,12 +527,17 @@ const TweetList = () => {
   return (
     <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', marginBottom: 20, gap: 10 }}>
-        <Input
-          placeholder="输入关键词搜索"
+        <Form
+          layout="inline"
           style={{ flex: 1 }}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-        />
+          onFinish={(values) => {
+            setSearchValue(values.keyword);
+          }}
+        >
+          <Form.Item name="keyword" style={{ width: '100%' }}>
+            <Input placeholder="输入关键词搜索" style={{ flex: 1 }} />
+          </Form.Item>
+        </Form>
         <Dropdown
           disabled={selectedRowKeys.length === 0}
           menu={{
@@ -570,6 +579,7 @@ const TweetList = () => {
           })}
         </Checkbox.Group>
       </Spin>
+      <div style={{ marginTop: 20, textAlign: 'center' }}>总互动量：{totalHeat}</div>
       <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>{Pagination}</div>
     </div>
   );

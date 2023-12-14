@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRequest, useSearchParams } from '@umijs/max';
-import { Affix, Button, Card, Form, Space, Tabs, Tag, message } from 'antd';
+import { Affix, Button, Card, Collapse, Form, Space, Tabs, Tag, message } from 'antd';
 import useCreateReducer from '@/hooks/useCreateReducer';
 import ReportContext from './Report.context';
 import initialState, { ReportInitialState } from './Report.state';
@@ -13,8 +13,9 @@ import TopicAnalysis from './TopicAnalysis';
 import FilterForm from './FilterForm';
 import { chartData, commentChartData, commentSentiment } from '@/services/report';
 import { keywordsInfo, taskList } from '@/services/brands';
-import styles from './index.module.scss';
 import dayjs from 'dayjs';
+import { CaretRightOutlined } from '@ant-design/icons';
+import styles from './index.module.scss';
 
 const Report = () => {
   const [searchParams] = useSearchParams();
@@ -143,7 +144,11 @@ const Report = () => {
     },
   });
 
-  const { run: commentSentimentApi } = useRequest(
+  const {
+    run: commentSentimentApi,
+    cancel: cancelCommentSentimentApi,
+    loading: commentSentimentApiLoading,
+  } = useRequest(
     () =>
       commentSentiment({
         timeLimit: projectTimeRange,
@@ -211,58 +216,83 @@ const Report = () => {
     },
   );
 
-  // 获取图表数据
-  const fetchChatData = async () => {
-    dispatch({ field: 'chartLoading', value: true });
-    try {
-      commentSentimentApi();
-      const res = await chartData({
-        timeLimit,
-        platforms,
-        tasksId,
-        userGender: gender,
-        includeWords,
-        excludeWords,
-        userType,
-        sentiment,
-        hiddenWord: {
-          wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
-          brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
-          appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
-          wordClass: [
-            ...wordClassHiddenWord,
-            ...wordClassDeleteWord,
-            ...specificChartHiddenWord,
-            ...specificChartDeleteWord,
-          ],
-          wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
-          categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
-        },
-        mappingWord: wordMap,
-        classification: category,
-        excludeNotes,
-        excludeUsers,
-        wordClassType,
-      });
-
+  const {
+    run: chartDataApi,
+    cancel: cancelChartDataApi,
+    loading: chartDataApiLoading,
+  } = useRequest(chartData, {
+    manual: true,
+    onSuccess: (res) => {
       commentChartDataApi();
 
-      dispatch({ field: 'wordcloudData', value: res.data.wordCloud });
-      dispatch({ field: 'tweetTrendData', value: res.data.tweetTrend });
-      dispatch({ field: 'adNode', value: res.data.adNode });
-      dispatch({ field: 'tweetWordTrendData', value: res.data.wordTrend });
-      dispatch({ field: 'tweetAppearTogetherData', value: res.data.appearTogether });
-      dispatch({ field: 'userPortraitData', value: res.data.userPortrait });
-      dispatch({ field: 'topicData', value: res.data.topic });
-      dispatch({ field: 'brandBarData', value: res.data.brandBar });
-      dispatch({ field: 'wordClassData', value: res.data.wordClass });
-      dispatch({ field: 'categoryBarData', value: res.data.categoryBar });
-      dispatch({ field: 'tweetSentimentData', value: res.data.tweetSentiment });
-    } catch (e) {
-      console.log(e);
-    }
-    dispatch({ field: 'chartLoading', value: false });
-  };
+      dispatch({ field: 'wordcloudData', value: res.wordCloud });
+      dispatch({ field: 'tweetTrendData', value: res.tweetTrend });
+      dispatch({ field: 'adNode', value: res.adNode });
+      dispatch({ field: 'tweetWordTrendData', value: res.wordTrend });
+      dispatch({ field: 'tweetAppearTogetherData', value: res.appearTogether });
+      dispatch({ field: 'userPortraitData', value: res.userPortrait });
+      dispatch({ field: 'topicData', value: res.topic });
+      dispatch({ field: 'brandBarData', value: res.brandBar });
+      dispatch({ field: 'wordClassData', value: res.wordClass });
+      dispatch({ field: 'categoryBarData', value: res.categoryBar });
+      dispatch({ field: 'tweetSentimentData', value: res.tweetSentiment });
+
+      dispatch({ field: 'chartLoading', value: false });
+    },
+  });
+
+  // 获取图表数据
+  // const fetchChatData = async () => {
+  //   dispatch({ field: 'chartLoading', value: true });
+  //   try {
+  //     commentSentimentApi();
+  //     const res = await chartDataApi({
+  //       timeLimit,
+  //       platforms,
+  //       tasksId,
+  //       userGender: gender,
+  //       includeWords,
+  //       excludeWords,
+  //       userType,
+  //       sentiment,
+  //       hiddenWord: {
+  //         wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
+  //         brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
+  //         appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
+  //         wordClass: [
+  //           ...wordClassHiddenWord,
+  //           ...wordClassDeleteWord,
+  //           ...specificChartHiddenWord,
+  //           ...specificChartDeleteWord,
+  //         ],
+  //         wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
+  //         categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
+  //       },
+  //       mappingWord: wordMap,
+  //       classification: category,
+  //       excludeNotes,
+  //       excludeUsers,
+  //       wordClassType,
+  //     });
+
+  //     // commentChartDataApi();
+
+  //     // dispatch({ field: 'wordcloudData', value: res.wordCloud });
+  //     // dispatch({ field: 'tweetTrendData', value: res.tweetTrend });
+  //     // dispatch({ field: 'adNode', value: res.adNode });
+  //     // dispatch({ field: 'tweetWordTrendData', value: res.wordTrend });
+  //     // dispatch({ field: 'tweetAppearTogetherData', value: res.appearTogether });
+  //     // dispatch({ field: 'userPortraitData', value: res.userPortrait });
+  //     // dispatch({ field: 'topicData', value: res.topic });
+  //     // dispatch({ field: 'brandBarData', value: res.brandBar });
+  //     // dispatch({ field: 'wordClassData', value: res.wordClass });
+  //     // dispatch({ field: 'categoryBarData', value: res.categoryBar });
+  //     // dispatch({ field: 'tweetSentimentData', value: res.tweetSentiment });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  //   dispatch({ field: 'chartLoading', value: false });
+  // };
 
   // 图表操作： 新增关键词
   const addListKeyword = useCallback(
@@ -329,7 +359,43 @@ const Report = () => {
 
   useEffect(() => {
     if (!tasksId.length) return;
-    fetchChatData();
+
+    if (chartDataApiLoading) {
+      cancelChartDataApi();
+    }
+    if (commentSentimentApiLoading) {
+      cancelCommentSentimentApi();
+    }
+    dispatch({ field: 'chartLoading', value: true });
+    commentSentimentApi();
+    chartDataApi({
+      timeLimit,
+      platforms,
+      tasksId,
+      userGender: gender,
+      includeWords,
+      excludeWords,
+      userType,
+      sentiment,
+      hiddenWord: {
+        wordCloud: [...wordCloudHiddenWord, ...wordCloudDeleteWord],
+        brandBar: [...brandBarHiddenWord, ...brandBarDeleteWord],
+        appearTogether: [...appearTogetherHiddenWord, ...appearTogetherDeleteWord],
+        wordClass: [
+          ...wordClassHiddenWord,
+          ...wordClassDeleteWord,
+          ...specificChartHiddenWord,
+          ...specificChartDeleteWord,
+        ],
+        wordTrend: [...wordTrendHiddenWord, ...wordTrendDeleteWord],
+        categoryBar: [...categoryBarHiddenWord, ...categoryBarDeleteWord],
+      },
+      mappingWord: wordMap,
+      classification: category,
+      excludeNotes,
+      excludeUsers,
+      wordClassType,
+    });
   }, [
     timeLimit,
     platforms,
@@ -373,8 +439,8 @@ const Report = () => {
     <ReportContext.Provider value={{ ...contextValue, addListKeyword }}>
       <div>
         <Affix offsetTop={0}>
-          <Card>
-            <h4>
+          <Card bodyStyle={{ paddingTop: 0 }}>
+            <h4 style={{ paddingInlineStart: 20 }}>
               任务关键词：
               {keywords.map((item) => (
                 <Tag color="#3b5999" key={item} style={{ fontSize: 14 }}>
@@ -382,92 +448,107 @@ const Report = () => {
                 </Tag>
               ))}
             </h4>
-            <h4>列表筛选条件：</h4>
-            <Form size="small">
-              <Form.Item label="时间范围">
-                {listTimeLimit?.gte ? (
-                  <Space>
-                    <Tag>
-                      {dayjs(listTimeLimit.gte).format('YYYY-MM-DD')} ~{' '}
-                      {dayjs(listTimeLimit.lte).format('YYYY-MM-DD')}
-                    </Tag>
-                    {listTimeLimit.gte !== timeLimit.gte || listTimeLimit.lte !== timeLimit.lte ? (
-                      <Button
-                        onClick={() => dispatch({ field: 'listTimeLimit', value: timeLimit })}
-                      >
-                        重置
-                      </Button>
+            <Collapse
+              defaultActiveKey={['info']}
+              bordered={false}
+              expandIcon={({ isActive }) => <CaretRightOutlined rotate={isActive ? 90 : 0} />}
+            >
+              <Collapse.Panel key="info" header="列表筛选条件：">
+                <Form size="small" className={styles.form}>
+                  <Form.Item label="时间范围">
+                    {listTimeLimit?.gte ? (
+                      <Space>
+                        <Tag>
+                          {dayjs(listTimeLimit.gte).format('YYYY-MM-DD')} ~{' '}
+                          {dayjs(listTimeLimit.lte).format('YYYY-MM-DD')}
+                        </Tag>
+                        {listTimeLimit.gte !== timeLimit.gte ||
+                        listTimeLimit.lte !== timeLimit.lte ? (
+                          <Button
+                            onClick={() => dispatch({ field: 'listTimeLimit', value: timeLimit })}
+                          >
+                            重置
+                          </Button>
+                        ) : null}
+                      </Space>
                     ) : null}
-                  </Space>
-                ) : null}
-              </Form.Item>
-              <Form.Item label="推文关键词">
-                {listIncludeWords.map((item, index) => (
-                  <Tag
-                    key={item.join(',')}
-                    closable
-                    onClose={() => {
-                      listIncludeWords.splice(index, 1);
+                  </Form.Item>
+                  {listIncludeWords.length ? (
+                    <Form.Item label="推文关键词">
+                      {listIncludeWords.map((item, index) => (
+                        <Tag
+                          key={item.join(',')}
+                          closable
+                          onClose={() => {
+                            listIncludeWords.splice(index, 1);
 
-                      dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
-                    }}
-                    style={{ fontSize: 14 }}
-                  >
-                    {item.join(' + ')}
-                  </Tag>
-                ))}
-              </Form.Item>
-              <Form.Item label="评论关键词">
-                {commentIncludeWords.map((item, index) => (
-                  <Tag
-                    key={item.join(',')}
-                    closable
-                    onClose={() => {
-                      commentIncludeWords.splice(index, 1);
-                      dispatch({ field: 'commentIncludeWords', value: [...commentIncludeWords] });
-                    }}
-                    style={{ fontSize: 14 }}
-                  >
-                    {item.join(' + ')}
-                  </Tag>
-                ))}
-              </Form.Item>
-              {/* <Form.Item label="平台">
-                {listPlatforms.map((item) => (
-                  <Tag
-                    key={item}
-                    style={{ fontSize: 14 }}
-                    closable
-                    onClose={() => {
-                      listPlatforms.splice(listPlatforms.indexOf(item), 1);
-                      console.log(listPlatforms.toString());
-                      if (listPlatforms.length === 0) {
-                        listPlatforms.push(...platforms);
-                      }
-                      console.log(listPlatforms.toString());
-                      dispatch({ field: 'listPlatforms', value: [...listPlatforms] });
-                    }}
-                  >
-                    {platform[item]}
-                  </Tag>
-                ))}
-              </Form.Item>
-              <Form.Item label="情感">
-                {listSentiment.map((item) => (
-                  <Tag
-                    key={item}
-                    style={{ fontSize: 14 }}
-                    closable
-                    onClose={() => {
-                      listSentiment.splice(listSentiment.indexOf(item), 1);
-                      dispatch({ field: 'listSentiment', value: [...listSentiment] });
-                    }}
-                  >
-                    {item}
-                  </Tag>
-                ))}
-              </Form.Item> */}
-            </Form>
+                            dispatch({ field: 'listIncludeWords', value: [...listIncludeWords] });
+                          }}
+                          style={{ fontSize: 14 }}
+                        >
+                          {item.join(' + ')}
+                        </Tag>
+                      ))}
+                    </Form.Item>
+                  ) : null}
+                  {commentIncludeWords.length ? (
+                    <Form.Item label="评论关键词">
+                      {commentIncludeWords.map((item, index) => (
+                        <Tag
+                          key={item.join(',')}
+                          closable
+                          onClose={() => {
+                            commentIncludeWords.splice(index, 1);
+                            dispatch({
+                              field: 'commentIncludeWords',
+                              value: [...commentIncludeWords],
+                            });
+                          }}
+                          style={{ fontSize: 14 }}
+                        >
+                          {item.join(' + ')}
+                        </Tag>
+                      ))}
+                    </Form.Item>
+                  ) : null}
+                  {/* <Form.Item label="平台">
+                    {listPlatforms.map((item) => (
+                      <Tag
+                        key={item}
+                        style={{ fontSize: 14 }}
+                        closable
+                        onClose={() => {
+                          listPlatforms.splice(listPlatforms.indexOf(item), 1);
+                          console.log(listPlatforms.toString());
+                          if (listPlatforms.length === 0) {
+                            listPlatforms.push(...platforms);
+                          }
+                          console.log(listPlatforms.toString());
+                          dispatch({ field: 'listPlatforms', value: [...listPlatforms] });
+                        }}
+                      >
+                        {platform[item]}
+                      </Tag>
+                    ))}
+                  </Form.Item>
+                  <Form.Item label="情感">
+                    {listSentiment.map((item) => (
+                      <Tag
+                        key={item}
+                        style={{ fontSize: 14 }}
+                        closable
+                        onClose={() => {
+                          listSentiment.splice(listSentiment.indexOf(item), 1);
+                          dispatch({ field: 'listSentiment', value: [...listSentiment] });
+                        }}
+                      >
+                        {item}
+                      </Tag>
+                    ))}
+                  </Form.Item> */}
+                </Form>
+              </Collapse.Panel>
+            </Collapse>
           </Card>
         </Affix>
         <div className={styles.main}>

@@ -1,6 +1,6 @@
 .main {
   display: flex;
-  min-width: 1400px;
+  // min-width: 1400px;
   gap: 20px;
 }
 
@@ -8,4 +8,10 @@
 .right-container {
   flex-shrink: 0;
   width: calc(50% - 10px);
+}
+
+.form {
+  :global(.ant-form-item:last-child) {
+    margin-bottom: 0;
+  }
 }

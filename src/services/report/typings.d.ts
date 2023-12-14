@@ -208,13 +208,14 @@ declare namespace ReportApi {
     commentNum: number;
     likeNum: number;
     repostNum: number;
-    platform: 'redbook' | 'tiktok';
+    platform: 'redbook' | 'tiktok' | 'weibo';
     gender: '男' | '女' | '未知';
   };
 
   type TweetListRes = Response<{
     count: number;
     data: TweetListItem[];
+    heat: number;
   }>;
 
   type CommentListReq = {
@@ -262,7 +263,7 @@ declare namespace ReportApi {
       id: string;
       sentiment: 1 | 2 | 3;
     }[];
-    platform: 'redbook' | 'tiktok';
+    platform: 'redbook' | 'tiktok' | 'weibo';
     type: 'tweet' | 'comment';
   };
 

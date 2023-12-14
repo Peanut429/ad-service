@@ -9,7 +9,7 @@ type SentimentFormProps = {
   trigger: JSX.Element;
   id: string;
   type: 'comment' | 'tweet';
-  platform: 'tiktok' | 'redbook';
+  platform: 'tiktok' | 'redbook' | 'weibo';
   onChange?: (sentiment: 1 | 2 | 3) => void;
 };
 const SentimentForm = ({ trigger, id, type, platform, onChange }: SentimentFormProps) => {
